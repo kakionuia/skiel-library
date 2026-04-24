@@ -33,12 +33,36 @@ const showingNavigationDropdown = ref(false);
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
-                                    Dashboard
-                                </NavLink>
+                                <template v-if="$page.props.auth.user.role === 'admin'">
+                                    <NavLink
+                                        :href="route('admin.dashboard')"
+                                        :active="route().current('admin.dashboard')"
+                                    >
+                                        Dashboard
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('admin.accounts')"
+                                        :active="route().current('admin.accounts')"
+                                    >
+                                        Kelola Akun
+                                    </NavLink>
+                                </template>
+                                <template v-else-if="$page.props.auth.user.role === 'petugas'">
+                                    <NavLink
+                                        :href="route('petugas.dashboard')"
+                                        :active="route().current('petugas.dashboard')"
+                                    >
+                                        Dashboard
+                                    </NavLink>
+                                </template>
+                                <template v-else>
+                                    <NavLink
+                                        :href="route('dashboard')"
+                                        :active="route().current('dashboard')"
+                                    >
+                                        Dashboard
+                                    </NavLink>
+                                </template>
                             </div>
                         </div>
 

@@ -33,6 +33,27 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = $request->user();
+
+        // Redirect based on role
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        } elseif ($user->role === 'petugas') {
+            return redirect()->intended(route('petugas.dashboard', absolute: false));
+        } elseif ($user->status === 'pending') {
+            // If user is pending, redirect to waiting page
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('error', 'Akun Anda masih menunggu persetujuan admin.');
+        } elseif ($user->status === 'rejected') {
+            // If user is rejected
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('error', 'Akun Anda ditolak. Silakan hubungi admin.');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
