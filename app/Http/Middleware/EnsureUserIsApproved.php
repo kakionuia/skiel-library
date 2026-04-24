@@ -25,7 +25,7 @@ class EnsureUserIsApproved
         }
 
         // Only allow user role that is approved
-        if ($request->user()->role !== 'user' || $request->user()->status !== 'approved') {
+        if ($request->user()->role !== 'anggota' || $request->user()->status !== 'approved') {
             abort(403, 'Akses tidak diizinkan.');
         }
 
