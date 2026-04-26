@@ -14,6 +14,11 @@ class EnsureUserIsApproved
             return redirect()->route('login');
         }
 
+        // Admin and petugas don't need approval
+        if ($request->user()->role === 'admin' || $request->user()->role === 'petugas') {
+            return $next($request);
+        }
+
         // If user is not approved, redirect to waiting page
         if ($request->user()->status === 'pending') {
             return redirect()->route('waiting');
@@ -24,7 +29,7 @@ class EnsureUserIsApproved
             return redirect()->route('login')->with('error', 'Akun Anda ditolak. Silakan hubungi admin.');
         }
 
-        // Only allow user role that is approved
+        // Only allow anggota role that is approved
         if ($request->user()->role !== 'anggota' || $request->user()->status !== 'approved') {
             abort(403, 'Akses tidak diizinkan.');
         }

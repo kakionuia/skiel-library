@@ -14,7 +14,7 @@ class AccountController extends Controller
     {
         $admins = User::where('role', 'admin')->get();
         $petugas = User::where('role', 'petugas')->get();
-        $users = User::where('role', 'user')->get();
+        $users = User::where('role', 'anggota')->get();
 
         return inertia('Admin/Accounts/Index', [
             'admins' => $admins,
@@ -45,24 +45,24 @@ class AccountController extends Controller
 
     public function approveUser(User $user)
     {
-        if ($user->role !== 'user') {
-            return back()->with('error', 'Hanya akun user yang dapat disetujui.');
+        if ($user->role !== 'anggota') {
+            return back()->with('error', 'Hanya akun anggota yang dapat disetujui.');
         }
 
         $user->update(['status' => 'approved']);
 
-        return back()->with('success', 'Akun user telah disetujui.');
+        return back()->with('success', 'Akun anggota telah disetujui.');
     }
 
     public function rejectUser(User $user)
     {
-        if ($user->role !== 'user') {
-            return back()->with('error', 'Hanya akun user yang dapat ditolak.');
+        if ($user->role !== 'anggota') {
+            return back()->with('error', 'Hanya akun anggota yang dapat ditolak.');
         }
 
         $user->update(['status' => 'rejected']);
 
-        return back()->with('success', 'Akun user telah ditolak.');
+        return back()->with('success', 'Akun anggota telah ditolak.');
     }
 
     public function destroy(User $user)
