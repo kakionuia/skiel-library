@@ -27,6 +27,7 @@ class User extends Authenticatable
         'nisn',
         'kelas',
         'phone',
+        'borrow_restricted',
     ];
 
     /**
@@ -49,6 +50,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'borrow_restricted' => 'boolean',
         ];
     }
 
@@ -80,5 +82,50 @@ class User extends Authenticatable
     public function isRejected(): bool
     {
         return $this->status === 'rejected';
+    }
+
+    public function borrows()
+    {
+        return $this->hasMany(Borrow::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class);
+    }
+
+    public function suggestions()
+    {
+        return $this->hasMany(Suggestion::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    public function bookRequests()
+    {
+        return $this->hasMany(BookRequest::class, 'petugas_id');
+    }
+
+    public function lateBorrows()
+    {
+        return $this->hasMany(Borrow::class)->where('status', 'borrowed')->where('due_date', '<', now());
+    }
+
+    public function totalLateFee()
+    {
+        return $this->borrows()->where('status', '!=', 'returned')->sum('late_fee');
+    }
+
+    public function recentBorrows($limit = 3)
+    {
+        return $this->borrows()->with('book')->orderBy('created_at', 'desc')->limit($limit)->get();
     }
 }
