@@ -1,183 +1,139 @@
 <template>
   <AuthenticatedLayout title="Dashboard">
-    <div class="py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto">
-        
-        <div class="mb-8">
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Dashboard Admin</h1>
-          <p class="mt-2 text-sm text-gray-500">Pantau performa sistem dan kelola pengguna dalam satu dasbor terpadu.</p>
+    <div class="min-h-screen bg-[#f8fafc] pb-12">
+      <div class="relative overflow-hidden bg-white pb-32 pt-12 shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 class="text-3xl font-bold text-slate-900 tracking-tight flex items-center">
+                Dashboard Overview
+                <span class="ml-3 inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  Admin Access
+                </span>
+              </h1>
+              <p class="mt-2 text-base text-slate-500">
+                Selamat datang kembali. Berikut adalah ringkasan aktivitas perpustakaan hari ini.
+              </p>
+            </div>
+            <div class="mt-4 md:mt-0 flex space-x-3">
+               <button class="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-all">
+                Download Report
+              </button>
+            </div>
+          </div>
         </div>
+        <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 blur-3xl opacity-20 pointer-events-none">
+          <div class="aspect-square w-[400px] bg-gradient-to-tr from-blue-600 to-indigo-400 rounded-full"></div>
+        </div>
+      </div>
 
-        <!-- Stats Cards -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-20">
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md">
-            <dt>
-              <div class="absolute rounded-xl bg-blue-500/10 p-3">
-                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+          <div v-for="stat in mainStats" :key="stat.label" 
+            class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transition-all hover:translate-y-[-4px] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]">
+            <div class="flex items-center justify-between">
+              <div :class="['rounded-xl p-3', stat.bgIcon]">
+                <component :is="stat.icon" :class="['h-6 w-6', stat.iconColor]" />
               </div>
-              <p class="ml-16 truncate text-sm font-medium text-gray-500">Total Buku</p>
-            </dt>
-            <dd class="ml-16 flex items-baseline">
-              <p class="text-3xl font-semibold text-gray-900">{{ stats.totalBooks }}</p>
-            </dd>
-          </div>
-
-          <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md">
-            <dt>
-              <div class="absolute rounded-xl bg-green-500/10 p-3">
-                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+              <span class="text-xs font-medium text-slate-400 group-hover:text-slate-600 transition-colors">Total Data</span>
+            </div>
+            <div class="mt-5">
+              <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">{{ stat.label }}</p>
+              <div class="flex items-baseline space-x-2">
+                <p class="text-3xl font-bold text-slate-900 tracking-tight">{{ stat.value }}</p>
+                <span v-if="stat.trend" class="text-xs font-semibold text-green-600">+{{ stat.trend }}%</span>
               </div>
-              <p class="ml-16 truncate text-sm font-medium text-gray-500">Total Anggota</p>
-            </dt>
-            <dd class="ml-16 flex items-baseline">
-              <p class="text-3xl font-semibold text-gray-900">{{ stats.totalMembers }}</p>
-            </dd>
-          </div>
-
-          <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md">
-            <dt>
-              <div class="absolute rounded-xl bg-purple-500/10 p-3">
-                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p class="ml-16 truncate text-sm font-medium text-gray-500">Total Petugas</p>
-            </dt>
-            <dd class="ml-16 flex items-baseline">
-              <p class="text-3xl font-semibold text-gray-900">{{ stats.totalPetugas }}</p>
-            </dd>
-          </div>
-
-          <div class="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md">
-            <dt>
-              <div class="absolute rounded-xl bg-amber-500/10 p-3">
-                <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p class="ml-16 truncate text-sm font-medium text-gray-500">Menunggu Persetujuan</p>
-            </dt>
-            <dd class="ml-16 flex items-baseline">
-              <p class="text-3xl font-semibold text-amber-600">{{ stats.pendingMembers }}</p>
-            </dd>
+            </div>
           </div>
         </div>
 
-        <!-- Charts and Alerts Row -->
-        <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <!-- Borrow Chart -->
-          <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">Peminjaman Buku (6 Bulan Terakhir)</h2>
-            <div class="mt-6 h-64">
-              <div class="flex h-full items-end justify-between gap-2">
-                <div v-for="(item, index) in monthlyBorrows" :key="index" class="flex-1 flex flex-col items-center">
-                  <div class="w-full relative flex-1 flex items-end">
+        <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div class="lg:col-span-2 rounded-2xl bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+            <div class="flex items-center justify-between mb-8">
+              <div>
+                <h2 class="text-lg font-bold text-slate-900">Analisis Peminjaman</h2>
+                <p class="text-sm text-slate-500">Aktivitas 6 bulan terakhir</p>
+              </div>
+              <select class="text-sm border-none bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option>Tahun 2024</option>
+              </select>
+            </div>
+            
+            <div class="h-72">
+              <div class="flex h-full items-end justify-between gap-3">
+                <div v-for="(item, index) in monthlyBorrows" :key="index" class="group relative flex-1 flex flex-col items-center">
+                  <div class="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md mb-2 pointer-events-none">
+                    {{ item.count }} Buku
+                  </div>
+                  <div class="w-full relative flex-1 flex items-end px-1 sm:px-2">
                     <div 
-                      class="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg transition-all duration-500"
+                      class="w-full bg-blue-500 rounded-t-md transition-all duration-700 ease-out group-hover:bg-blue-600 shadow-sm"
                       :style="{ height: `${(item.count / maxBorrow) * 100}%` }"
                     ></div>
                   </div>
-                  <p class="mt-2 text-xs text-gray-500">{{ item.month }}</p>
-                  <p class="text-sm font-medium text-gray-900">{{ item.count }}</p>
+                  <p class="mt-4 text-[11px] font-bold text-slate-400 group-hover:text-blue-600 uppercase tracking-tighter">{{ item.month.substring(0, 3) }}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Late Fees & Alerts -->
           <div class="space-y-6">
-            <!-- Late Returns Alert -->
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-500">Buku Terlambat</p>
-                  <p class="mt-2 text-3xl font-bold text-red-600">{{ stats.lateReturnsCount }}</p>
+            <div class="rounded-2xl bg-slate-900 p-8 text-white shadow-xl relative overflow-hidden group">
+              <div class="relative z-10">
+                <p class="text-slate-400 text-sm font-medium">Total Denda Terkumpul</p>
+                <h3 class="text-3xl font-bold mt-2 tracking-tight">Rp {{ formatNumber(stats.totalLateFee) }}</h3>
+                <div class="mt-6 flex items-center text-xs text-slate-300">
+                  <span class="bg-white/10 px-2 py-1 rounded mr-2">Info</span>
+                  Berdasarkan keterlambatan bulan ini
                 </div>
-                <Link href="/admin/late-returns" class="text-sm text-blue-600 hover:text-blue-800">
-                  Lihat Semua →
+              </div>
+              <div class="absolute -right-4 -bottom-4 h-24 w-24 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/40 transition-all"></div>
+            </div>
+
+            <div class="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+              <div class="p-5 border-b border-gray-50 flex items-center justify-between bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 text-sm">Status Notifikasi</h3>
+                <span class="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+              </div>
+              <div class="p-0">
+                <Link href="/admin/late-returns" class="flex items-center px-6 py-4 hover:bg-slate-50 transition-colors">
+                  <div class="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center mr-4">
+                    <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-bold text-slate-900">{{ stats.lateReturnsCount }} Buku Terlambat</p>
+                    <p class="text-xs text-slate-500">Perlu tindak lanjut segera</p>
+                  </div>
+                  <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke-width="2" /></svg>
                 </Link>
-              </div>
-            </div>
-
-            <!-- Total Late Fee -->
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-500">Total Denda Keterlambatan</p>
-                  <p class="mt-2 text-3xl font-bold text-orange-600">Rp {{ formatNumber(stats.totalLateFee) }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pending Book Requests -->
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-500">Permintaan Buku</p>
-                  <p class="mt-2 text-3xl font-bold text-indigo-600">{{ stats.pendingBookRequests }}</p>
-                </div>
-                <Link href="/admin/book-requests" class="text-sm text-blue-600 hover:text-blue-800">
-                  Lihat Semua →
+                <Link href="/admin/book-requests" class="flex items-center px-6 py-4 border-t border-gray-50 hover:bg-slate-50 transition-colors">
+                  <div class="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center mr-4">
+                    <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-bold text-slate-900">{{ stats.pendingBookRequests }} Permintaan</p>
+                    <p class="text-xs text-slate-500">Menunggu review admin</p>
+                  </div>
+                  <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke-width="2" /></svg>
                 </Link>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Quick Menu -->
-        <div class="mt-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">Menu Cepat</h2>
-          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Link href="/admin/accounts" class="group flex items-center space-x-4 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-blue-500 hover:ring-1 hover:ring-blue-500">
-              <div class="flex-shrink-0 rounded-lg bg-blue-50 p-3 group-hover:bg-blue-100">
-                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+        <div class="mt-8">
+          <div class="flex items-center space-x-2 mb-6">
+            <div class="h-1.5 w-8 bg-blue-600 rounded-full"></div>
+            <h2 class="text-xl font-bold text-slate-900">Akses Cepat</h2>
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Link v-for="menu in quickMenus" :key="menu.title" :href="menu.link" 
+              class="group flex flex-col p-5 rounded-2xl bg-white border border-gray-100 shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+              <div :class="['h-12 w-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110', menu.bg]">
+                <component :is="menu.icon" :class="['h-6 w-6', menu.iconColor]" />
               </div>
-              <div>
-                <p class="font-medium text-gray-900">Kelola Akun</p>
-                <p class="text-sm text-gray-500">Kelola anggota & petugas</p>
-              </div>
-            </Link>
-
-            <Link href="/admin/book-requests" class="group flex items-center space-x-4 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-green-500 hover:ring-1 hover:ring-green-500">
-              <div class="flex-shrink-0 rounded-lg bg-green-50 p-3 group-hover:bg-green-100">
-                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-900">Permintaan Buku</p>
-                <p class="text-sm text-gray-500">Lihat permintaan petugas</p>
-              </div>
-            </Link>
-
-            <Link href="/admin/late-returns" class="group flex items-center space-x-4 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-red-500 hover:ring-1 hover:ring-red-500">
-              <div class="flex-shrink-0 rounded-lg bg-red-50 p-3 group-hover:bg-red-100">
-                <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-900">Penunggakan</p>
-                <p class="text-sm text-gray-500">Lihat buku terlambat</p>
-              </div>
-            </Link>
-
-            <Link href="/admin/complaints" class="group flex items-center space-x-4 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-yellow-500 hover:ring-1 hover:ring-yellow-500">
-              <div class="flex-shrink-0 rounded-lg bg-yellow-50 p-3 group-hover:bg-yellow-100">
-                <svg class="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-900">Keluhan & Saran</p>
-                <p class="text-sm text-gray-500">{{ stats.pendingComplaints }} belum ditangani</p>
-              </div>
+              <h3 class="font-bold text-slate-900">{{ menu.title }}</h3>
+              <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ menu.desc }}</p>
             </Link>
           </div>
         </div>
@@ -190,12 +146,38 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, markRaw } from 'vue';
+// Import icons (Assuming you use standard Heroicons or similar SVG paths)
+import { 
+  BookOpenIcon, 
+  UsersIcon, 
+  UserGroupIcon, 
+  ClockIcon,
+  ShieldCheckIcon,
+  ClipboardDocumentListIcon,
+  ExclamationCircleIcon,
+  ChatBubbleLeftRightIcon 
+} from '@heroicons/vue/24/outline';
 
 const props = defineProps({
   stats: { type: Object, default: () => ({}) },
   monthlyBorrows: { type: Array, default: () => [] },
 });
+
+// Helper formatted stats for the cards
+const mainStats = computed(() => [
+  { label: 'Total Buku', value: props.stats.totalBooks, icon: markRaw(BookOpenIcon), bgIcon: 'bg-blue-50', iconColor: 'text-blue-600', trend: 12 },
+  { label: 'Anggota', value: props.stats.totalMembers, icon: markRaw(UserGroupIcon), bgIcon: 'bg-green-50', iconColor: 'text-green-600', trend: 5 },
+  { label: 'Petugas', value: props.stats.totalPetugas, icon: markRaw(ShieldCheckIcon), bgIcon: 'bg-purple-50', iconColor: 'text-purple-600' },
+  { label: 'Pending', value: props.stats.pendingMembers, icon: markRaw(ClockIcon), bgIcon: 'bg-amber-50', iconColor: 'text-amber-600' },
+]);
+
+const quickMenus = [
+  { title: 'Kelola Akun', desc: 'Pengaturan hak akses anggota & petugas.', link: '/admin/accounts', icon: markRaw(UsersIcon), bg: 'bg-blue-50', iconColor: 'text-blue-600' },
+  { title: 'Permintaan Buku', desc: 'Review pengajuan pengadaan buku baru.', link: '/admin/book-requests', icon: markRaw(ClipboardDocumentListIcon), bg: 'bg-green-50', iconColor: 'text-green-600' },
+  { title: 'Penunggakan', desc: 'Monitoring keterlambatan pengembalian.', link: '/admin/late-returns', icon: markRaw(ExclamationCircleIcon), bg: 'bg-red-50', iconColor: 'text-red-600' },
+  { title: 'Keluhan & Saran', desc: 'Merespon feedback dari pengguna.', link: '/admin/complaints', icon: markRaw(ChatBubbleLeftRightIcon), bg: 'bg-yellow-50', iconColor: 'text-yellow-600' },
+];
 
 const maxBorrow = computed(() => {
   const max = Math.max(...props.monthlyBorrows.map(b => b.count));
@@ -206,3 +188,11 @@ const formatNumber = (num) => {
   return new Intl.NumberFormat('id-ID').format(num || 0);
 };
 </script>
+
+<style scoped>
+/* Custom curve for chart bars if needed */
+.rounded-t-md {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+</style>

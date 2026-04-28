@@ -1,17 +1,24 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import Sidebar from '@/Components/Sidebar.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+
+defineProps({
+    showSidebar: {
+        type: Boolean,
+        default: true,
+    },
+});
 
 const showingNavigationDropdown = ref(false);
 </script>
 
 <template>
     <div class="min-h-screen bg-slate-50 flex">
-        <Sidebar />
+        <Sidebar v-if="showSidebar" />
 
-        <div class="flex-1 ml-72 flex flex-col">
+        <div :class="['flex-1', 'flex', 'flex-col', showSidebar ? 'ml-72' : 'ml-0']">
             
             <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-20 px-8 flex items-center justify-between">
                 <div>

@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+// Pastikan baris WithoutModelEvents tetap ada jika dibutuhkan
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,7 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Admin User if not exists
+        // 1. Create Admin
         User::firstOrCreate(
             ['email' => 'admin@perpus.com'],
             [
@@ -26,7 +27,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Create Petugas User if not exists
+        // 2. Create Petugas
         User::firstOrCreate(
             ['email' => 'petugas@perpus.com'],
             [
@@ -36,5 +37,26 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
+
+        // 3. Create Siswa
+        User::firstOrCreate(
+            ['email' => 'siswa@perpus.com'],
+            [
+                'name' => 'Siswa Test',
+                'password' => bcrypt('password'),
+                'role' => 'anggota',
+                'status' => 'approved',
+                'nisn' => '001',
+                'kelas' => '10-A',
+                'phone' => '08123456789',
+            ]
+        );
+
+        // 4. Panggil Seeder Lainnya
+        // Pastikan file BookSeeder.php dan BorrowSeeder.php SUDAH ADA di folder seeders
+        $this->call([
+            BookSeeder::class,
+            BorrowSeeder::class,
+        ]);
     }
 }

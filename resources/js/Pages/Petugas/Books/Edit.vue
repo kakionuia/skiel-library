@@ -1,80 +1,88 @@
 <template>
-  <PetugasLayout title="Edit Buku">
-    <div class="py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mx-auto">
-        
-        <div class="mb-6 flex items-center gap-4">
-          <Link href="/petugas/books" class="text-gray-500 hover:text-gray-700">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <h1 class="text-2xl font-bold text-gray-900">Edit Buku</h1>
-        </div>
+  <div class="flex min-h-screen bg-[#F8FAFC] font-sans text-slate-900">
+    <PetugasSidebar class="fixed inset-y-0 left-0 w-80 z-50 shadow-xl shadow-slate-200/50" />
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-gray-200">
-          <form @submit.prevent="updateBook">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Judul Buku <span class="text-red-500">*</span></label>
-                <input v-model="form.title" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Penulis <span class="text-red-500">*</span></label>
-                <input v-model="form.author" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Penerbit</label>
-                <input v-model="form.publisher" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Terbit</label>
-                <input v-model="form.year" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">ISBN</label>
-                <input v-model="form.isbn" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                <select v-model="form.category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                  <option value="">Pilih kategori</option>
-                  <option value="Fiksi">Fiksi</option>
-                  <option value="Non-Fiksi">Non-Fiksi</option>
-                  <option value="Pendidikan">Pendidikan</option>
-                  <option value="Ilmu Pengetahuan">Ilmu Pengetahuan</option>
-                  <option value="Sejarah">Sejarah</option>
-                  <option value="Agama">Agama</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Eksemplar</label>
-                <input v-model="form.stock" type="number" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Sinopsis</label>
-                <textarea v-model="form.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-              </div>
+    <main class="flex-1 ml-80 min-h-screen relative">
+      <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-md border-b border-slate-200 px-10 py-6">
+        <div class="flex items-center justify-between max-w-[1400px] mx-auto">
+          <div class="flex items-center gap-4">
+            <Link :href="route('petugas.books')" class="text-slate-400 hover:text-slate-600 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </Link>
+            <div>
+              <h1 class="text-2xl font-bold tracking-tight text-slate-800">Edit Koleksi Buku</h1>
+              <p class="text-slate-500 text-sm mt-1">Perbarui informasi detail buku</p>
             </div>
-            <div class="mt-6 flex gap-4">
-              <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
-                Simpan Perubahan
-              </button>
-              <Link href="/petugas/books" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">
-                Batal
-              </Link>
-            </div>
-          </form>
+          </div>
         </div>
+      </header>
 
+      <div class="p-10 max-w-2xl mx-auto space-y-8">
+        <form @submit.prevent="updateBook" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Judul Buku <span class="text-rose-500">*</span></label>
+              <input v-model="form.title" type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Penulis <span class="text-rose-500">*</span></label>
+              <input v-model="form.author" type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Penerbit</label>
+              <input v-model="form.publisher" type="text" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">ISBN</label>
+              <input v-model="form.isbn" type="text" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium font-mono">
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Tahun Terbit</label>
+              <input v-model="form.year" type="number" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Kategori</label>
+              <select v-model="form.category" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+                <option value="">Pilih kategori</option>
+                <option value="Fiksi">Fiksi</option>
+                <option value="Non-Fiksi">Non-Fiksi</option>
+                <option value="Referensi">Referensi</option>
+                <option value="Cerita Anak">Cerita Anak</option>
+              </select>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Jumlah Eksemplar</label>
+              <input v-model="form.quantity" type="number" min="0" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Sinopsis</label>
+            <textarea v-model="form.description" rows="4" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium resize-none"></textarea>
+          </div>
+
+          <div class="flex gap-4 pt-4">
+            <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+              Simpan Perubahan
+            </button>
+            <Link :href="route('petugas.books')" class="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">
+              Batal
+            </Link>
+          </div>
+        </form>
       </div>
-    </div>
-  </PetugasLayout>
+    </main>
+  </div>
 </template>
 
 <script setup>
-import PetugasLayout from '@/Layouts/PetugasLayout.vue';
+import PetugasSidebar from '@/Components/PetugasSidebar.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -89,7 +97,7 @@ const form = ref({
   year: props.book.year || '',
   isbn: props.book.isbn || '',
   category: props.book.category || '',
-  stock: props.book.stock || 1,
+  quantity: props.book.quantity || 1,
   description: props.book.description || '',
 });
 

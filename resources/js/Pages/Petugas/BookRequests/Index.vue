@@ -1,135 +1,172 @@
 <template>
-  <PetugasLayout title="Pengajuan Buku">
-    <div class="py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto">
-        
-        <div class="mb-8">
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Pengajuan Buku</h1>
-          <p class="mt-2 text-sm text-gray-500">Ajukan buku baru untuk koleksi perpustakaan.</p>
-        </div>
+  <div class="flex min-h-screen bg-[#F8FAFC] font-sans">
+    <PetugasSidebar class="fixed inset-y-0 left-0 w-80 z-50 shadow-xl shadow-slate-200/50" />
 
-        <!-- Add Book Request Form -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-gray-200 mb-8">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Ajukan Buku Baru</h3>
-          <form @submit.prevent="submitRequest" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Judul Buku</label>
-              <input v-model="form.title" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Masukkan judul buku">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Pengarang</label>
-              <input v-model="form.author" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Masukkan nama pengarang">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Penerbit</label>
-              <input v-model="form.publisher" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Masukkan nama penerbit">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Terbit</label>
-              <input v-model="form.year" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Contoh: 2024">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">ISBN</label>
-              <input v-model="form.isbn" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Masukkan ISBN (opsional)">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-              <select v-model="form.category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="">Pilih kategori</option>
-                <option value="Fiksi">Fiksi</option>
-                <option value="Non-Fiksi">Non-Fiksi</option>
-                <option value="Pendidikan">Pendidikan</option>
-                <option value="Ilmu Pengetahuan">Ilmu Pengetahuan</option>
-                <option value="Sejarah">Sejarah</option>
-                <option value="Agama">Agama</option>
-                <option value="Lainnya">Lainnya</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
-              <input v-model="form.quantity" type="number" min="1" required class="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Jumlah buku">
-            </div>
-            <div class="md:col-span-2">
-              <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
-                Kirim Pengajuan
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- My Book Requests Table -->
-        <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Riwayat Pengajuan</h3>
+    <main class="flex-1 ml-80 min-h-screen pb-12">
+      <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-md border-b border-slate-200 px-10 py-6">
+        <div class="flex items-center justify-between max-w-[1400px] mx-auto">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Permintaan Buku Member</h1>
+            <p class="text-slate-500 text-sm">Kelola pengajuan koleksi baru dari anggota perpustakaan</p>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50/50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Judul</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Pengarang</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Jumlah</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Status</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Tanggal</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                <tr v-for="request in bookRequests.data" :key="request.id" class="hover:bg-gray-50/50 transition-colors">
-                  <td class="px-6 py-4">
-                    <div class="text-sm font-medium text-gray-900">{{ request.title }}</div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="text-sm text-gray-600">{{ request.author }}</div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="text-sm text-gray-600">{{ request.quantity }}</div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span :class="{
-                      'bg-amber-100 text-amber-700': request.status === 'pending',
-                      'bg-green-100 text-green-700': request.status === 'approved',
-                      'bg-red-100 text-red-700': request.status === 'rejected',
-                    }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">
-                      {{ request.status }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="text-xs text-gray-500">{{ request.created_at }}</div>
-                  </td>
-                </tr>
-                <tr v-if="!bookRequests.data?.length">
-                  <td colspan="5" class="px-6 py-8 text-center text-gray-500">Belum ada pengajuan.</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="px-4 py-2 bg-orange-50 rounded-xl border border-orange-100">
+            <p class="text-xs font-bold text-orange-600 uppercase tracking-wider">{{ pendingCount }} Menunggu Approval</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="px-10 py-8 max-w-[1400px] mx-auto">
+        <div class="flex gap-3 mb-8">
+          <button @click="filterStatus = ''" :class="filterButtonClass('')" class="px-6 py-3 rounded-xl font-bold text-sm transition-all">
+            <span v-if="filterStatus === ''" class="flex items-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1H3zm0 4a1 1 0 011-1h12a1 1 0 011 1H3zm0 4a1 1 0 011-1h12a1 1 0 011 1H3zm0 4a1 1 0 011-1h12a1 1 0 011 1H3z"/></svg>
+              Semua
+            </span>
+            <span v-else>Semua</span>
+          </button>
+          <button @click="filterStatus = 'pending'" :class="filterButtonClass('pending')" class="px-6 py-3 rounded-xl font-bold text-sm transition-all">
+            <span v-if="filterStatus === 'pending'" class="flex items-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/></svg>
+              Menunggu
+            </span>
+            <span v-else>Menunggu</span>
+          </button>
+          <button @click="filterStatus = 'approved'" :class="filterButtonClass('approved')" class="px-6 py-3 rounded-xl font-bold text-sm transition-all">
+            <span v-if="filterStatus === 'approved'" class="flex items-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
+              Disetujui
+            </span>
+            <span v-else>Disetujui</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-3 mb-8 bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+          <div class="flex-1 relative">
+            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </span>
+            <input v-model="searchQuery" type="text" placeholder="Cari nama member atau judul buku..." class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-slate-200 text-sm">
           </div>
         </div>
 
+        <div class="space-y-3">
+          <div v-for="request in filteredRequests" :key="request.id" class="bg-white rounded-2xl border border-slate-200 p-7 shadow-sm hover:shadow-md transition-all group">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+              <div class="md:col-span-5 flex gap-4">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-bold text-sm border border-indigo-100 flex-shrink-0">
+                  {{ request.user_name?.[0]?.toUpperCase() }}
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-slate-800">{{ request.user_name }}</h3>
+                  <p class="text-[11px] text-slate-400">{{ formatDate(request.created_at) }}</p>
+                  <p class="text-xs text-slate-600 mt-2 italic">
+                    <span class="font-semibold text-slate-700">"{{ request.reason }}"</span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="md:col-span-4">
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Informasi Buku</p>
+                  <p class="text-sm font-bold text-slate-800">{{ request.title }}</p>
+                  <p class="text-xs text-slate-500">{{ request.author }}</p>
+                  <p class="text-[11px] text-slate-400 mt-2 font-mono">{{ request.isbn || 'ISBN tidak tersedia' }}</p>
+                </div>
+              </div>
+
+              <div class="md:col-span-3 flex flex-col gap-3 justify-between">
+                <div class="text-right">
+                  <span :class="getStatusBadgeClass(request.status)" class="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider inline-block">
+                    {{ getStatusText(request.status) }}
+                  </span>
+                </div>
+
+                <div class="flex gap-2">
+                  <button v-if="request.status === 'pending'" @click="approveRequest(request)" class="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
+                    Setujui
+                  </button>
+                  <button v-if="request.status === 'pending'" @click="rejectRequest(request)" class="px-4 py-2.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-rose-100 hover:text-rose-600 transition-all">
+                    Tolak
+                  </button>
+                  <button v-if="request.status === 'approved'" class="flex-1 px-4 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+                    Tandai Sudah Dibeli
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="filteredRequests.length === 0" class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+            </div>
+            <p class="text-slate-500 text-sm font-medium">Tidak ada permintaan buku untuk ditampilkan</p>
+          </div>
+        </div>
       </div>
-    </div>
-  </PetugasLayout>
+    </main>
+  </div>
 </template>
 
 <script setup>
-import PetugasLayout from '@/Layouts/PetugasLayout.vue';
-import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import PetugasSidebar from '@/Components/PetugasSidebar.vue';
+import { ref, computed } from 'vue';
 
-defineProps({
-  bookRequests: { type: Object, default: () => ({ data: [] }) },
+const props = defineProps({
+  bookRequests: { type: Array, default: () => [] },
 });
 
-const form = ref({
-  title: '',
-  author: '',
-  publisher: '',
-  year: '',
-  isbn: '',
-  category: '',
-  quantity: 1,
+const filterStatus = ref('');
+const searchQuery = ref('');
+
+const filteredRequests = computed(() => {
+  return props.bookRequests.filter(request => {
+    const matchesSearch = request.user_name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                         request.title?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                         request.author?.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesStatus = filterStatus.value ? request.status === filterStatus.value : true;
+    return matchesSearch && matchesStatus;
+  });
 });
 
-const submitRequest = () => {
-  router.post(route('petugas.book-requests.store'), form.value);
+const pendingCount = computed(() => {
+  return props.bookRequests.filter(r => r.status === 'pending').length;
+});
+
+const formatDate = (date) => {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+const getStatusBadgeClass = (status) => {
+  switch(status) {
+    case 'pending': return 'bg-orange-50 text-orange-600 border border-orange-100';
+    case 'approved': return 'bg-emerald-50 text-emerald-600 border border-emerald-100';
+    case 'rejected': return 'bg-rose-50 text-rose-600 border border-rose-100';
+    default: return 'bg-slate-50 text-slate-600';
+  }
+};
+
+const getStatusText = (status) => {
+  switch(status) {
+    case 'pending': return 'Menunggu';
+    case 'approved': return 'Disetujui';
+    case 'rejected': return 'Ditolak';
+    default: return status;
+  }
+};
+
+const filterButtonClass = (status) => {
+  return filterStatus.value === status
+    ? 'bg-slate-900 text-white border border-slate-700 shadow-lg shadow-slate-200'
+    : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100';
+};
+
+const approveRequest = (request) => {
+  console.log('Approve request:', request);
+};
+
+const rejectRequest = (request) => {
+  console.log('Reject request:', request);
 };
 </script>

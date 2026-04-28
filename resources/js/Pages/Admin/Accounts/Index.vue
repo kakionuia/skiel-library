@@ -20,7 +20,7 @@
             <p class="text-sm text-gray-500">Petugas yang ditambahkan akan memiliki akses untuk mengelola data harian.</p>
           </div>
           <div class="p-6">
-            <form @submit.prevent="submitPetugas" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <form @submit.prevent="submitPetugas" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <div>
                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1 ml-1">Nama Lengkap</label>
                 <input v-model="petugasForm.name" type="text" placeholder="Masukkan nama..." class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm" required />
@@ -28,6 +28,10 @@
               <div>
                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1 ml-1">Alamat Email</label>
                 <input v-model="petugasForm.email" type="email" placeholder="nama@email.com" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm" required />
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase text-gray-500 mb-1 ml-1">Password</label>
+                <input v-model="petugasForm.password" type="text" placeholder="Kosongkan untuk auto" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm" />
               </div>
               <button type="submit" :disabled="petugasForm.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-sm shadow-indigo-200 disabled:opacity-50 flex items-center justify-center gap-2">
                 <svg v-if="!petugasForm.processing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
@@ -150,6 +154,7 @@ defineProps({
 const petugasForm = useForm({
   name: '',
   email: '',
+  password: '',
 });
 
 const submitPetugas = () => {

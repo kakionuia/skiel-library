@@ -24,10 +24,11 @@
                 <tr v-for="req in requests.data" :key="req.id" class="hover:bg-gray-50/50 transition-colors">
                   <td class="px-6 py-4">
                     <div class="font-semibold text-gray-900">{{ req.title }}</div>
-                    <div class="text-xs text-gray-500">{{ req.author }} • {{ req.year }}</div>
+                    <div class="text-xs text-gray-500">{{ req.author }} • {{ req.year || '-' }}</div>
+                    <div class="text-xs text-gray-400 mt-1">{{ req.description }}</div>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="text-sm text-gray-900">{{ req.petugas?.name || '-' }}</div>
+                    <div class="text-sm text-gray-900">{{ req.user?.name || '-' }}</div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="text-sm text-gray-900">{{ req.quantity }}</div>
@@ -43,15 +44,15 @@
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div v-if="req.status === 'pending'" class="flex justify-end gap-2">
-                      <button @click="approveRequest(req)" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium">
+                      <button @click="approveRequest(req)" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                         Setuju
                       </button>
-                      <button @click="rejectRequest(req)" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium">
+                      <button @click="rejectRequest(req)" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                         Tolak
                       </button>
                     </div>
                     <span v-else class="text-xs text-gray-500">
-                      {{ req.admin_note || '-' }}
+                      {{ req.admin_note || 'Selesai' }}
                     </span>
                   </td>
                 </tr>
@@ -80,15 +81,15 @@ defineProps({
 });
 
 const approveRequest = (req) => {
-  if (confirm('Setuju kan permintaan buku ini? Buku akan ditambahkan ke koleksi.')) {
-    router.post(`/admin/book-requests/${req.id}/approve`);
+  if (confirm(`Setuju kan permintaan buku "${req.title}"? Buku akan ditambahkan ke koleksi.`)) {
+    router.post(route('admin.book-requests.approve', req.id));
   }
 };
 
 const rejectRequest = (req) => {
   const note = prompt('Masukkan alasan penolakan:');
   if (note) {
-    router.post(`/admin/book-requests/${req.id}/reject`, { admin_note: note });
+    router.post(route('admin.book-requests.reject', req.id), { admin_note: note });
   }
 };
 </script>

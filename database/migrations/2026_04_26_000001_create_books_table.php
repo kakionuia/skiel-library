@@ -8,22 +8,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->string('author');
-            $table->string('publisher')->nullable();
-            $table->year('year')->nullable();
-            $table->string('isbn')->nullable();
-            $table->string('category')->nullable();
-            $table->text('description')->nullable();
-            $table->integer('stock')->default(1);
-            $table->integer('available')->default(1);
-            $table->string('cover_image')->nullable();
-            $table->string('location')->nullable(); // rak/lokasi
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->timestamps();
-        });
+    Schema::create('books', function (Blueprint $table) {
+    $table->id();
+    $table->string('book_id')->unique(); // <--- BARIS INI WAJIB ADA
+    $table->string('title');
+    $table->string('author');
+    $table->string('publisher')->nullable();
+    $table->integer('year')->nullable();
+    $table->string('isbn')->nullable();
+    $table->string('category')->nullable();
+    $table->integer('quantity')->default(1);
+    $table->integer('available_quantity')->default(1);
+    $table->text('description')->nullable();
+    $table->string('status')->default('pending');
+    $table->foreignId('created_by')->constrained('users');
+    $table->timestamps(); // Ini agar tidak error 'updated_at' lagi
+    });
     }
 
     public function down(): void

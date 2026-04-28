@@ -9,25 +9,30 @@ class Book extends Model
 {
     use HasFactory;
 
+    public $timestamps = true;
+
     protected $fillable = [
-        'title',
-        'author',
-        'publisher',
-        'year',
-        'isbn',
-        'category',
-        'description',
-        'stock',
-        'available',
-        'cover_image',
-        'location',
-        'status',
-    ];
+    'book_id',
+    'title', 
+    'author', 
+    'publisher', 
+    'year', 
+    'isbn', 
+    'category', 
+    'quantity', 
+    'available_quantity', 
+    'description', 
+    'cover_image',
+    'status',
+    'created_by',
+    'approved_by',
+    'approved_at',
+];
 
     protected $casts = [
         'year' => 'integer',
-        'stock' => 'integer',
-        'available' => 'integer',
+        'quantity' => 'integer',
+        'available_quantity' => 'integer',
     ];
 
     public function borrows()
@@ -38,6 +43,16 @@ class Book extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function averageRating()

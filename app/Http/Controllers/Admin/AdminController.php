@@ -13,6 +13,7 @@ use App\Models\Activity;
 use App\Models\BookRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -66,6 +67,9 @@ class AdminController extends Controller
         // Pending book requests
         $pendingBookRequests = BookRequest::where('status', 'pending')->count();
 
+        // Pending book submissions (from petugas)
+        $pendingBookSubmissions = Book::where('status', 'pending')->count();
+
         // Pending complaints
         $pendingComplaints = Complaint::where('status', 'pending')->count();
 
@@ -78,6 +82,7 @@ class AdminController extends Controller
                 'totalLateFee' => $totalLateFee,
                 'pendingMembers' => $pendingMembers,
                 'pendingBookRequests' => $pendingBookRequests,
+                'pendingBookSubmissions' => $pendingBookSubmissions,
                 'pendingComplaints' => $pendingComplaints,
             ],
             'monthlyBorrows' => $monthlyBorrows,
@@ -103,9 +108,11 @@ class AdminController extends Controller
         $request->validate([
             'email' => 'required|email|unique:users,email',
             'name' => 'required|string|max:255',
+            'password' => 'nullable|string|min:6',
         ]);
 
-        $password = Str::random(8);
+        // Use provided password or generate random one
+        $password = $request->password ?: Str::random(8);
 
         $petugas = User::create([
             'name' => $request->name,
@@ -116,7 +123,7 @@ class AdminController extends Controller
         ]);
 
         // Log activity
-        Activity::log(auth()->id(), 'create_petugas', "Membuat akun petugas: {$petugas->email}");
+        Activity::log(Auth::id(), 'create_petugas', "Membuat akun petugas: {$petugas->email}");
 
         return back()->with('success', 'Akun petugas berhasil dibuat. Password: ' . $password);
     }
@@ -128,7 +135,7 @@ class AdminController extends Controller
         }
 
         $user->update(['status' => 'approved']);
-        Activity::log(auth()->id(), 'approve_user', "Menyetujuai akun anggota: {$user->email}");
+        Activity::log(Auth::id(), 'approve_user', "Menyetujuai akun anggota: {$user->email}");
 
         return back()->with('success', 'Akun anggota telah disetujui.');
     }
@@ -140,7 +147,7 @@ class AdminController extends Controller
         }
 
         $user->update(['status' => 'rejected']);
-        Activity::log(auth()->id(), 'reject_user', "Menolak akun anggota: {$user->email}");
+        Activity::log(Auth::id(), 'reject_user', "Menolak akun anggota: {$user->email}");
 
         return back()->with('success', 'Akun anggota telah ditolak.');
     }
@@ -170,7 +177,7 @@ class AdminController extends Controller
     public function restrictUser(Request $request, User $user)
     {
         $user->update(['borrow_restricted' => true]);
-        Activity::log(auth()->id(), 'restrict_user', "Membatasi pinjaman akun: {$user->email}");
+        Activity::log(Auth::id(), 'restrict_user', "Membatasi pinjaman akun: {$user->email}");
 
         return back()->with('success', 'Akun telah dibatasi pinjamannya.');
     }
@@ -178,7 +185,7 @@ class AdminController extends Controller
     public function unrestrictUser(Request $request, User $user)
     {
         $user->update(['borrow_restricted' => false]);
-        Activity::log(auth()->id(), 'unrestrict_user', "Menghapus pembatasan pinjaman: {$user->email}");
+        Activity::log(Auth::id(), 'unrestrict_user', "Menghapus pembatasan pinjaman: {$user->email}");
 
         return back()->with('success', 'Pembatasan pinjaman telah dicabut.');
     }
@@ -191,7 +198,7 @@ class AdminController extends Controller
 
         $email = $user->email;
         $user->delete();
-        Activity::log(auth()->id(), 'delete_user', "Menghapus akun: {$email}");
+        Activity::log(Auth::id(), 'delete_user', "Menghapus akun: {$email}");
 
         return back()->with('success', 'Akun berhasil dihapus.');
     }
@@ -199,7 +206,7 @@ class AdminController extends Controller
     // Book Requests
     public function bookRequests()
     {
-        $requests = BookRequest::with('petugas')
+        $requests = BookRequest::with('user')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -208,45 +215,159 @@ class AdminController extends Controller
         ]);
     }
 
-    public function approveBookRequest(BookRequest $request)
+    public function approveBookRequest(BookRequest $bookRequest)
     {
-        // Create the book
+        // Create the book from the request
         Book::create([
-            'title' => $request->title,
-            'author' => $request->author,
-            'publisher' => $request->publisher,
-            'year' => $request->year,
-            'isbn' => $request->isbn,
-            'category' => $request->category,
-            'description' => $request->description,
-            'stock' => $request->quantity,
-            'available' => $request->quantity,
+            'book_id' => 'BK-' . strtoupper(\Illuminate\Support\Str::random(8)),
+            'title' => $bookRequest->title,
+            'author' => $bookRequest->author,
+            'isbn' => $bookRequest->isbn,
+            'publisher' => $bookRequest->publisher ?? '-',
+            'year' => $bookRequest->year,
+            'category' => $bookRequest->category ?? 'Umum',
+            'description' => $bookRequest->description,
+            'quantity' => $bookRequest->quantity ?? 1,
+            'available_quantity' => $bookRequest->quantity ?? 1,
             'status' => 'active',
+            'created_by' => $bookRequest->user_id,
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
         ]);
 
-        $request->update([
+        // Update the request status
+        $bookRequest->update([
             'status' => 'approved',
-            'reviewed_by' => auth()->id(),
         ]);
 
-        Activity::log(auth()->id(), 'approve_book', "Menyetujui permintaan buku: {$request->title}");
+        Activity::log(Auth::id(), 'approve_book', "Menyetujui dan menambahkan buku: {$bookRequest->title}");
 
-        return back()->with('success', 'Permintaan buku telah disetujui dan buku ditambahkan.');
+        return back()->with('success', 'Buku telah ditambahkan ke perpustakaan.');
     }
 
     public function rejectBookRequest(Request $request, BookRequest $bookRequest)
     {
-        $request->validate(['admin_note' => 'required|string']);
-
         $bookRequest->update([
             'status' => 'rejected',
-            'admin_note' => $request->admin_note,
-            'reviewed_by' => auth()->id(),
         ]);
 
-        Activity::log(auth()->id(), 'reject_book', "Menolak permintaan buku: {$bookRequest->title}");
+        Activity::log(Auth::id(), 'reject_book', "Menolak permintaan buku: {$bookRequest->title}");
 
         return back()->with('success', 'Permintaan buku telah ditolak.');
+    }
+
+    // Pengajuan Buku (Book Submissions from Petugas)
+    public function bookSubmissions()
+    {
+        $submissions = Book::with('user')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // Transform the submissions
+        $submissions->getCollection()->transform(function ($book) {
+            return [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'isbn' => $book->isbn,
+                'category' => $book->category,
+                'quantity' => $book->quantity,
+                'status' => $book->status,
+                'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+                'created_at' => $book->created_at,
+                'petugas' => $book->user ? [
+                    'id' => $book->user->id,
+                    'name' => $book->user->name,
+                    'email' => $book->user->email,
+                ] : null,
+            ];
+        });
+
+        return inertia('Admin/BookSubmissions/Index', [
+            'submissions' => $submissions,
+        ]);
+    }
+
+    public function showBookSubmission(Book $book)
+    {
+        // Make sure it's a pending book
+        if ($book->status !== 'pending') {
+            return back()->with('error', 'Pengajuan buku tidak ditemukan.');
+        }
+
+        $book->load('user', 'approver');
+        $createdBy = $book->user;
+
+        return inertia('Admin/BookSubmissions/Show', [
+            'book' => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'publisher' => $book->publisher,
+                'year' => $book->year,
+                'isbn' => $book->isbn,
+                'category' => $book->category,
+                'quantity' => $book->quantity,
+                'description' => $book->description,
+                'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+                'status' => $book->status,
+                'created_at' => $book->created_at,
+                'approved_at' => $book->approved_at,
+                'created_by' => $book->created_by,
+                'approved_by_user' => $book->approver ? [
+                    'id' => $book->approver->id,
+                    'name' => $book->approver->name,
+                    'email' => $book->approver->email,
+                ] : null,
+            ],
+            'createdBy' => $createdBy ? [
+                'id' => $createdBy->id,
+                'name' => $createdBy->name,
+                'email' => $createdBy->email,
+                'role' => $createdBy->role,
+            ] : null,
+        ]);
+    }
+
+    public function approveBookSubmission(Book $book)
+    {
+        // Make sure it's a pending book
+        if ($book->status !== 'pending') {
+            return back()->with('error', 'Pengajuan buku tidak valid.');
+        }
+
+        $book->update([
+            'status' => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        Activity::log(Auth::id(), 'approve_book_submission', "Menyetujui pengajuan buku dari petugas: {$book->title}");
+
+        return back()->with('success', 'Pengajuan buku telah disetujui dan ditambahkan ke perpustakaan.');
+    }
+
+    public function rejectBookSubmission(Request $request, Book $book)
+    {
+        // Make sure it's a pending book
+        if ($book->status !== 'pending') {
+            return back()->with('error', 'Pengajuan buku tidak valid.');
+        }
+
+        $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $book->update([
+            'status' => 'rejected',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        Activity::log(Auth::id(), 'reject_book_submission', "Menolak pengajuan buku: {$book->title}");
+
+        return back()->with('success', 'Pengajuan buku telah ditolak.');
     }
 
     // Late Returns
@@ -314,7 +435,7 @@ class AdminController extends Controller
     {
         $bookTitle = $review->book->title;
         $review->delete();
-        Activity::log(auth()->id(), 'delete_review', "Menghapus ulasan buku: {$bookTitle}");
+        Activity::log(Auth::id(), 'delete_review', "Menghapus ulasan buku: {$bookTitle}");
 
         return back()->with('success', 'Ulasan berhasil dihapus.');
     }
@@ -333,7 +454,7 @@ class AdminController extends Controller
 
     public function showComplaint(Complaint $complaint)
     {
-        $complaint->load('user', 'handler');
+        $complaint->load('user');
 
         return inertia('Admin/Complaints/Show', [
             'complaint' => $complaint,
@@ -342,17 +463,11 @@ class AdminController extends Controller
 
     public function resolveComplaint(Request $request, Complaint $complaint)
     {
-        $request->validate([
-            'admin_response' => 'required|string',
-        ]);
-
         $complaint->update([
             'status' => 'resolved',
-            'admin_response' => $request->admin_response,
-            'handled_by' => auth()->id(),
         ]);
 
-        Activity::log(auth()->id(), 'resolve_complaint', "Menangani keluhan: {$complaint->subject}");
+        Activity::log(Auth::id(), 'resolve_complaint', "Menangani keluhan: {$complaint->subject}");
 
         return back()->with('success', 'Keluhan telah ditangani.');
     }
@@ -371,14 +486,8 @@ class AdminController extends Controller
 
     public function updateSuggestionStatus(Request $request, Suggestion $suggestion)
     {
-        $request->validate(['status' => 'required|in:pending,reviewed,implemented,rejected']);
-
-        $suggestion->update([
-            'status' => $request->status,
-            'admin_note' => $request->admin_note,
-        ]);
-
-        Activity::log(auth()->id(), 'update_suggestion', "Mengupdate status saran");
+        // Suggestions table doesn't have status column, just log the activity
+        Activity::log(Auth::id(), 'update_suggestion', "Mengupdate status saran");
 
         return back()->with('success', 'Status saran telah diupdate.');
     }

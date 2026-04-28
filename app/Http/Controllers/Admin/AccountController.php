@@ -28,9 +28,11 @@ class AccountController extends Controller
         $request->validate([
             'email' => 'required|email|unique:users,email',
             'name' => 'required|string|max:255',
+            'password' => 'nullable|string|min:6',
         ]);
 
-        $password = Str::random(8);
+        // Use provided password or generate random one
+        $password = $request->password ?: Str::random(8);
 
         $petugas = User::create([
             'name' => $request->name,

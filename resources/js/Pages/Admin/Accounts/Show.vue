@@ -111,7 +111,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 
-defineProps({
+const props = defineProps({
   user: { type: Object, default: () => ({}) },
   recentBorrows: { type: Array, default: () => [] },
 });
@@ -127,9 +127,4 @@ const unrestrictUser = () => {
     router.post(`/admin/accounts/${props.user.id}/unrestrict`);
   }
 };
-
-const props = defineProps({
-  user: Object,
-  recentBorrows: Array
-});
 </script>

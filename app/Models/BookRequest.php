@@ -10,18 +10,16 @@ class BookRequest extends Model
     use HasFactory;
 
     protected $fillable = [
-        'petugas_id',
+        'user_id',
         'title',
         'author',
+        'isbn',
         'publisher',
         'year',
-        'isbn',
         'category',
         'description',
         'quantity',
         'status',
-        'admin_note',
-        'reviewed_by',
     ];
 
     protected $casts = [
@@ -29,13 +27,8 @@ class BookRequest extends Model
         'quantity' => 'integer',
     ];
 
-    public function petugas()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'petugas_id');
-    }
-
-    public function reviewer()
-    {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
