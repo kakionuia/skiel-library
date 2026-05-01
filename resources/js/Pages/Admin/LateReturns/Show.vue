@@ -94,8 +94,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { confirmDialog, dangerConfirm } from '@/Utils/sweetAlert';
 
-defineProps({
+const props = defineProps({
   user: { type: Object, default: () => ({}) },
   lateBorrows: { type: Array, default: () => [] },
 });
@@ -104,20 +105,24 @@ const formatNumber = (num) => {
   return new Intl.NumberFormat('id-ID').format(num || 0);
 };
 
-const restrictUser = () => {
-  if (confirm('Batasi peminjaman akun ini?')) {
+const restrictUser = async () => {
+  if (await dangerConfirm({
+    title: 'Batasi peminjaman akun ini?',
+    text: `${props.user.name} tidak akan bisa melakukan peminjaman baru.`,
+    confirmButtonText: 'Ya, batasi',
+  })) {
     router.post(`/admin/accounts/${props.user.id}/restrict`);
   }
 };
 
-const unrestrictUser = () => {
-  if (confirm('Cabut pembatasan peminjaman?')) {
+const unrestrictUser = async () => {
+  if (await confirmDialog({
+    title: 'Cabut pembatasan peminjaman?',
+    text: `${props.user.name} akan bisa melakukan peminjaman kembali.`,
+    confirmButtonText: 'Ya, cabut',
+  })) {
     router.post(`/admin/accounts/${props.user.id}/unrestrict`);
   }
 };
 
-const props = defineProps({
-  user: Object,
-  lateBorrows: Array
-});
 </script>

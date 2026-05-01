@@ -12,7 +12,7 @@
           <div class="flex items-center gap-6">
             <div class="text-right border-r border-slate-200 pr-6 hidden sm:block">
               <p class="text-sm font-bold text-slate-700">{{ formattedDate }}</p>
-              <p class="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">Live Report</p>
+              <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">Live Report</p>
             </div>
             <button class="bg-white border border-slate-200 p-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -25,10 +25,10 @@
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <div class="bg-white p-7 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md transition-all group">
             <div class="flex justify-between items-start mb-5">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
               </div>
-              <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg italic">DAILY</span>
+              <span class="text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded-lg italic">DAILY</span>
             </div>
             <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Peminjaman Hari Ini</p>
             <h3 class="text-4xl font-black text-slate-900 mt-1">{{ todayLoans }} <span class="text-sm font-medium text-slate-400">Buku</span></h3>
@@ -84,7 +84,7 @@
             <div class="space-y-3">
               <div v-for="member in topMembers" :key="member.id" class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
+                  <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-sm font-bold text-orange-600">
                     {{ member.name?.[0]?.toUpperCase() }}
                   </div>
                   <div>
@@ -92,7 +92,7 @@
                     <p class="text-[10px] text-slate-500">{{ member.borrow_count }} peminjaman</p>
                   </div>
                 </div>
-                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">{{ member.borrow_count }}x</span>
+                <span class="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-lg">{{ member.borrow_count }}x</span>
               </div>
             </div>
           </div>

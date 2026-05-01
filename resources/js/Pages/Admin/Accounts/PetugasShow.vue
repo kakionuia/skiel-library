@@ -17,7 +17,7 @@
           <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-gray-200">
               <div class="flex flex-col items-center">
-                <div class="w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-2xl">
+                <div class="w-20 h-20 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-2xl">
                   {{ petugas.name.charAt(0) }}
                 </div>
                 <h2 class="mt-4 text-xl font-bold text-gray-900">{{ petugas.name }}</h2>
@@ -47,7 +47,7 @@
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Aktivitas Terbaru</h3>
               <div class="space-y-3">
                 <div v-for="activity in activities" :key="activity.id" class="flex items-start gap-3 p-3 border rounded-lg">
-                  <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>

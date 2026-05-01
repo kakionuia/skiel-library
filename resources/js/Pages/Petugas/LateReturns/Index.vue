@@ -82,7 +82,7 @@
                     <p class="text-sm font-bold text-slate-900">Rp {{ loan.fine.toLocaleString('id-ID') }}</p>
                   </td>
                   <td class="px-8 py-6 text-right">
-                    <button class="px-3 py-1 text-[10px] font-bold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all">
+                    <button class="px-3 py-1 text-[10px] font-bold rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 transition-all">
                       Proses
                     </button>
                   </td>

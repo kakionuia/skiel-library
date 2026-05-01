@@ -18,7 +18,7 @@
               <div class="mb-4">
                 <span :class="{
                   'bg-amber-100 text-amber-700': complaint.status === 'pending',
-                  'bg-blue-100 text-blue-700': complaint.status === 'reviewed',
+                  'bg-orange-100 text-orange-700': complaint.status === 'reviewed',
                   'bg-green-100 text-green-700': complaint.status === 'resolved',
                   'bg-red-100 text-red-700': complaint.status === 'rejected',
                 }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
@@ -67,6 +67,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { confirmDialog } from '@/Utils/sweetAlert';
 
 const props = defineProps({
   complaint: { type: Object, default: () => ({}) },
@@ -74,8 +75,12 @@ const props = defineProps({
 
 const response = ref('');
 
-const resolveComplaint = () => {
-  if (response.value.trim()) {
+const resolveComplaint = async () => {
+  if (response.value.trim() && await confirmDialog({
+    title: 'Kirim tanggapan?',
+    text: 'Keluhan akan ditandai selesai dengan tanggapan ini.',
+    confirmButtonText: 'Ya, kirim',
+  })) {
     router.post(`/admin/complaints/${props.complaint.id}/resolve`, {
       admin_response: response.value
     });

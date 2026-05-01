@@ -25,3 +25,32 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+// Hilangkan semua tooltip URL di seluruh aplikasi
+document.addEventListener('DOMContentLoaded', function() {
+    // Hilangkan tooltip dari semua element
+    const removeTooltips = () => {
+        document.querySelectorAll('[title]').forEach(el => {
+            el.removeAttribute('title');
+        });
+        
+        document.querySelectorAll('a, button, div').forEach(el => {
+            el.addEventListener('mouseenter', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.status = '';
+                return false;
+            });
+        });
+    };
+    
+    removeTooltips();
+    
+    // Observer untuk element yang baru ditambahkan
+    const observer = new MutationObserver(removeTooltips);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+
+// Override default browser behavior
+window.defaultStatus = '';
+window.status = '';

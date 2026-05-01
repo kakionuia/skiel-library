@@ -5,7 +5,7 @@
         
         <!-- Back Button -->
         <div class="mb-6">
-          <Link :href="route('admin.book-submissions')" class="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1">
+          <Link :href="route('admin.book-submissions')" class="text-orange-600 hover:text-orange-700 font-medium text-sm flex items-center gap-1">
             ← Kembali ke Pengajuan
           </Link>
         </div>
@@ -127,8 +127,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { confirmDialog, promptDialog } from '@/Utils/sweetAlert';
 
-defineProps({
+const props = defineProps({
   book: { type: Object, required: true },
   createdBy: { type: Object, default: () => ({}) },
 });
@@ -143,16 +144,26 @@ const formatDate = (date) => {
   });
 };
 
-const approveSubmission = () => {
-  if (confirm(`Setujui pengajuan buku "${book.title}"? Buku akan ditambahkan ke perpustakaan dan dapat diakses oleh pengguna.`)) {
-    router.post(route('admin.book-submissions.approve', book.id));
+const approveSubmission = async () => {
+  if (await confirmDialog({
+    title: 'Setujui pengajuan buku?',
+    text: `"${props.book.title}" akan ditambahkan ke perpustakaan dan dapat diakses pengguna.`,
+    confirmButtonText: 'Ya, setujui',
+  })) {
+    router.post(route('admin.book-submissions.approve', props.book.id));
   }
 };
 
-const rejectSubmission = () => {
-  const reason = prompt('Masukkan alasan penolakan (opsional):');
+const rejectSubmission = async () => {
+  const reason = await promptDialog({
+    title: 'Tolak pengajuan buku?',
+    text: `Tambahkan alasan penolakan untuk "${props.book.title}".`,
+    inputPlaceholder: 'Alasan penolakan (opsional)',
+    confirmButtonText: 'Tolak pengajuan',
+  });
+
   if (reason !== null) {
-    router.post(route('admin.book-submissions.reject', book.id), { reason });
+    router.post(route('admin.book-submissions.reject', props.book.id), { reason });
   }
 };
 </script>

@@ -63,13 +63,18 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { router } from '@inertiajs/vue3';
+import { dangerConfirm } from '@/Utils/sweetAlert';
 
 defineProps({
   reviews: { type: Object, default: () => ({ data: [] }) },
 });
 
-const deleteReview = (review) => {
-  if (confirm('Hapus ulasan ini?')) {
+const deleteReview = async (review) => {
+  if (await dangerConfirm({
+    title: 'Hapus ulasan ini?',
+    text: `Ulasan untuk buku "${review.book?.title || 'ini'}" akan dihapus permanen.`,
+    confirmButtonText: 'Ya, hapus',
+  })) {
     router.delete(`/admin/reviews/${review.id}`);
   }
 };

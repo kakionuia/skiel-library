@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@heroicons/vue": "^2.2.0",
-        "aos": "^2.3.4"
+        "aos": "^2.3.4",
+        "sweetalert2": "^11.26.24"
     }
 }

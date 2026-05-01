@@ -49,7 +49,7 @@
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div v-if="book.status === 'pending'" class="flex justify-end gap-2">
-                      <Link :href="route('admin.book-submissions.show', book.id)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                      <Link :href="route('admin.book-submissions.show', book.id)" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                         Detail
                       </Link>
                       <button @click="approveSubmission(book)" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
@@ -59,7 +59,7 @@
                         Tolak
                       </button>
                     </div>
-                    <Link v-else :href="route('admin.book-submissions.show', book.id)" class="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                    <Link v-else :href="route('admin.book-submissions.show', book.id)" class="text-xs text-orange-600 hover:text-orange-700 font-medium">
                       Lihat Detail
                     </Link>
                   </td>
@@ -83,6 +83,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { confirmDialog, promptDialog } from '@/Utils/sweetAlert';
 
 defineProps({
   submissions: { type: Object, default: () => ({ data: [] }) },
@@ -98,14 +99,25 @@ const formatDate = (date) => {
   });
 };
 
-const approveSubmission = (book) => {
-  if (confirm(`Setujui pengajuan buku "${book.title}" dari ${book.petugas?.name}? Buku akan ditambahkan ke perpustakaan.`)) {
+const approveSubmission = async (book) => {
+  if (await confirmDialog({
+    title: 'Setujui pengajuan buku?',
+    text: `"${book.title}" dari ${book.petugas?.name || 'petugas'} akan ditambahkan ke perpustakaan.`,
+    confirmButtonText: 'Ya, setujui',
+  })) {
     router.post(route('admin.book-submissions.approve', book.id));
   }
 };
 
-const rejectSubmission = (book) => {
-  const reason = prompt('Masukkan alasan penolakan:');
+const rejectSubmission = async (book) => {
+  const reason = await promptDialog({
+    title: 'Tolak pengajuan buku?',
+    text: `Berikan alasan penolakan untuk "${book.title}".`,
+    inputPlaceholder: 'Contoh: ISBN atau data buku belum valid.',
+    confirmButtonText: 'Tolak pengajuan',
+    required: true,
+  });
+
   if (reason !== null) {
     router.post(route('admin.book-submissions.reject', book.id), { reason });
   }

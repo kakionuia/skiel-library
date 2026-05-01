@@ -28,7 +28,7 @@
                   <svg v-else class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </div>
                 <div class="flex-1">
-                  <input @change="handleImageUpload" type="file" accept="image/*" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+                  <input @change="handleImageUpload" type="file" accept="image/*" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
                   <p class="text-[10px] text-slate-400 mt-2">Format: JPG, PNG, atau WEBP (Max 2MB)</p>
                 </div>
               </div>
@@ -36,32 +36,32 @@
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Judul Buku <span class="text-rose-500">*</span></label>
-              <input v-model="form.title" type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+              <input v-model="form.title" type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Penulis <span class="text-rose-500">*</span></label>
-              <input v-model="form.author" type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+              <input v-model="form.author" type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Penerbit</label>
-              <input v-model="form.publisher" type="text" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+              <input v-model="form.publisher" type="text" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">ISBN</label>
-              <input v-model="form.isbn" type="text" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium font-mono">
+              <input v-model="form.isbn" type="text" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium font-mono">
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Tahun Terbit</label>
-              <input v-model="form.year" type="number" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+              <input v-model="form.year" type="number" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Kategori</label>
-              <select v-model="form.category" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+              <select v-model="form.category" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
                 <option value="">Pilih kategori</option>
                 <option value="Fiksi">Fiksi</option>
                 <option value="Non-Fiksi">Non-Fiksi</option>
@@ -72,17 +72,17 @@
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Jumlah Eksemplar</label>
-              <input v-model="form.quantity" type="number" min="0" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
+              <input v-model="form.quantity" type="number" min="0" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
           </div>
 
           <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
             <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Sinopsis</label>
-            <textarea v-model="form.description" rows="4" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium resize-none"></textarea>
+            <textarea v-model="form.description" rows="4" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium resize-none"></textarea>
           </div>
 
           <div class="flex gap-4 pt-4">
-            <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+            <button type="submit" class="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold text-sm hover:bg-orange-700 transition-colors shadow-md shadow-orange-200">
               Tambah Buku
             </button>
             <Link :href="route('petugas.books')" class="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">

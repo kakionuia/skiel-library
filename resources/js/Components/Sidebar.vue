@@ -1,6 +1,7 @@
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import SidebarLink from '@/components/SidebarLink.vue';
 
 const activeSub = ref(null);
 const logoutForm = useForm({});
@@ -25,53 +26,52 @@ const menus = [
         <div class="flex h-full flex-col">
             <div class="flex items-center px-8 py-8">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100 transition-transform hover:scale-105">
+                    <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-100 transition-transform hover:scale-105">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-slate-900 tracking-tight leading-none">Libra<span class="text-indigo-600">Sync</span></h1>
+                        <h1 class="text-xl font-bold text-slate-900 tracking-tight leading-none">SKIE-Library</h1>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Administrator</p>
                     </div>
                 </div>
             </div>
 
             <nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
-                <Link v-for="menu in menus" :key="menu.name" :href="route(menu.route)" 
-                    class="nav-link group" :class="{ 'active-link': route().current(menu.route) }">
+                <SidebarLink v-for="menu in menus" :key="menu.name" :href="route(menu.route)">
                     <svg class="w-5 h-5 icon-style" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="menu.icon"></path>
                     </svg>
                     {{ menu.name }}
-                </Link>
+                </SidebarLink>
 
                 <div class="pt-2">
                     <button @click="activeSub = activeSub === 'log' ? null : 'log'"
                         class="w-full flex items-center justify-between px-4 py-3 text-slate-600 font-semibold text-sm rounded-xl hover:bg-slate-50 transition-all group">
                         <div class="flex items-center gap-4">
-                            <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-orange-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             Log Aktivitas
                         </div>
-                        <svg :class="{'rotate-180 text-indigo-600': activeSub === 'log'}" class="w-4 h-4 transition-transform duration-300 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg :class="{'rotate-180 text-orange-600': activeSub === 'log'}" class="w-4 h-4 transition-transform duration-300 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
                     
                     <div v-show="activeSub === 'log'" class="pl-12 mt-1 space-y-1 overflow-hidden transition-all">
-                        <Link :href="route('admin.activity-logs', {role: 'anggota'})" class="sub-link" :class="{ 'sub-link-active': route().current('admin.activity-logs', {role: 'anggota'}) }">Siswa</Link>
-                        <Link :href="route('admin.activity-logs', {role: 'petugas'})" class="sub-link" :class="{ 'sub-link-active': route().current('admin.activity-logs', {role: 'petugas'}) }">Petugas</Link>
-                        <Link :href="route('admin.activity-logs', {role: 'admin'})" class="sub-link" :class="{ 'sub-link-active': route().current('admin.activity-logs', {role: 'admin'}) }">Admin</Link>
+                        <SidebarLink :href="route('admin.activity-logs', {role: 'anggota'})" class="!py-2 !text-xs">Siswa</SidebarLink>
+                        <SidebarLink :href="route('admin.activity-logs', {role: 'petugas'})" class="!py-2 !text-xs">Petugas</SidebarLink>
+                        <SidebarLink :href="route('admin.activity-logs', {role: 'admin'})" class="!py-2 !text-xs">Admin</SidebarLink>
                     </div>
                 </div>
             </nav>
 
             <div class="p-4 border-t border-slate-100 bg-slate-50/50">
                 <div class="flex items-center gap-3 mb-4 p-2">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center border border-indigo-200 shadow-sm">
-                        <span class="text-sm font-bold text-indigo-700">{{ $page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'A' }}</span>
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center border border-orange-200 shadow-sm">
+                        <span class="text-sm font-bold text-orange-700">{{ $page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'A' }}</span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold text-slate-900 truncate">{{ $page.props.auth?.user?.name || 'Admin' }}</p>
@@ -91,34 +91,31 @@ const menus = [
 
 <style scoped>
 .nav-link {
-    @apply flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-slate-50 hover:text-indigo-600;
-}
-
-.active-link {
-    @apply bg-indigo-50 text-indigo-700 font-bold shadow-sm shadow-indigo-100/50;
+    @apply flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-slate-50 hover:text-orange-600;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
 }
 
 .active-link .icon-style {
-    @apply text-indigo-600 scale-110;
+    @apply text-orange-600 scale-110;
 }
 
 .icon-style {
-    @apply transition-transform duration-200 text-slate-400 group-hover:text-indigo-600;
+    @apply transition-transform duration-200 text-slate-400 group-hover:text-orange-600;
 }
 
-.sub-link {
-    @apply block py-2 text-xs font-semibold text-slate-400 hover:text-indigo-500 transition-colors;
-}
-
-.sub-link-active {
-    @apply text-indigo-600 font-bold;
-}
-
-/* Custom Scrollbar for better UI */
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-slate-200 rounded-full;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
 }
 </style>

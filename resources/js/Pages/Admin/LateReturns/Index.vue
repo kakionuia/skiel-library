@@ -40,7 +40,7 @@
                     <span class="text-orange-600 font-medium">Rp {{ formatNumber(borrow.late_fee) }}</span>
                   </td>
                   <td class="px-6 py-4 text-right">
-                    <Link :href="`/admin/late-returns/${borrow.user_id}`" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <Link :href="`/admin/late-returns/${borrow.user_id}`" class="text-orange-600 hover:text-orange-800 text-sm">
                       Detail →
                     </Link>
                   </td>

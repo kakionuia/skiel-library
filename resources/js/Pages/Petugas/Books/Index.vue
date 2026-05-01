@@ -102,7 +102,7 @@
                       <span v-else class="px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg ring-1 ring-amber-200">
                         ⏳ Menunggu
                       </span>
-                      <Link :href="`/petugas/books/${book.id}/edit`" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all border border-transparent hover:border-indigo-100">
+                      <Link :href="`/petugas/books/${book.id}/edit`" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 rounded-lg transition-all border border-transparent hover:border-orange-100">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         Edit
                       </Link>
@@ -136,6 +136,7 @@
 import PetugasSidebar from '@/Components/PetugasSidebar.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { dangerConfirm } from '@/Utils/sweetAlert';
 
 const props = defineProps({
   books: { type: Array, default: () => [] },
@@ -170,8 +171,12 @@ const tabButtonClass = (tab) => {
     : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100';
 };
 
-const deleteBook = (book) => {
-  if (confirm(`Yakin ingin menghapus buku "${book.title}"? Tindakan ini tidak dapat dibatalkan.`)) {
+const deleteBook = async (book) => {
+  if (await dangerConfirm({
+    title: 'Hapus buku ini?',
+    text: `"${book.title}" akan dihapus dan tindakan ini tidak dapat dibatalkan.`,
+    confirmButtonText: 'Ya, hapus',
+  })) {
     router.delete(route('petugas.books.destroy', book.id));
   }
 };

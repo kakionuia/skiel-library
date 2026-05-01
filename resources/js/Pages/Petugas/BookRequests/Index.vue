@@ -53,7 +53,7 @@
           <div v-for="request in filteredRequests" :key="request.id" class="bg-white rounded-2xl border border-slate-200 p-7 shadow-sm hover:shadow-md transition-all group">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
               <div class="md:col-span-5 flex gap-4">
-                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-bold text-sm border border-indigo-100 flex-shrink-0">
+                <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center font-bold text-sm border border-orange-100 flex-shrink-0">
                   {{ request.user_name?.[0]?.toUpperCase() }}
                 </div>
                 <div class="flex-1">
@@ -88,7 +88,7 @@
                   <button v-if="request.status === 'pending'" @click="rejectRequest(request)" class="px-4 py-2.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-rose-100 hover:text-rose-600 transition-all">
                     Tolak
                   </button>
-                  <button v-if="request.status === 'approved'" class="flex-1 px-4 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+                  <button v-if="request.status === 'approved'" class="flex-1 px-4 py-2.5 bg-orange-600 text-white text-xs font-bold rounded-lg hover:bg-orange-700 transition-all shadow-lg shadow-orange-100">
                     Tandai Sudah Dibeli
                   </button>
                 </div>

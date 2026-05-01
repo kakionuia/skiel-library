@@ -23,17 +23,17 @@
             <form @submit.prevent="submitPetugas" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <div>
                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1 ml-1">Nama Lengkap</label>
-                <input v-model="petugasForm.name" type="text" placeholder="Masukkan nama..." class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm" required />
+                <input v-model="petugasForm.name" type="text" placeholder="Masukkan nama..." class="w-full rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500 transition-all text-sm" required />
               </div>
               <div>
                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1 ml-1">Alamat Email</label>
-                <input v-model="petugasForm.email" type="email" placeholder="nama@email.com" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm" required />
+                <input v-model="petugasForm.email" type="email" placeholder="nama@email.com" class="w-full rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500 transition-all text-sm" required />
               </div>
               <div>
                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1 ml-1">Password</label>
-                <input v-model="petugasForm.password" type="text" placeholder="Kosongkan untuk auto" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm" />
+                <input v-model="petugasForm.password" type="text" placeholder="Kosongkan untuk auto" class="w-full rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500 transition-all text-sm" />
               </div>
-              <button type="submit" :disabled="petugasForm.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-sm shadow-indigo-200 disabled:opacity-50 flex items-center justify-center gap-2">
+              <button type="submit" :disabled="petugasForm.processing" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-sm shadow-orange-200 disabled:opacity-50 flex items-center justify-center gap-2">
                 <svg v-if="!petugasForm.processing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                 {{ petugasForm.processing ? 'Memproses...' : 'Simpan Petugas' }}
               </button>
@@ -60,7 +60,7 @@
                   <tr v-for="person in petugas" :key="person.id" class="hover:bg-gray-50/50 transition-colors">
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs uppercase">{{ person.name.charAt(0) }}</div>
+                        <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs uppercase">{{ person.name.charAt(0) }}</div>
                         <div>
                           <div class="text-sm font-semibold text-gray-900">{{ person.name }}</div>
                           <div class="text-xs text-gray-500">{{ person.email }}</div>
@@ -69,7 +69,7 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                       <div class="flex justify-end gap-2">
-                        <Link :href="`/admin/accounts/petugas/${person.id}`" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Lihat Detail">
+                        <Link :href="`/admin/accounts/petugas/${person.id}`" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all" title="Lihat Detail">
                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         </Link>
                         <button @click="deleteUser(person)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Hapus">
@@ -86,7 +86,7 @@
           <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
               <h3 class="font-bold text-gray-900">Validasi Anggota</h3>
-              <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold">Total: {{ anggota.length }}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold">Total: {{ anggota.length }}</span>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-sm">
@@ -122,7 +122,7 @@
                         </button>
                       </div>
                       <div v-else class="flex justify-end gap-2">
-                        <Link :href="`/admin/accounts/anggota/${user.id}`" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Lihat Detail">
+                        <Link :href="`/admin/accounts/anggota/${user.id}`" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all" title="Lihat Detail">
                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         </Link>
                         <button @click="deleteUser(user)" class="p-2 text-gray-300 hover:text-rose-600 transition-all" title="Hapus">
@@ -145,6 +145,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; 
 import { useForm, router, Link } from '@inertiajs/vue3';
+import { confirmDialog, dangerConfirm } from '@/Utils/sweetAlert';
 
 defineProps({
   petugas: { type: Array, default: () => [] },
@@ -165,20 +166,32 @@ const submitPetugas = () => {
   });
 };
 
-const approveUser = (user) => {
-  if (confirm('Verifikasi akun ini?')) {
+const approveUser = async (user) => {
+  if (await confirmDialog({
+    title: 'Verifikasi akun ini?',
+    text: `Akun ${user.name} akan mendapatkan akses perpustakaan.`,
+    confirmButtonText: 'Ya, verifikasi',
+  })) {
     router.post(`/admin/accounts/${user.id}/approve`);
   }
 };
 
-const rejectUser = (user) => {
-  if (confirm('Tolak akses akun ini?')) {
+const rejectUser = async (user) => {
+  if (await dangerConfirm({
+    title: 'Tolak akses akun ini?',
+    text: `Akun ${user.name} akan ditandai sebagai ditolak.`,
+    confirmButtonText: 'Ya, tolak',
+  })) {
     router.post(`/admin/accounts/${user.id}/reject`);
   }
 };
 
-const deleteUser = (user) => {
-  if (confirm('Hapus akun ini secara permanen?')) {
+const deleteUser = async (user) => {
+  if (await dangerConfirm({
+    title: 'Hapus akun ini?',
+    text: `Akun ${user.name} akan dihapus secara permanen.`,
+    confirmButtonText: 'Ya, hapus',
+  })) {
     router.delete(`/admin/accounts/${user.id}`);
   }
 };

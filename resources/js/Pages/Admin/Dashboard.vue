@@ -7,7 +7,7 @@
             <div>
               <h1 class="text-3xl font-bold text-slate-900 tracking-tight flex items-center">
                 Dashboard Overview
-                <span class="ml-3 inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                <span class="ml-3 inline-flex items-center rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-700/10">
                   Admin Access
                 </span>
               </h1>
@@ -23,7 +23,7 @@
           </div>
         </div>
         <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 blur-3xl opacity-20 pointer-events-none">
-          <div class="aspect-square w-[400px] bg-gradient-to-tr from-blue-600 to-indigo-400 rounded-full"></div>
+          <div class="aspect-square w-[400px] bg-gradient-to-tr from-orange-500 to-orange-400 rounded-full"></div>
         </div>
       </div>
 
@@ -54,7 +54,7 @@
                 <h2 class="text-lg font-bold text-slate-900">Analisis Peminjaman</h2>
                 <p class="text-sm text-slate-500">Aktivitas 6 bulan terakhir</p>
               </div>
-              <select class="text-sm border-none bg-slate-50 rounded-lg focus:ring-2 focus:ring-blue-500">
+              <select class="text-sm border-none bg-slate-50 rounded-lg focus:ring-2 focus:ring-orange-500">
                 <option>Tahun 2024</option>
               </select>
             </div>
@@ -67,11 +67,11 @@
                   </div>
                   <div class="w-full relative flex-1 flex items-end px-1 sm:px-2">
                     <div 
-                      class="w-full bg-blue-500 rounded-t-md transition-all duration-700 ease-out group-hover:bg-blue-600 shadow-sm"
+                      class="w-full bg-orange-500 rounded-t-md transition-all duration-700 ease-out group-hover:bg-orange-600 shadow-sm"
                       :style="{ height: `${(item.count / maxBorrow) * 100}%` }"
                     ></div>
                   </div>
-                  <p class="mt-4 text-[11px] font-bold text-slate-400 group-hover:text-blue-600 uppercase tracking-tighter">{{ item.month.substring(0, 3) }}</p>
+                  <p class="mt-4 text-[11px] font-bold text-slate-400 group-hover:text-orange-600 uppercase tracking-tighter">{{ item.month.substring(0, 3) }}</p>
                 </div>
               </div>
             </div>
@@ -87,7 +87,7 @@
                   Berdasarkan keterlambatan bulan ini
                 </div>
               </div>
-              <div class="absolute -right-4 -bottom-4 h-24 w-24 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/40 transition-all"></div>
+              <div class="absolute -right-4 -bottom-4 h-24 w-24 bg-orange-500/20 rounded-full blur-2xl group-hover:bg-orange-500/40 transition-all"></div>
             </div>
 
             <div class="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
@@ -107,8 +107,8 @@
                   <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke-width="2" /></svg>
                 </Link>
                 <Link href="/admin/book-requests" class="flex items-center px-6 py-4 border-t border-gray-50 hover:bg-slate-50 transition-colors">
-                  <div class="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center mr-4">
-                    <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                  <div class="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center mr-4">
+                    <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                   </div>
                   <div class="flex-1">
                     <p class="text-sm font-bold text-slate-900">{{ stats.pendingBookRequests }} Permintaan</p>
@@ -123,12 +123,12 @@
 
         <div class="mt-8">
           <div class="flex items-center space-x-2 mb-6">
-            <div class="h-1.5 w-8 bg-blue-600 rounded-full"></div>
+            <div class="h-1.5 w-8 bg-orange-600 rounded-full"></div>
             <h2 class="text-xl font-bold text-slate-900">Akses Cepat</h2>
           </div>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Link v-for="menu in quickMenus" :key="menu.title" :href="menu.link" 
-              class="group flex flex-col p-5 rounded-2xl bg-white border border-gray-100 shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+              class="group flex flex-col p-5 rounded-2xl bg-white border border-gray-100 shadow-sm transition-all hover:border-orange-200 hover:shadow-md">
               <div :class="['h-12 w-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110', menu.bg]">
                 <component :is="menu.icon" :class="['h-6 w-6', menu.iconColor]" />
               </div>
@@ -166,14 +166,14 @@ const props = defineProps({
 
 // Helper formatted stats for the cards
 const mainStats = computed(() => [
-  { label: 'Total Buku', value: props.stats.totalBooks, icon: markRaw(BookOpenIcon), bgIcon: 'bg-blue-50', iconColor: 'text-blue-600', trend: 12 },
+  { label: 'Total Buku', value: props.stats.totalBooks, icon: markRaw(BookOpenIcon), bgIcon: 'bg-orange-50', iconColor: 'text-orange-600', trend: 12 },
   { label: 'Anggota', value: props.stats.totalMembers, icon: markRaw(UserGroupIcon), bgIcon: 'bg-green-50', iconColor: 'text-green-600', trend: 5 },
-  { label: 'Petugas', value: props.stats.totalPetugas, icon: markRaw(ShieldCheckIcon), bgIcon: 'bg-purple-50', iconColor: 'text-purple-600' },
+  { label: 'Petugas', value: props.stats.totalPetugas, icon: markRaw(ShieldCheckIcon), bgIcon: 'bg-orange-50', iconColor: 'text-orange-600' },
   { label: 'Pending', value: props.stats.pendingMembers, icon: markRaw(ClockIcon), bgIcon: 'bg-amber-50', iconColor: 'text-amber-600' },
 ]);
 
 const quickMenus = [
-  { title: 'Kelola Akun', desc: 'Pengaturan hak akses anggota & petugas.', link: '/admin/accounts', icon: markRaw(UsersIcon), bg: 'bg-blue-50', iconColor: 'text-blue-600' },
+  { title: 'Kelola Akun', desc: 'Pengaturan hak akses anggota & petugas.', link: '/admin/accounts', icon: markRaw(UsersIcon), bg: 'bg-orange-50', iconColor: 'text-orange-600' },
   { title: 'Permintaan Buku', desc: 'Review pengajuan pengadaan buku baru.', link: '/admin/book-requests', icon: markRaw(ClipboardDocumentListIcon), bg: 'bg-green-50', iconColor: 'text-green-600' },
   { title: 'Penunggakan', desc: 'Monitoring keterlambatan pengembalian.', link: '/admin/late-returns', icon: markRaw(ExclamationCircleIcon), bg: 'bg-red-50', iconColor: 'text-red-600' },
   { title: 'Keluhan & Saran', desc: 'Merespon feedback dari pengguna.', link: '/admin/complaints', icon: markRaw(ChatBubbleLeftRightIcon), bg: 'bg-yellow-50', iconColor: 'text-yellow-600' },

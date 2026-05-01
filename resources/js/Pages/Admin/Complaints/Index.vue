@@ -35,7 +35,7 @@
                   <td class="px-6 py-4">
                     <span :class="{
                       'bg-amber-100 text-amber-700': complaint.status === 'pending',
-                      'bg-blue-100 text-blue-700': complaint.status === 'reviewed',
+                      'bg-orange-100 text-orange-700': complaint.status === 'reviewed',
                       'bg-green-100 text-green-700': complaint.status === 'resolved',
                       'bg-red-100 text-red-700': complaint.status === 'rejected',
                     }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">
@@ -46,7 +46,7 @@
                     <div class="text-xs text-gray-500">{{ complaint.created_at }}</div>
                   </td>
                   <td class="px-6 py-4 text-right">
-                    <Link :href="`/admin/complaints/${complaint.id}`" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <Link :href="`/admin/complaints/${complaint.id}`" class="text-orange-600 hover:text-orange-800 text-sm">
                       Tangani →
                     </Link>
                   </td>

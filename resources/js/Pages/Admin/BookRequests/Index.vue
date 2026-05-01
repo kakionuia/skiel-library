@@ -75,19 +75,31 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { router } from '@inertiajs/vue3';
+import { confirmDialog, promptDialog } from '@/Utils/sweetAlert';
 
 defineProps({
   requests: { type: Object, default: () => ({ data: [] }) },
 });
 
-const approveRequest = (req) => {
-  if (confirm(`Setuju kan permintaan buku "${req.title}"? Buku akan ditambahkan ke koleksi.`)) {
+const approveRequest = async (req) => {
+  if (await confirmDialog({
+    title: 'Setujui permintaan buku?',
+    text: `"${req.title}" akan ditambahkan ke koleksi perpustakaan.`,
+    confirmButtonText: 'Ya, setujui',
+  })) {
     router.post(route('admin.book-requests.approve', req.id));
   }
 };
 
-const rejectRequest = (req) => {
-  const note = prompt('Masukkan alasan penolakan:');
+const rejectRequest = async (req) => {
+  const note = await promptDialog({
+    title: 'Tolak permintaan buku?',
+    text: `Berikan alasan penolakan untuk "${req.title}".`,
+    inputPlaceholder: 'Contoh: Data buku belum lengkap.',
+    confirmButtonText: 'Tolak permintaan',
+    required: true,
+  });
+
   if (note) {
     router.post(route('admin.book-requests.reject', req.id), { admin_note: note });
   }

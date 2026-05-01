@@ -55,7 +55,7 @@
         <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-900">Daftar Pengajuan</h2>
-            <Link :href="route('petugas.books.create')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <Link :href="route('petugas.books.create')" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
               + Ajukan Buku Baru
             </Link>
           </div>
@@ -110,7 +110,7 @@
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
-                      <button v-if="sub.status === 'pending'" @click="showDetails(sub)" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                      <button v-if="sub.status === 'pending'" @click="showDetails(sub)" class="text-orange-600 hover:text-orange-700 font-medium text-sm">
                         Lihat
                       </button>
                       <span v-else class="text-xs text-gray-500">
@@ -124,7 +124,7 @@
                     <div class="flex flex-col items-center justify-center gap-2">
                       <div class="text-4xl">📭</div>
                       <p>Belum ada pengajuan buku.</p>
-                      <Link :href="route('petugas.books.create')" class="text-blue-600 hover:text-blue-700 font-medium mt-2">
+                      <Link :href="route('petugas.books.create')" class="text-orange-600 hover:text-orange-700 font-medium mt-2">
                         Buat pengajuan baru →
                       </Link>
                     </div>
@@ -143,6 +143,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import { infoAlert } from '@/Utils/sweetAlert';
 
 defineProps({
   submissions: { type: Array, default: () => [] },
@@ -167,6 +168,14 @@ const getStatusLabel = (status) => {
 };
 
 const showDetails = (sub) => {
-  alert(`Status: ${sub.status}\nDiajukan: ${formatDate(sub.created_at)}`);
+  infoAlert({
+    title: 'Detail Pengajuan',
+    html: `
+      <div class="space-y-2 text-left">
+        <p><span class="font-bold text-slate-700">Status:</span> ${getStatusLabel(sub.status)}</p>
+        <p><span class="font-bold text-slate-700">Diajukan:</span> ${formatDate(sub.created_at)}</p>
+      </div>
+    `,
+  });
 };
 </script>

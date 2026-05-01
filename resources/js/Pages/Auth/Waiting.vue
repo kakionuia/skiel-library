@@ -78,10 +78,11 @@
         </button>
 
         <button
-          @click="showDeleteConfirm = true"
+          @click="confirmDeleteAccount"
+          :disabled="isDeleting"
           class="w-full px-4 py-2 text-red-700 border-2 border-red-300 rounded-lg hover:bg-red-50 transition-colors font-medium"
         >
-          Hapus Akun
+          {{ isDeleting ? 'Menghapus...' : 'Hapus Akun' }}
         </button>
 
         <div v-if="statusMessage" :class="[
@@ -99,56 +100,13 @@
       </p>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <Teleport to="body">
-      <Transition name="fade">
-        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-lg border-2 border-red-200">
-            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
-              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            
-            <h3 class="text-lg font-bold text-gray-900 text-center mb-2">Hapus Akun?</h3>
-            <p class="text-gray-600 text-center text-sm mb-6">
-              Tindakan ini tidak dapat dibatalkan. Semua data akun Anda akan dihapus secara permanen.
-            </p>
-
-            <div class="space-y-3">
-              <button
-                @click="deleteAccount"
-                :disabled="isDeleting"
-                class="w-full px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-400 transition-colors"
-              >
-                <span v-if="!isDeleting">Ya, Hapus Akun</span>
-                <span v-else class="flex items-center justify-center gap-2">
-                  <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Menghapus...
-                </span>
-              </button>
-
-              <button
-                @click="showDeleteConfirm = false"
-                :disabled="isDeleting"
-                class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:bg-gray-100 transition-colors font-medium"
-              >
-                Batalkan
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { router, usePage } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
+import { dangerConfirm } from '@/Utils/sweetAlert';
 
 const props = defineProps({
   user: {
@@ -161,7 +119,6 @@ const isChecking = ref(false);
 const isDeleting = ref(false);
 const statusMessage = ref('');
 const statusType = ref('');
-const showDeleteConfirm = ref(false);
 const autoCheckInterval = 30000; // 30 seconds
 let autoCheckTimer = null;
 
@@ -213,6 +170,16 @@ const checkStatus = async () => {
     statusType.value = 'error';
   } finally {
     isChecking.value = false;
+  }
+};
+
+const confirmDeleteAccount = async () => {
+  if (await dangerConfirm({
+    title: 'Hapus akun?',
+    text: 'Tindakan ini tidak dapat dibatalkan. Semua data akun Anda akan dihapus permanen.',
+    confirmButtonText: 'Ya, hapus akun',
+  })) {
+    deleteAccount();
   }
 };
 

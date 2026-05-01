@@ -71,12 +71,28 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { router } from '@inertiajs/vue3';
+import { confirmDialog, dangerConfirm } from '@/Utils/sweetAlert';
 
 defineProps({
   suggestions: { type: Object, default: () => ({ data: [] }) },
 });
 
-const updateStatus = (id, status) => {
-  router.post(`/admin/suggestions/${id}/update-status`, { status });
+const updateStatus = async (id, status) => {
+  const isApproved = status === 'approved';
+  const confirmed = isApproved
+    ? await confirmDialog({
+        title: 'Setujui saran ini?',
+        text: 'Status saran akan diperbarui menjadi disetujui.',
+        confirmButtonText: 'Ya, setujui',
+      })
+    : await dangerConfirm({
+        title: 'Tolak saran ini?',
+        text: 'Status saran akan diperbarui menjadi ditolak.',
+        confirmButtonText: 'Ya, tolak',
+      });
+
+  if (confirmed) {
+    router.post(route('admin.suggestions.update', id), { status });
+  }
 };
 </script>

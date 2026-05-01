@@ -12,7 +12,7 @@
         <div class="flex gap-2 mb-6">
           <Link v-for="role in ['anggota', 'petugas', 'admin']" :key="role"
             :href="route('admin.activity-logs', {role})"
-            :class="currentRole === role ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+            :class="currentRole === role ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
             class="px-4 py-2 rounded-lg text-sm font-medium ring-1 ring-gray-200">
             {{ role === 'anggota' ? 'Siswa' : role.charAt(0).toUpperCase() + role.slice(1) }}
           </Link>
@@ -37,10 +37,10 @@
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
                       <span :class="{
-                        'bg-blue-100 text-blue-700': activity.type === 'login',
+                        'bg-orange-100 text-orange-700': activity.type === 'login',
                         'bg-green-100 text-green-700': activity.type === 'borrow',
                         'bg-orange-100 text-orange-700': activity.type === 'return',
-                        'bg-purple-100 text-purple-700': activity.type === 'create',
+                        'bg-orange-100 text-orange-700': activity.type === 'create',
                         'bg-red-100 text-red-700': activity.type === 'delete',
                         'bg-amber-100 text-amber-700': activity.type === 'update',
                       }" class="px-2 py-1 rounded text-[10px] font-black uppercase">

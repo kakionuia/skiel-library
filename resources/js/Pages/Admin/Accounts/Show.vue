@@ -17,7 +17,7 @@
           <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-gray-200">
               <div class="flex flex-col items-center">
-                <div class="w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-2xl">
+                <div class="w-20 h-20 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-2xl">
                   {{ user.name.charAt(0) }}
                 </div>
                 <h2 class="mt-4 text-xl font-bold text-gray-900">{{ user.name }}</h2>
@@ -110,20 +110,29 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { confirmDialog, dangerConfirm } from '@/Utils/sweetAlert';
 
 const props = defineProps({
   user: { type: Object, default: () => ({}) },
   recentBorrows: { type: Array, default: () => [] },
 });
 
-const restrictUser = () => {
-  if (confirm('Batasi peminjaman akun ini?')) {
+const restrictUser = async () => {
+  if (await dangerConfirm({
+    title: 'Batasi peminjaman akun ini?',
+    text: `${props.user.name} tidak akan bisa melakukan peminjaman baru.`,
+    confirmButtonText: 'Ya, batasi',
+  })) {
     router.post(`/admin/accounts/${props.user.id}/restrict`);
   }
 };
 
-const unrestrictUser = () => {
-  if (confirm('Cabut pembatasan peminjaman?')) {
+const unrestrictUser = async () => {
+  if (await confirmDialog({
+    title: 'Cabut pembatasan peminjaman?',
+    text: `${props.user.name} akan bisa melakukan peminjaman kembali.`,
+    confirmButtonText: 'Ya, cabut',
+  })) {
     router.post(`/admin/accounts/${props.user.id}/unrestrict`);
   }
 };

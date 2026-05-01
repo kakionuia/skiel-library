@@ -28,7 +28,7 @@
             <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.15em] mb-3">Peminjaman Aktif</p>
             <div class="flex items-end justify-between">
               <h3 class="text-3xl font-black text-slate-800">{{ stats.activeCount }}</h3>
-              <div class="p-3 rounded-2xl bg-indigo-50 text-indigo-600 group-hover:scale-110 transition-transform">
+              <div class="p-3 rounded-2xl bg-orange-50 text-orange-600 group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
               </div>
             </div>
@@ -93,7 +93,7 @@
                 <tr v-for="loan in filteredBorrows" :key="loan.id" class="hover:bg-slate-50/50 transition-colors group">
                   <td class="px-8 py-5">
                     <div class="flex items-center gap-4">
-                      <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-bold text-xs border border-indigo-100">
+                      <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center font-bold text-xs border border-orange-100">
                         {{ loan.member_name?.[0]?.toUpperCase() }}
                       </div>
                       <div>
@@ -142,23 +142,23 @@
           <form @submit.prevent="createLoan" class="p-10 space-y-6">
             <div>
               <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pilih Anggota Perpustakaan</label>
-              <select v-model="loanForm.user_id" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-indigo-500/20">
+              <select v-model="loanForm.user_id" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-orange-500/20">
                 <option value="">Pilih Anggota</option>
               </select>
             </div>
             <div>
               <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Koleksi Buku</label>
-              <select v-model="loanForm.book_id" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-indigo-500/20">
+              <select v-model="loanForm.book_id" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-orange-500/20">
                 <option value="">Cari Judul Buku</option>
               </select>
             </div>
             <div>
               <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tanggal Pengembalian</label>
-              <input type="date" v-model="loanForm.due_date" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-indigo-500/20">
+              <input type="date" v-model="loanForm.due_date" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-orange-500/20">
             </div>
             <div class="flex gap-4 pt-4">
               <button type="button" @click="showLoanModal = false" class="flex-1 px-6 py-4 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Batal</button>
-              <button type="submit" class="flex-1 px-6 py-4 text-sm font-bold text-white bg-slate-900 hover:bg-indigo-600 rounded-2xl transition-all shadow-xl shadow-slate-200">Simpan Data</button>
+              <button type="submit" class="flex-1 px-6 py-4 text-sm font-bold text-white bg-slate-900 hover:bg-orange-600 rounded-2xl transition-all shadow-xl shadow-slate-200">Simpan Data</button>
             </div>
           </form>
         </div>
@@ -201,7 +201,7 @@ const formatDate = (date) => {
 
 const getStatusClass = (status) => {
   switch(status) {
-    case 'borrowed': return 'bg-indigo-50 text-indigo-600 border border-indigo-100';
+    case 'borrowed': return 'bg-orange-50 text-orange-600 border border-orange-100';
     case 'returned': return 'bg-emerald-50 text-emerald-600 border border-emerald-100';
     case 'overdue': return 'bg-rose-50 text-rose-600 border border-rose-100';
     default: return 'bg-slate-50 text-slate-600';

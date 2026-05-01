@@ -34,8 +34,8 @@
             <div class="flex items-start justify-between">
               <div class="flex items-start gap-4">
                 <div :class="{
-                  'bg-indigo-100 text-indigo-600': log.action === 'create',
-                  'bg-blue-100 text-blue-600': log.action === 'update',
+                  'bg-orange-100 text-orange-600': log.action === 'create',
+                  'bg-orange-100 text-orange-600': log.action === 'update',
                   'bg-red-100 text-red-600': log.action === 'delete',
                   'bg-emerald-100 text-emerald-600': log.action === 'process'
                 }" class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm">
@@ -51,8 +51,8 @@
                 </div>
               </div>
               <span :class="{
-                'bg-indigo-100 text-indigo-700': log.action === 'create',
-                'bg-blue-100 text-blue-700': log.action === 'update',
+                'bg-orange-100 text-orange-700': log.action === 'create',
+                'bg-orange-100 text-orange-700': log.action === 'update',
                 'bg-red-100 text-red-700': log.action === 'delete',
                 'bg-emerald-100 text-emerald-700': log.action === 'process'
               }" class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">

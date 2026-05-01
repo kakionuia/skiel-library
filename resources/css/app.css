@@ -1,3 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background-color: #f8fafc;
+    }
+}
+
+/* Hilangkan tooltip global */
+*[title] {
+    title: none !important;
+    pointer-events: auto;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* Sembunyikan title attribute */
+[title]:hover:after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Hilangkan URL status bar */
+body {
+    overflow:-moz-scrollbars-none;
+    -ms-overflow-style: none;
+}
+
+/* Untuk Chrome/Edge/Safari */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hilangkan href tooltip */
+a[href]:hover::after {
+    display: none;
+}
