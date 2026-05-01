@@ -1,3 +1,4 @@
+import './disable-tooltip';  // Tambahkan ini PERTAMA
 import '../css/app.css';
 import './bootstrap';
 

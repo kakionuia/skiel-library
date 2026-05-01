@@ -42,3 +42,52 @@ body {
 a[href]:hover::after {
     display: none;
 }
+
+/* GLOBAL TOOLTIP KILLER - HILANGKAN SEMUA URL TOOLTIP */
+*,
+*:before,
+*:after {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+a[href]:hover,
+button:hover,
+div:hover,
+[title]:hover {
+    pointer-events: auto !important;
+}
+
+/* Sembunyikan semua tooltip */
+[title] {
+    title: none !important;
+    pointer-events: none !important;
+}
+
+/* Block status bar */
+body {
+    overflow: auto !important;
+}
+
+/* Hilangkan hover effect bawaan browser */
+a:focus,
+button:focus,
+div:focus {
+    outline: none !important;
+}
+
+/* Force no tooltip di semua browser */
+::-webkit-tooltip {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Firefox */
+* {
+    -moz-appearance: none !important;
+}
+
+/* Chrome/Safari */
+* {
+    -webkit-appearance: none !important;
+}

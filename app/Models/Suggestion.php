@@ -11,8 +11,9 @@ class Suggestion extends Model
 
     protected $fillable = [
         'user_id',
-        'subject',
-        'message',
+        'content',
+        'status',
+        'admin_note',
     ];
 
     public function user()

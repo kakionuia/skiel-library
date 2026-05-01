@@ -1,216 +1,271 @@
 <template>
   <UserLayout>
     <div class="space-y-8">
-      <!-- Header Section -->
-      <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
-        <div class="flex items-center justify-between">
+      <section class="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm">
+        <div class="grid gap-6 p-8 lg:grid-cols-[1.5fr_1fr]">
           <div>
-            <h1 class="text-3xl font-black text-slate-900 mb-2">Selamat Datang, {{ user.name }}! 👋</h1>
-            <p class="text-slate-600">Dashboard perpustakaan Anda - kelola peminjaman dan jelajahi koleksi buku</p>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-orange-600">Dashboard Siswa</p>
+            <h1 class="mt-3 text-3xl font-black leading-tight text-slate-950">
+              Selamat Datang, {{ user.name }}!
+            </h1>
+            <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
+              Pantau peminjaman, jelajahi koleksi buku, kirim ulasan, keluhan, dan saran langsung dari satu halaman.
+            </p>
           </div>
-          <div class="hidden lg:block">
-            <div class="text-right">
-              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Status Akun</p>
-              <span :class="{
-                'bg-emerald-100 text-emerald-700': user.status === 'approved',
-                'bg-amber-100 text-amber-700': user.status === 'pending',
-                'bg-rose-100 text-rose-700': user.status === 'rejected'
-              }" class="inline-block px-4 py-2 rounded-full font-bold text-sm mt-1">
-                {{ user.status === 'approved' ? '✓ Disetujui' : user.status === 'pending' ? '⏳ Menunggu' : '✕ Ditolak' }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
-          <div class="flex items-end justify-between">
-            <div>
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Buku Sedang Dipinjam</p>
-              <h3 class="text-4xl font-black text-indigo-600">{{ activeBorrows.length }}</h3>
-              <p class="text-xs text-slate-500 mt-1">dari {{ maxBooksPerUser }} buku maksimal</p>
-            </div>
-            <div class="p-4 bg-indigo-50 rounded-2xl">
-              <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
-          <div class="flex items-end justify-between">
-            <div>
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Buku Terlambat</p>
-              <h3 class="text-4xl font-black text-rose-600">{{ overdueCount }}</h3>
-              <p class="text-xs text-slate-500 mt-1">{{ totalFines.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'}) }}</p>
-            </div>
-            <div class="p-4 bg-rose-50 rounded-2xl">
-              <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
-          <div class="flex items-end justify-between">
-            <div>
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Peminjaman</p>
-              <h3 class="text-4xl font-black text-emerald-600">{{ totalBorrows }}</h3>
-              <p class="text-xs text-slate-500 mt-1">sepanjang waktu</p>
-            </div>
-            <div class="p-4 bg-emerald-50 rounded-2xl">
-              <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Active Borrows -->
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-            </svg>
-            Buku Yang Sedang Dipinjam
-          </h2>
-          <div class="space-y-3">
-            <div v-for="borrow in activeBorrows" :key="borrow.id" class="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 transition-all">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <p class="font-bold text-slate-900">{{ borrow.book?.title || 'Buku' }}</p>
-                  <p class="text-sm text-slate-600">{{ borrow.book?.author || '-' }}</p>
-                  <div class="mt-3 flex gap-4 text-xs text-slate-500">
-                    <span>📅 Dipinjam: {{ formatDate(borrow.borrow_date) }}</span>
-                    <span>📌 Kembali: {{ formatDate(borrow.due_date) }}</span>
-                  </div>
-                </div>
-                <span :class="{
-                  'bg-emerald-100 text-emerald-700': daysUntilDue(borrow.due_date) > 3,
-                  'bg-amber-100 text-amber-700': daysUntilDue(borrow.due_date) > 0 && daysUntilDue(borrow.due_date) <= 3,
-                  'bg-rose-100 text-rose-700': daysUntilDue(borrow.due_date) <= 0
-                }" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                  {{ daysUntilDue(borrow.due_date) > 0 ? daysUntilDue(borrow.due_date) + ' hari' : 'Sudah Terlambat' }}
-                </span>
+          <div class="rounded-2xl bg-orange-50 p-5">
+            <div class="flex items-center gap-3">
+              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-600 text-lg font-black text-white">
+                {{ user.name?.charAt(0)?.toUpperCase() || 'S' }}
+              </div>
+              <div>
+                <p class="text-sm font-black text-slate-900">{{ user.name }}</p>
+                <p class="text-xs text-slate-500">{{ user.email }}</p>
               </div>
             </div>
-            <div v-if="activeBorrows.length === 0" class="text-center py-8 text-slate-500">
-              <p class="text-sm">Anda belum meminjam buku. 📚</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Profile Card -->
-        <div class="space-y-6">
-          <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl border border-indigo-200 p-6">
-            <div class="text-center">
-              <div class="w-16 h-16 bg-indigo-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">
-                {{ user.name.charAt(0).toUpperCase() }}
+            <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-xl bg-white p-3">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">NISN</p>
+                <p class="mt-1 font-bold text-slate-800">{{ user.nisn || '-' }}</p>
               </div>
-              <h3 class="font-bold text-slate-900">{{ user.name }}</h3>
-              <p class="text-sm text-slate-600 mt-1">{{ user.email }}</p>
-              <div class="mt-4 pt-4 border-t border-indigo-200 space-y-2 text-left">
-                <div class="flex justify-between text-sm">
-                  <span class="text-slate-600">NISN</span>
-                  <span class="font-semibold text-slate-900">{{ user.nisn || '-' }}</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-slate-600">Kelas</span>
-                  <span class="font-semibold text-slate-900">{{ user.kelas || '-' }}</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-slate-600">HP</span>
-                  <span class="font-semibold text-slate-900">{{ user.phone || '-' }}</span>
-                </div>
+              <div class="rounded-xl bg-white p-3">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Kelas</p>
+                <p class="mt-1 font-bold text-slate-800">{{ user.kelas || '-' }}</p>
               </div>
             </div>
-            <Link href="/profile" class="mt-4 w-full block text-center py-2 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all">
+            <Link href="/profile" class="mt-4 block rounded-xl bg-orange-600 px-4 py-3 text-center text-sm font-black text-white transition hover:bg-orange-700">
               Edit Profil
             </Link>
           </div>
+        </div>
+      </section>
 
-          <!-- Restrictions -->
-          <div v-if="user.borrow_restricted" class="bg-rose-50 border border-rose-200 rounded-2xl p-4">
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div v-for="stat in statCards" :key="stat.label" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ stat.label }}</p>
+          <p class="mt-3 text-3xl font-black" :class="stat.color">{{ stat.value }}</p>
+          <p class="mt-1 text-xs text-slate-500">{{ stat.caption }}</p>
+        </div>
+      </section>
+
+      <section v-if="user.borrow_restricted" class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+        <p class="text-sm font-black text-rose-900">Peminjaman Anda sedang dibatasi.</p>
+        <p class="mt-1 text-sm text-rose-700">Hubungi petugas perpustakaan untuk informasi lebih lanjut.</p>
+      </section>
+
+      <section class="grid grid-cols-1 gap-8 xl:grid-cols-3">
+        <div class="xl:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 class="text-lg font-black text-slate-950">Katalog Buku Tersedia</h2>
+              <p class="text-sm text-slate-500">Data buku approved dari database perpustakaan.</p>
+            </div>
             <div class="flex gap-3">
-              <div class="text-2xl">⚠️</div>
-              <div>
-                <p class="font-bold text-rose-900">Peminjaman Dibatasi</p>
-                <p class="text-sm text-rose-700 mt-1">Peminjaman Anda saat ini dibatasi oleh admin. Hubungi petugas untuk informasi lebih lanjut.</p>
-              </div>
+              <input v-model="bookSearch" type="text" placeholder="Cari buku..." class="w-full rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500 md:w-56">
+              <select v-model="activeCategory" class="rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500">
+                <option value="">Semua</option>
+                <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+              </select>
             </div>
           </div>
 
-          <!-- Info -->
-          <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Kebijakan Peminjaman</p>
-            <ul class="space-y-2 text-sm text-slate-600">
-              <li class="flex gap-2">
-                <span>📖</span>
-                <span>Maksimal {{ maxBooksPerUser }} buku per peminjaman</span>
-              </li>
-              <li class="flex gap-2">
-                <span>📅</span>
-                <span>Durasi peminjaman {{ maxLoanDays }} hari</span>
-              </li>
-              <li class="flex gap-2">
-                <span>💰</span>
-                <span>Denda keterlambatan Rp {{ finePerDay.toLocaleString('id-ID') }}/hari</span>
-              </li>
-            </ul>
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <article v-for="book in filteredBooks" :key="book.id" class="rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-orange-200 hover:bg-orange-50/40">
+              <div class="flex gap-4">
+                <div class="h-28 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white">
+                  <img v-if="book.cover_image" :src="book.cover_image" :alt="book.title" class="h-full w-full object-cover">
+                  <div v-else class="flex h-full w-full items-center justify-center bg-orange-100 text-xl font-black text-orange-600">
+                    {{ book.title?.charAt(0) || 'B' }}
+                  </div>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm font-black text-slate-900">{{ book.title }}</p>
+                  <p class="mt-1 truncate text-xs text-slate-500">{{ book.author }}</p>
+                  <p class="mt-2 text-[11px] font-bold uppercase tracking-wider text-orange-600">{{ book.category }}</p>
+                  <div class="mt-3 flex flex-wrap gap-2 text-[11px] font-bold">
+                    <span class="rounded-full bg-white px-2.5 py-1 text-slate-600">{{ book.available_quantity }}/{{ book.quantity }} tersedia</span>
+                    <span class="rounded-full bg-white px-2.5 py-1 text-slate-600">Rating {{ book.average_rating || '0.0' }}</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div v-if="filteredBooks.length === 0" class="py-12 text-center text-sm text-slate-500">
+            Belum ada buku yang cocok dengan pencarian.
           </div>
         </div>
-      </div>
 
-      <!-- Recent History -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-        <h2 class="text-lg font-bold text-slate-900 mb-6">Riwayat Peminjaman (5 Terbaru)</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b border-slate-200">
-                <th class="text-left py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Judul Buku</th>
-                <th class="text-left py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal Pinjam</th>
-                <th class="text-left py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal Kembali</th>
-                <th class="text-left py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-for="borrow in recentBorrows" :key="borrow.id" class="hover:bg-slate-50 transition-colors">
-                <td class="py-4 px-4">
-                  <p class="font-medium text-slate-900">{{ borrow.book?.title || 'Buku' }}</p>
+        <aside class="space-y-6">
+          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="text-lg font-black text-slate-950">Buku Populer</h2>
+            <div class="mt-5 space-y-3">
+              <div v-for="book in popularBooks" :key="book.id" class="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-bold text-slate-900">{{ book.title }}</p>
+                  <p class="text-xs text-slate-500">{{ book.author }}</p>
+                </div>
+                <span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">{{ book.borrows_count }}x</span>
+              </div>
+              <p v-if="popularBooks.length === 0" class="text-sm text-slate-500">Belum ada data peminjaman.</p>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="text-lg font-black text-slate-950">Kebijakan Peminjaman</h2>
+            <ul class="mt-4 space-y-3 text-sm text-slate-600">
+              <li>Maksimal {{ maxBooksPerUser }} buku per siswa.</li>
+              <li>Durasi peminjaman {{ maxLoanDays }} hari.</li>
+              <li>Denda keterlambatan {{ formatCurrency(finePerDay) }} per hari.</li>
+              <li>Peminjaman dan pengembalian diproses oleh petugas.</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Buku Sedang Dipinjam</h2>
+          <div class="mt-5 space-y-3">
+            <div v-for="borrow in activeBorrows" :key="borrow.id" class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <p class="font-bold text-slate-900">{{ borrow.book?.title || 'Buku' }}</p>
                   <p class="text-sm text-slate-500">{{ borrow.book?.author || '-' }}</p>
-                </td>
-                <td class="py-4 px-4 text-sm text-slate-600">{{ formatDate(borrow.borrow_date) }}</td>
-                <td class="py-4 px-4 text-sm text-slate-600">{{ borrow.return_date ? formatDate(borrow.return_date) : '-' }}</td>
-                <td class="py-4 px-4">
-                  <span :class="{
-                    'bg-emerald-100 text-emerald-700': borrow.status === 'returned',
-                    'bg-indigo-100 text-indigo-700': borrow.status === 'borrowed',
-                    'bg-rose-100 text-rose-700': borrow.status === 'overdue'
-                  }" class="px-3 py-1 rounded-full text-xs font-bold">
-                    {{ borrow.status === 'returned' ? 'Dikembalikan' : borrow.status === 'borrowed' ? 'Aktif' : 'Terlambat' }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <p class="mt-2 text-xs text-slate-500">Jatuh tempo: {{ formatDate(borrow.due_date) }}</p>
+                </div>
+                <span :class="dueBadgeClass(borrow.due_date)" class="rounded-full px-3 py-1 text-[10px] font-black uppercase">
+                  {{ dueText(borrow.due_date) }}
+                </span>
+              </div>
+            </div>
+            <p v-if="activeBorrows.length === 0" class="py-8 text-center text-sm text-slate-500">Tidak ada buku yang sedang dipinjam.</p>
+          </div>
         </div>
-      </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Riwayat Peminjaman</h2>
+          <div class="mt-5 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <th class="py-3 pr-4">Buku</th>
+                  <th class="py-3 pr-4">Pinjam</th>
+                  <th class="py-3 pr-4">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="borrow in recentBorrows" :key="borrow.id">
+                  <td class="py-4 pr-4">
+                    <p class="font-bold text-slate-900">{{ borrow.book?.title || 'Buku' }}</p>
+                    <p class="text-xs text-slate-500">{{ borrow.book?.author || '-' }}</p>
+                  </td>
+                  <td class="py-4 pr-4 text-slate-500">{{ formatDate(borrow.borrow_date) }}</td>
+                  <td class="py-4 pr-4">
+                    <span :class="borrowStatusClass(borrow.status)" class="rounded-full px-3 py-1 text-[10px] font-black uppercase">
+                      {{ borrowStatusText(borrow.status) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p v-if="recentBorrows.length === 0" class="py-8 text-center text-sm text-slate-500">Belum ada riwayat peminjaman.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 gap-8 xl:grid-cols-3">
+        <form @submit.prevent="submitReview" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Beri Ulasan Buku</h2>
+          <div class="mt-5 space-y-4">
+            <select v-model="reviewForm.book_id" class="w-full rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500" required>
+              <option value="">Pilih buku</option>
+              <option v-for="book in availableBooks" :key="book.id" :value="book.id">{{ book.title }}</option>
+            </select>
+            <select v-model="reviewForm.rating" class="w-full rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500" required>
+              <option v-for="rating in [5,4,3,2,1]" :key="rating" :value="rating">{{ rating }} bintang</option>
+            </select>
+            <textarea v-model="reviewForm.comment" rows="4" placeholder="Tulis ulasan..." class="w-full rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500"></textarea>
+            <button :disabled="reviewForm.processing" class="w-full rounded-xl bg-orange-600 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-700 disabled:opacity-50">
+              Simpan Ulasan
+            </button>
+          </div>
+        </form>
+
+        <form @submit.prevent="submitComplaint" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Kirim Keluhan</h2>
+          <div class="mt-5 space-y-4">
+            <input v-model="complaintForm.subject" type="text" placeholder="Subjek keluhan" class="w-full rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500" required>
+            <textarea v-model="complaintForm.description" rows="5" placeholder="Ceritakan kendala yang dialami..." class="w-full rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500" required></textarea>
+            <button :disabled="complaintForm.processing" class="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:opacity-50">
+              Kirim Keluhan
+            </button>
+          </div>
+        </form>
+
+        <form @submit.prevent="submitSuggestion" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Kirim Saran</h2>
+          <div class="mt-5 space-y-4">
+            <textarea v-model="suggestionForm.content" rows="7" placeholder="Tulis saran untuk perpustakaan..." class="w-full rounded-xl border-slate-200 text-sm focus:border-orange-500 focus:ring-orange-500" required></textarea>
+            <button :disabled="suggestionForm.processing" class="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:opacity-50">
+              Kirim Saran
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Ulasan Terbaru</h2>
+          <div class="mt-5 space-y-4">
+            <div v-for="review in latestReviews" :key="review.id" class="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+              <p class="text-sm font-bold text-slate-900">{{ review.book?.title || 'Buku' }}</p>
+              <p class="mt-1 text-xs text-orange-600">{{ review.rating }} bintang oleh {{ review.user?.name || 'Siswa' }}</p>
+              <p class="mt-2 text-sm text-slate-500">{{ review.comment || 'Tanpa komentar.' }}</p>
+            </div>
+            <p v-if="latestReviews.length === 0" class="text-sm text-slate-500">Belum ada ulasan.</p>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Keluhan Saya</h2>
+          <div class="mt-5 space-y-3">
+            <div v-for="complaint in userComplaints" :key="complaint.id" class="rounded-2xl bg-slate-50 p-4">
+              <div class="flex items-start justify-between gap-3">
+                <p class="text-sm font-bold text-slate-900">{{ complaint.subject }}</p>
+                <span :class="complaintStatusClass(complaint.status)" class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase">{{ complaint.status }}</span>
+              </div>
+              <p class="mt-2 line-clamp-2 text-xs text-slate-500">{{ complaint.description }}</p>
+            </div>
+            <p v-if="userComplaints.length === 0" class="text-sm text-slate-500">Belum ada keluhan.</p>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-black text-slate-950">Saran Saya</h2>
+          <div class="mt-5 space-y-3">
+            <div v-for="suggestion in userSuggestions" :key="suggestion.id" class="rounded-2xl bg-slate-50 p-4">
+              <div class="flex items-start justify-between gap-3">
+                <p class="line-clamp-2 text-sm font-bold text-slate-900">{{ suggestion.content }}</p>
+                <span :class="suggestionStatusClass(suggestion.status)" class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase">{{ suggestion.status }}</span>
+              </div>
+              <p v-if="suggestion.admin_note" class="mt-2 text-xs text-slate-500">{{ suggestion.admin_note }}</p>
+            </div>
+            <p v-if="userSuggestions.length === 0" class="text-sm text-slate-500">Belum ada saran.</p>
+          </div>
+        </div>
+      </section>
     </div>
   </UserLayout>
 </template>
 
 <script setup>
 import UserLayout from '@/Layouts/UserLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { successAlert } from '@/Utils/sweetAlert';
 
-defineProps({
+const props = defineProps({
   user: { type: Object, required: true },
   activeBorrows: { type: Array, default: () => [] },
   recentBorrows: { type: Array, default: () => [] },
@@ -220,19 +275,131 @@ defineProps({
   maxBooksPerUser: { type: Number, default: 3 },
   maxLoanDays: { type: Number, default: 7 },
   finePerDay: { type: Number, default: 5000 },
+  availableBooks: { type: Array, default: () => [] },
+  popularBooks: { type: Array, default: () => [] },
+  latestReviews: { type: Array, default: () => [] },
+  userReviews: { type: Array, default: () => [] },
+  userComplaints: { type: Array, default: () => [] },
+  userSuggestions: { type: Array, default: () => [] },
+  dashboardStats: { type: Object, default: () => ({}) },
 });
+
+const bookSearch = ref('');
+const activeCategory = ref('');
+
+const reviewForm = useForm({ book_id: '', rating: 5, comment: '' });
+const complaintForm = useForm({ subject: '', description: '' });
+const suggestionForm = useForm({ content: '' });
+
+const categories = computed(() => {
+  return [...new Set(props.availableBooks.map((book) => book.category).filter(Boolean))].sort();
+});
+
+const filteredBooks = computed(() => {
+  const search = bookSearch.value.toLowerCase();
+  return props.availableBooks.filter((book) => {
+    const matchesSearch = !search
+      || book.title?.toLowerCase().includes(search)
+      || book.author?.toLowerCase().includes(search)
+      || book.isbn?.toLowerCase().includes(search);
+    const matchesCategory = !activeCategory.value || book.category === activeCategory.value;
+    return matchesSearch && matchesCategory;
+  });
+});
+
+const statCards = computed(() => [
+  { label: 'Judul Buku', value: props.dashboardStats.totalTitles ?? 0, caption: 'koleksi approved', color: 'text-orange-600' },
+  { label: 'Eksemplar Tersedia', value: props.dashboardStats.availableCopies ?? 0, caption: 'siap dipinjam via petugas', color: 'text-emerald-600' },
+  { label: 'Sedang Dipinjam', value: props.activeBorrows.length, caption: `${props.maxBooksPerUser} buku maksimal`, color: 'text-slate-900' },
+  { label: 'Denda Aktif', value: formatCurrency(props.totalFines), caption: `${props.overdueCount} buku terlambat`, color: 'text-rose-600' },
+]);
 
 const formatDate = (date) => {
   if (!date) return '-';
   return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const formatCurrency = (value) => {
+  return Number(value || 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+};
+
 const daysUntilDue = (dueDate) => {
   if (!dueDate) return 0;
   const now = new Date();
   const due = new Date(dueDate);
-  const diff = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-  return diff;
+  return Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+};
+
+const dueText = (dueDate) => {
+  const days = daysUntilDue(dueDate);
+  if (days > 3) return `${days} hari`;
+  if (days > 0) return `${days} hari lagi`;
+  return 'Terlambat';
+};
+
+const dueBadgeClass = (dueDate) => {
+  const days = daysUntilDue(dueDate);
+  if (days > 3) return 'bg-emerald-100 text-emerald-700';
+  if (days > 0) return 'bg-amber-100 text-amber-700';
+  return 'bg-rose-100 text-rose-700';
+};
+
+const borrowStatusText = (status) => ({
+  returned: 'Dikembalikan',
+  borrowed: 'Aktif',
+  overdue: 'Terlambat',
+  lost: 'Hilang',
+}[status] || status);
+
+const borrowStatusClass = (status) => ({
+  returned: 'bg-emerald-100 text-emerald-700',
+  borrowed: 'bg-orange-100 text-orange-700',
+  overdue: 'bg-rose-100 text-rose-700',
+  lost: 'bg-slate-200 text-slate-700',
+}[status] || 'bg-slate-100 text-slate-700');
+
+const complaintStatusClass = (status) => ({
+  pending: 'bg-amber-100 text-amber-700',
+  reviewed: 'bg-orange-100 text-orange-700',
+  resolved: 'bg-emerald-100 text-emerald-700',
+  rejected: 'bg-rose-100 text-rose-700',
+}[status] || 'bg-slate-100 text-slate-700');
+
+const suggestionStatusClass = (status) => ({
+  pending: 'bg-amber-100 text-amber-700',
+  reviewed: 'bg-orange-100 text-orange-700',
+  implemented: 'bg-emerald-100 text-emerald-700',
+  rejected: 'bg-rose-100 text-rose-700',
+}[status] || 'bg-slate-100 text-slate-700');
+
+const submitReview = () => {
+  reviewForm.post(route('dashboard.reviews.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      reviewForm.reset('book_id', 'comment');
+      reviewForm.rating = 5;
+      successAlert({ title: 'Ulasan disimpan', text: 'Terima kasih sudah memberi ulasan.' });
+    },
+  });
+};
+
+const submitComplaint = () => {
+  complaintForm.post(route('dashboard.complaints.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      complaintForm.reset();
+      successAlert({ title: 'Keluhan terkirim', text: 'Admin akan meninjau keluhan Anda.' });
+    },
+  });
+};
+
+const submitSuggestion = () => {
+  suggestionForm.post(route('dashboard.suggestions.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      suggestionForm.reset();
+      successAlert({ title: 'Saran terkirim', text: 'Terima kasih atas masukannya.' });
+    },
+  });
 };
 </script>
-

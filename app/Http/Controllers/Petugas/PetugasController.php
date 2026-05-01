@@ -234,7 +234,7 @@ class PetugasController extends Controller
         ]);
 
         BookRequest::create([
-            'user_id' => Auth::id(),
+            'petugas_id' => Auth::id(),
             'title' => $request->title,
             'author' => $request->author,
             'publisher' => $request->publisher,

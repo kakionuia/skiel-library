@@ -6,7 +6,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WaitingController;
 use App\Http\Controllers\Auth\StatusCheckController;
 use App\Http\Controllers\Auth\AccountDeletionController;
+use App\Models\Book;
+use App\Models\Borrow;
+use App\Models\Complaint;
+use App\Models\Review;
+use App\Models\Suggestion;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -46,8 +52,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     
     // Book Requests
     Route::get('/book-requests', [AdminController::class, 'bookRequests'])->name('book-requests');
-    Route::post('/book-requests/{request}/approve', [AdminController::class, 'approveBookRequest'])->name('book-requests.approve');
-    Route::post('/book-requests/{request}/reject', [AdminController::class, 'rejectBookRequest'])->name('book-requests.reject');
+    Route::post('/book-requests/{bookRequest}/approve', [AdminController::class, 'approveBookRequest'])->name('book-requests.approve');
+    Route::post('/book-requests/{bookRequest}/reject', [AdminController::class, 'rejectBookRequest'])->name('book-requests.reject');
     
     // Book Submissions from Petugas
     Route::get('/book-submissions', [AdminController::class, 'bookSubmissions'])->name('book-submissions');
@@ -117,36 +123,100 @@ Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('pet
 Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
-        
-        // Get active borrows (currently borrowed)
-        $activeBorrows = \App\Models\Borrow::with('book')
+
+        $activeBorrows = Borrow::with('book')
             ->where('user_id', $user->id)
             ->where('status', 'borrowed')
             ->orderBy('due_date', 'asc')
             ->get();
-        
-        // Get recent borrows (last 5)
-        $recentBorrows = \App\Models\Borrow::with('book')
+
+        $recentBorrows = Borrow::with('book')
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
-        
-        // Count overdue
-        $overdueCount = \App\Models\Borrow::where('user_id', $user->id)
+
+        $overdueCount = Borrow::where('user_id', $user->id)
             ->where('status', 'borrowed')
             ->where('due_date', '<', now())
             ->count();
-        
-        // Total fines (from overdue items)
-        $totalFines = \App\Models\Borrow::where('user_id', $user->id)
+
+        $totalFines = Borrow::where('user_id', $user->id)
             ->where('status', 'borrowed')
             ->where('due_date', '<', now())
             ->sum('late_fee') ?? 0;
-        
-        // Total borrows (count all)
-        $totalBorrows = \App\Models\Borrow::where('user_id', $user->id)->count();
-        
+
+        $totalBorrows = Borrow::where('user_id', $user->id)->count();
+
+        $availableBooks = Book::query()
+            ->where('status', 'approved')
+            ->withAvg('reviews', 'rating')
+            ->withCount(['reviews', 'borrows'])
+            ->orderByDesc('available_quantity')
+            ->orderBy('title')
+            ->limit(12)
+            ->get()
+            ->map(fn ($book) => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'publisher' => $book->publisher,
+                'year' => $book->year,
+                'isbn' => $book->isbn,
+                'category' => $book->category ?: 'Umum',
+                'quantity' => (int) $book->quantity,
+                'available_quantity' => (int) $book->available_quantity,
+                'description' => $book->description,
+                'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+                'average_rating' => round((float) ($book->reviews_avg_rating ?? 0), 1),
+                'reviews_count' => $book->reviews_count,
+                'borrows_count' => $book->borrows_count,
+            ]);
+
+        $popularBooks = Book::query()
+            ->where('status', 'approved')
+            ->withCount('borrows')
+            ->orderByDesc('borrows_count')
+            ->orderBy('title')
+            ->limit(5)
+            ->get(['id', 'title', 'author', 'category', 'available_quantity']);
+
+        $latestReviews = Review::with(['user:id,name', 'book:id,title'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $userReviews = Review::with('book:id,title')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->limit(4)
+            ->get();
+
+        $userComplaints = Complaint::where('user_id', $user->id)
+            ->latest()
+            ->limit(4)
+            ->get();
+
+        $userSuggestions = Suggestion::where('user_id', $user->id)
+            ->latest()
+            ->limit(4)
+            ->get();
+
+        $dashboardStats = [
+            'totalTitles' => Book::where('status', 'approved')->count(),
+            'availableCopies' => (int) Book::where('status', 'approved')->sum('available_quantity'),
+            'categories' => Book::where('status', 'approved')
+                ->whereNotNull('category')
+                ->distinct('category')
+                ->count('category'),
+            'activeLoans' => Borrow::where('status', 'borrowed')->count(),
+            'todayLoans' => Borrow::whereDate('borrow_date', now()->toDateString())->count(),
+            'todayReturns' => Borrow::whereDate('return_date', now()->toDateString())->count(),
+            'libraryOverdue' => Borrow::where('status', 'borrowed')
+                ->where('due_date', '<', now())
+                ->count(),
+        ];
+
         return Inertia::render('Dashboard', [
             'user' => $user,
             'activeBorrows' => $activeBorrows,
@@ -157,8 +227,65 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             'maxBooksPerUser' => 3,
             'maxLoanDays' => 7,
             'finePerDay' => 5000,
+            'availableBooks' => $availableBooks,
+            'popularBooks' => $popularBooks,
+            'latestReviews' => $latestReviews,
+            'userReviews' => $userReviews,
+            'userComplaints' => $userComplaints,
+            'userSuggestions' => $userSuggestions,
+            'dashboardStats' => $dashboardStats,
         ]);
     })->name('dashboard');
+
+    Route::post('/dashboard/complaints', function (Request $request) {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'description' => 'required|string|max:2000',
+        ]);
+
+        Complaint::create([
+            'user_id' => Auth::id(),
+            'subject' => $validated['subject'],
+            'description' => $validated['description'],
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Keluhan berhasil dikirim.');
+    })->name('dashboard.complaints.store');
+
+    Route::post('/dashboard/suggestions', function (Request $request) {
+        $validated = $request->validate([
+            'content' => 'required|string|max:2000',
+        ]);
+
+        Suggestion::create([
+            'user_id' => Auth::id(),
+            'content' => $validated['content'],
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Saran berhasil dikirim.');
+    })->name('dashboard.suggestions.store');
+
+    Route::post('/dashboard/reviews', function (Request $request) {
+        $validated = $request->validate([
+            'book_id' => 'required|exists:books,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1500',
+        ]);
+
+        $book = Book::where('status', 'approved')->findOrFail($validated['book_id']);
+
+        Review::updateOrCreate(
+            ['user_id' => Auth::id(), 'book_id' => $book->id],
+            [
+                'rating' => $validated['rating'],
+                'comment' => $validated['comment'] ?? null,
+            ]
+        );
+
+        return back()->with('success', 'Ulasan buku berhasil disimpan.');
+    })->name('dashboard.reviews.store');
 });
 
 Route::middleware('auth')->group(function () {

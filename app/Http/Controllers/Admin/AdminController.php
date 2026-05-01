@@ -229,8 +229,8 @@ class AdminController extends Controller
             'description' => $bookRequest->description,
             'quantity' => $bookRequest->quantity ?? 1,
             'available_quantity' => $bookRequest->quantity ?? 1,
-            'status' => 'active',
-            'created_by' => $bookRequest->user_id,
+            'status' => 'approved',
+            'created_by' => $bookRequest->petugas_id,
             'approved_by' => Auth::id(),
             'approved_at' => now(),
         ]);
