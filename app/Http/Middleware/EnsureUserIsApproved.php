@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserIsApproved
@@ -25,7 +26,7 @@ class EnsureUserIsApproved
         }
 
         if ($request->user()->status === 'rejected') {
-            auth()->logout();
+            Auth::guard('web')->logout();
             return redirect()->route('login')->with('error', 'Akun Anda ditolak. Silakan hubungi admin.');
         }
 

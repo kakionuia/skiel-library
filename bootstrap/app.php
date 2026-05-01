@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'petugas' => \App\Http\Middleware\EnsureUserIsPetugas::class,
             'approved' => \App\Http\Middleware\EnsureUserIsApproved::class,
+            'pending' => \App\Http\Middleware\EnsureUserIsPending::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -1,65 +1,169 @@
 <template>
-  <Transition name="fade">
-    <div v-if="show" class="fixed inset-0 z-[110] flex items-center justify-center px-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')"></div>
+  <Transition name="modal">
+    <div v-if="show" class="fixed inset-0 z-[120] flex items-center justify-center p-6">
+      <div class="absolute inset-0 bg-gray-950/30 backdrop-blur-md" @click="handleClose"></div>
       
-      <div class="relative bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl transform transition-all">
-        <div class="p-8">
-          <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black text-gray-900">{{ isLogin ? 'Masuk ke Akun' : 'Daftar Akun Baru' }}</h2>
-            <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      <div class="relative bg-white w-full max-w-[440px] rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden transform transition-all border border-gray-100">
+        
+        <div class="px-10 py-12">
+          <div class="flex justify-center mb-8">
+            <div class="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+              <img src="/image/logo-smk.png" class="w-7 h-7" alt="Logo">
+            </div>
           </div>
 
+          <div class="text-center mb-10">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">
+              {{ isLogin ? 'Selamat Datang Kembali' : 'Bergabung dengan SKIE-Library' }}
+            </h2>
+            <p class="text-gray-400 mt-1.5 text-sm font-medium">
+              {{ isLogin ? 'Silakan masuk ke akun perpustakaan Anda' : 'Buat akun untuk akses penuh layanan digital' }}
+            </p>
+          </div>
+
+          <Transition name="fade">
+            <div v-if="formError" class="mb-6 px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
+              <p class="text-[11px] font-bold text-red-600 uppercase tracking-widest text-center">{{ formError }}</p>
+            </div>
+          </Transition>
+
           <form @submit.prevent="handleSubmit" class="space-y-5">
-            <div v-if="!isLogin" class="space-y-1">
-              <label class="text-sm font-bold text-gray-700 ml-1">Nama Lengkap</label>
-              <input type="text" placeholder="Aurel Filza" class="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all">
+            <div v-if="!isLogin" class="space-y-2">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Nama Lengkap</label>
+              <input v-model="form.name" type="text" placeholder="Aurel Filza" class="auth-input" :disabled="isSubmitting">
+              <p v-if="errors.name" class="error-msg">{{ errors.name }}</p>
             </div>
 
-            <div class="space-y-1">
-              <label class="text-sm font-bold text-gray-700 ml-1">Email Sekolah</label>
-              <input type="email" placeholder="example@smkn1gputri.sch.id" class="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all">
+            <div class="space-y-2">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Email Sekolah</label>
+              <input v-model="form.email" type="email" placeholder="name@smkn1gputri.sch.id" class="auth-input" :disabled="isSubmitting">
+              <p v-if="errors.email" class="error-msg">{{ errors.email }}</p>
             </div>
 
-            <div class="space-y-1">
-              <label class="text-sm font-bold text-gray-700 ml-1">Password</label>
-              <input type="password" placeholder="••••••••" class="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all">
+            <div class="space-y-2">
+              <div class="flex justify-between items-center ml-1">
+                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Kata Sandi</label>
+                <button v-if="isLogin" type="button" class="text-[10px] font-bold text-orange-600 hover:underline">Lupa Sandi?</button>
+              </div>
+              <input v-model="form.password" type="password" placeholder="••••••••" class="auth-input" :disabled="isSubmitting">
+              <p v-if="errors.password" class="error-msg">{{ errors.password }}</p>
             </div>
 
-            <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-orange-200 transition-all active:scale-95">
-              {{ isLogin ? 'Masuk Sekarang' : 'Buat Akun' }}
+            <div v-if="!isLogin" class="space-y-2">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Konfirmasi Kata Sandi</label>
+              <input v-model="form.password_confirmation" type="password" placeholder="••••••••" class="auth-input" :disabled="isSubmitting">
+              <p v-if="errors.password_confirmation" class="error-msg">{{ errors.password_confirmation }}</p>
+            </div>
+
+            <button type="submit" :disabled="isSubmitting" class="submit-btn">
+              <span v-if="!isSubmitting">{{ isLogin ? 'Masuk' : 'Buat Akun' }}</span>
+              <div v-else class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
             </button>
           </form>
 
           <div class="mt-8 text-center">
-            <p class="text-gray-500 text-sm">
-              {{ isLogin ? 'Belum punya akun?' : 'Sudah punya akun?' }}
-              <button @click="isLogin = !isLogin" class="text-orange-600 font-bold hover:underline ml-1">
-                {{ isLogin ? 'Daftar di sini' : 'Masuk di sini' }}
+            <p class="text-xs text-gray-400 font-medium">
+              {{ isLogin ? 'Belum terdaftar?' : 'Sudah punya akun?' }}
+              <button @click="toggleMode" class="text-orange-600 font-bold ml-1 hover:underline underline-offset-4">
+                {{ isLogin ? 'Daftar sekarang' : 'Masuk di sini' }}
               </button>
             </p>
           </div>
         </div>
+
+        <button @click="handleClose" class="absolute top-6 right-6 text-gray-300 hover:text-gray-900 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
       </div>
     </div>
   </Transition>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 
-defineProps(['show']);
-defineEmits(['close']);
+const props = defineProps({ show: Boolean });
+const emits = defineEmits(['close']);
 
 const isLogin = ref(true);
+const formError = ref('');
+const isSubmitting = ref(false);
+
+const form = useForm({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+  remember: false,
+});
+
+const errors = computed(() => form.errors);
+
+const toggleMode = () => {
+  isLogin.value = !isLogin.value;
+  form.clearErrors();
+  formError.value = '';
+};
+
+const handleClose = () => { if(!isSubmitting.value) emits('close'); };
 
 const handleSubmit = () => {
-  // Nantinya di sini panggil API Laravel 12 kamu
-  alert(isLogin.value ? 'Proses Login...' : 'Proses Pendaftaran...');
+  formError.value = '';
+  isSubmitting.value = true;
+
+  const endpoint = isLogin.value ? 'login' : 'register';
+
+  form.post(route(endpoint), {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSubmitting.value = false;
+      emits('close');
+      form.reset();
+    },
+    onError: (err) => {
+      isSubmitting.value = false;
+      // Ambil pesan error pertama
+      formError.value = Object.values(err)[0];
+    },
+    onFinish: () => {
+      isSubmitting.value = false;
+    }
+  });
 };
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.auth-input {
+  @apply w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-gray-100
+         text-sm font-semibold text-gray-900 outline-none transition-all duration-300
+         placeholder:text-gray-300 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5;
+}
+
+.submit-btn {
+  @apply w-full bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg 
+         shadow-orange-100 transition-all duration-300 flex items-center justify-center
+         hover:bg-orange-700 hover:shadow-orange-200 active:scale-[0.98]
+         disabled:bg-gray-100 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed;
+}
+
+.error-msg {
+  @apply text-[10px] text-red-500 font-bold mt-1 ml-1 tracking-wide;
+}
+
+/* Modal Smooth Animation */
+.modal-enter-active {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-leave-active {
+  transition: all 0.3s cubic-bezier(0.7, 0, 0.84, 0);
+}
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+}
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
 </style>

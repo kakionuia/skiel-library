@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WaitingController;
+use App\Http\Controllers\Auth\StatusCheckController;
+use App\Http\Controllers\Auth\AccountDeletionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +20,14 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/waiting', [WaitingController::class, 'index'])->name('waiting');
+// Waiting page for unapproved accounts
+Route::middleware(['auth', 'pending'])->get('/waiting', [WaitingController::class, 'index'])->name('waiting');
+
+// Delete account for pending/rejected users
+Route::middleware(['auth', 'pending'])->post('/delete-account', [AccountDeletionController::class, 'delete'])->name('account.delete');
+
+// API endpoint to check approval status
+Route::middleware('auth')->get('/api/check-approval-status', [StatusCheckController::class, 'checkApprovalStatus']);
 
 // Admin Routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
