@@ -1,14 +1,16 @@
 <template>
   <div class="min-h-screen bg-white font-sans text-gray-800 selection:bg-orange-100 overflow-x-hidden">
     <Navbar @open-auth="showAuthModal = true" />
-    <header class="relative pt-40 md:pt-40 pb-10 md:pb-20 px-4 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0">
+
+    <!-- Hero -->
+    <header class="relative pt-24 md:pt-40 pb-10 md:pb-20 px-4 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0">
       <div class="md:w-1/2" data-aos="fade-right">
-        <h2 class="text-orange-500 font-bold text-xl mb-3 text-left">Selamat Datang di!</h2>
+        <h2 class="text-orange-500 font-bold text-lg md:text-xl mb-3 text-left">Selamat Datang di!</h2>
         <h1 class="text-3xl md:text-5xl font-black leading-tight mb-6 text-gray-900 text-left">
           Pengelolaan Perpustakaan <br>
           <span class="text-orange-500">SMKN 1 Gunungputri</span> Berbasis Teknologi Web
         </h1>
-        <p class="text-gray-600 mb-8 text-lg leading-relaxed max-w-lg text-left">
+        <p class="text-gray-600 mb-8 text-base md:text-lg leading-relaxed max-w-lg text-left">
           Pengelolaan koleksi perpustakaan yang lebih mudah, cepat dan modern menggunakan Sistem Informasi berbasis Digital di SMKN 1 Gunungputri.
         </p>
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -16,35 +18,41 @@
           <button class="bg-orange-500 text-white px-6 sm:px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-orange-200 transition-all text-sm sm:text-base">Pelajari Fitur Dahulu</button>
         </div>
       </div>
-      
+
       <div class="md:w-1/2 flex justify-center md:justify-end mt-8 md:mt-0" data-aos="zoom-in">
         <div class="relative w-64 h-64 md:w-[400px] md:h-[400px]">
           <div class="absolute -top-5 -right-5 w-40 h-40 md:w-64 md:h-64 bg-orange-500 rounded-full opacity-90"></div>
           <div class="relative z-10 w-full h-full rounded-full border-[6px] md:border-[10px] border-white shadow-2xl overflow-hidden bg-gray-100">
-            <img src="/kepala-sekolah.png" class="w-full h-full object-cover">
+            <img src="/kepala-sekolah.png" class="w-full h-full object-cover" alt="Kepala Sekolah">
           </div>
           <div class="absolute bottom-2 md:bottom-5 left-0 z-20 bg-white/90 backdrop-blur-sm px-3 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl shadow-xl border border-white">
             <p class="font-bold text-gray-900 text-xs md:text-sm">Usman Ilham Pratama, M.Pd</p>
-            <p class="text-[8px] md:text-[10px] text-gray-500 font-medium">Kepala Sekolah SMKN 1 Gunungputri</p>
+            <p class="text-[10px] md:text-xs text-gray-500 font-medium">Kepala Sekolah SMKN 1 Gunungputri</p>
           </div>
         </div>
       </div>
     </header>
 
-    <section>
-      <div class="max-w-7xl mx-auto text-center py-16">
-        <div class="flex justify-center items-center p-4 rounded-full bg-orange-400 w-max mx-auto mb-6">
-          <img src="/image/logo-smk.png" alt="Logo" class="mx-auto w-20 h-20"/>      
-        </div>
-        <h2 class="text-3xl font-bold mb-2">Web ini merupakan web pengelolaan perpustakaan dari SMKN 1 Gunungputri</h2>
-        <p class="text-gray-500">Kunjungi halaman profil dan situs kami untuk melihat lebih banyak</p>
-        <div class="flex justify-center gap-4 mt-4">
-          <button class="bg-[#F69351] text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-orange-600 transition">Mulai Sekarang</button>
-        </div>
+    <!-- Intro -->
+    <section class="max-w-7xl mx-auto text-center py-16 px-4">
+      <div class="flex justify-center items-center p-4 rounded-full bg-orange-100 w-max mx-auto mb-6">
+        <img src="/image/logo-smk.png" alt="Logo" class="w-20 h-20 object-contain" />
+      </div>
+      <h2 class="text-3xl font-bold mb-2">Web pengelolaan perpustakaan SMKN 1 Gunungputri</h2>
+      <p class="text-gray-500 max-w-xl mx-auto">Kunjungi halaman profil dan situs kami untuk melihat lebih banyak</p>
+      <div class="flex justify-center gap-2 mt-8">
+        <button class="bg-orange-500 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-orange-600 transition">Web Sekolah</button>
+        <button class="bg-orange-500 text-white px-4 py-3 rounded-full font-bold shadow-lg hover:bg-orange-600 transition">          
+          <font-awesome-icon :icon="['fab', 'youtube']" style="color: white;" />
+        </button> 
+        <button class="bg-orange-500 text-white px-4 py-3 rounded-full font-bold shadow-lg hover:bg-orange-600 transition">          
+          <font-awesome-icon :icon="['fab', 'youtube']" style="color: white;" />
+        </button>
       </div>
     </section>
 
-    <section id="fitur" class="sf">
+    <!-- Fitur Unggulan (sf) -->
+    <section id="fitur" class="sf bg-orange-500">
       <div class="sf__bg-glow sf__bg-glow--a"></div>
       <div class="sf__bg-glow sf__bg-glow--b"></div>
       <svg class="sf__bg-grid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
@@ -192,65 +200,334 @@
       </div>
     </section>
 
-    <section class="py-12 md:py-24 px-4 md:px-12 max-w-7xl mx-auto text-center" data-aos="fade-up">
-      <h3 class="text-2xl md:text-3xl font-black mb-8 md:mb-16 underline decoration-orange-500 underline-offset-8">Profil Perpustakaan</h3>
-      <div class="flex flex-col md:flex-row gap-6 md:gap-12 text-left mb-10 md:mb-20">
-        <div class="md:w-1/2">
-          <img src="/gedung.jpg" class="rounded-2xl md:rounded-3xl shadow-xl w-full h-60 md:h-[350px] object-cover">
-        </div>
-        <div class="md:w-1/2">
-          <h4 class="text-xl md:text-2xl font-bold mb-4">Sejarah Singkat</h4>
-          <p class="text-gray-600 leading-relaxed text-sm md:text-base">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text...</p>
-        </div>
+<section class="py-20 md:py-32 px-6 md:px-12 max-w-7xl mx-auto" data-aos="fade-up">
+  <div class="flex flex-col md:flex-row items-center gap-16 lg:gap-24">
+    
+    <!-- Bagian Teks Carousel (Kiri) -->
+    <div class="w-full md:w-1/2 flex flex-col justify-center">
+      <div class="mb-6 inline-flex items-center gap-2">
+        <span class="w-12 h-[2px] bg-orange-500"></span>
+        <span class="text-orange-500 font-bold tracking-widest uppercase text-xs">Profil Perpustakaan</span>
       </div>
-    </section>
 
-    <section class="bg-orange-500 py-12 md:py-20 px-4 md:px-12 text-white">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
-        <div class="md:w-1/2 text-left" data-aos="fade-right">
-          <h3 class="text-2xl md:text-3xl font-black mb-6 md:mb-8 leading-snug">Repositori karya tulis siswa & guru SMK 1 Gunungputri.</h3>
-          <button class="bg-white text-orange-600 px-6 md:px-8 py-3 md:py-4 rounded-full font-bold flex items-center gap-2 md:gap-3 text-sm md:text-base">
-            Lihat Repository <span>→</span>
-          </button>
-        </div>
-        <div class="md:w-1/2 grid grid-cols-3 gap-2 md:gap-4" data-aos="fade-left">
-          <div v-for="i in 3" :key="i" class="bg-white p-1 md:p-2 rounded-lg shadow-2xl transform rotate-3 hover:rotate-0 transition-all">
-            <img src="/book-sample.jpg" class="w-full h-32 md:h-60 object-cover rounded shadow">
+      <div class="relative min-h-[350px] md:min-h-[400px]">
+        <transition name="slide-up" mode="out-in">
+          <div :key="activeProfileSlide" class="space-y-6">
+            <h2 class="text-4xl md:text-6xl font-black text-gray-900 leading-[1.1]">
+              {{ profileSlides[activeProfileSlide].title }}
+            </h2>
+            
+            <div class="pt-4">
+              <template v-if="typeof profileSlides[activeProfileSlide].content === 'string'">
+                <p class="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md">
+                  {{ profileSlides[activeProfileSlide].content }}
+                </p>
+              </template>
+              <ul v-else class="grid grid-cols-1 gap-4">
+                <li v-for="(item, idx) in profileSlides[activeProfileSlide].content" 
+                    :key="idx" 
+                    class="flex items-center gap-4 text-gray-600 text-lg font-semibold">
+                  <span class="flex-shrink-0 w-2 h-2 bg-orange-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></span>
+                  {{ item }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </transition>
+      </div>
+
+      <!-- Dots Indicator - Gaya Modern Pill -->
+      <div class="flex items-center gap-3 mt-10">
+        <button
+          v-for="(slide, index) in profileSlides"
+          :key="index"
+          @click="goToSlide(index)"
+          class="h-2 rounded-full transition-all duration-500"
+          :class="activeProfileSlide === index ? 'w-10 bg-orange-500' : 'w-2 bg-gray-200 hover:bg-orange-200'"
+          :aria-label="'Slide ' + (index + 1)"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Bagian Gambar Statis (Kanan) -->
+    <div class="w-full md:w-1/2 relative">
+      <!-- Ornamen Dekoratif Oranye -->
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-orange-100 rounded-full blur-3xl opacity-60"></div>
+      <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-80"></div>
+      
+      <div class="relative z-10">
+        <!-- Frame Gambar dengan Border Oranye Tipis -->
+        <div class="absolute inset-0 border-2 border-orange-500/20 translate-x-4 translate-y-4 rounded-[3rem] -z-10"></div>
+        
+        <img
+          src="/gedung.jpg" 
+          alt="Gedung Perpustakaan"
+          class="rounded-[3rem] w-full h-[450px] md:h-[600px] object-cover shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transform transition-transform duration-700 hover:scale-[1.01]"
+        />
+
+        <!-- Floating Badge (Opsional, Menambah Kesan Pro) -->
+        <div class="absolute -bottom-6 right-8 bg-white p-6 rounded-2xl shadow-xl border border-gray-50 flex items-center gap-4">
+          <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+            P
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-bold uppercase tracking-tighter">SMKN 1 Gunungputri</p>
+            <p class="text-sm font-black text-gray-900">Perpustakaan Digital</p>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <footer class="bg-orange-600 text-white py-10 md:py-16 px-4 md:px-12 border-t border-white/10">
-      <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 md:gap-12 text-left">
-        <div>
-          <h2 class="text-xl md:text-2xl font-black mb-4">SKIE-Library</h2>
-          <p class="text-orange-100 text-xs md:text-sm">Update kegiatan kami di media sosial.</p>
+  </div>
+</section>
+
+    <!-- ===== SECTION: PETUGAS PERPUSTAKAAN ===== -->
+<!-- ===== PETUGAS PERPUSTAKAAN ===== -->
+<section class="relative py-24 md:py-32 px-4 bg-white overflow-hidden">
+  <!-- Dekorasi latar -->
+  <div class="absolute top-0 left-0 w-full h-full pointer-events-none">
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-orange-50 rounded-full blur-3xl opacity-60"></div>
+    <div class="absolute -bottom-32 -right-32 w-[30rem] h-[30rem] bg-orange-50 rounded-full blur-3xl opacity-60"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-16 md:mb-24">
+      <span class="text-orange-500 font-bold text-xs tracking-[0.25em] uppercase block mb-4">Di Balik Layanan Prima</span>
+      <h2 class="text-4xl md:text-4xl lg:text-5xl font-black text-gray-900 leading-tight">
+          Petugas Perpustakaan
+      </h2>
+      <div class="w-20 h-1 bg-orange-500 mx-auto mt-8 rounded-full"></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6 lg:gap-8">
+      <div
+        v-for="(staff, i) in staffList"
+        :key="i"
+        class="group relative bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-700 ease-out backface-hidden overflow-hidden flex flex-col"
+        data-aos="fade-up"
+        :data-aos-delay="i * 150"
+      >
+        <div class="relative w-full h-72 sm:h-80 overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
+          
+          <img
+            :src="staff.photo"
+            :alt="staff.name"
+            class="absolute inset-0 w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-all duration-700 ease-out"
+          >
+          
+          <div class="absolute bottom-4 left-4 right-4 flex justify-center gap-3 z-20 translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+            <a href="#" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-orange-500 transition-colors duration-300">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-orange-500 transition-colors duration-300">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .867-.157 1.696-.44 2.465l-4.211-4.21a2.5 2.5 0 00-3.536 0L4.527 12.32A6 6 0 0010 16a6 6 0 004.134-10.134 6 6 0 00-4.134-1.866c.627.001 1.257.104 1.854.292l1.561 1.561a.5.5 0 01-.146.854l-2 1a.5.5 0 01-.598-.133l-1.293-1.724A6.001 6.001 0 0114 10z" clip-rule="evenodd"/></svg>
+            </a>
+          </div>
         </div>
-        <div>
-          <h4 class="font-bold mb-4 text-sm md:text-base">Peta Situs</h4>
-          <ul class="text-xs md:text-sm space-y-2 opacity-80">
-            <li>Beranda</li><li>Fitur</li><li>Tentang Kami</li>
-          </ul>
-        </div>
-        <div class="text-left md:text-right">
-          <h4 class="font-bold mb-4 text-sm md:text-base">Hubungi Kami</h4>
-          <p class="text-xs md:text-sm opacity-80">Jl. Barokah No. 06, Gunungputri, Bogor</p>
+
+        <div class="relative p-6 flex flex-col flex-1">
+          <div class="w-10 h-0.5 bg-orange-500 mb-4 group-hover:w-16 transition-all duration-500"></div>
+          
+          <h3 class="text-xl font-bold text-gray-900 tracking-tight">{{ staff.name }}</h3>
+          <p class="text-orange-500 font-semibold text-sm mt-1">{{ staff.role }}</p>
+          
+          <p class="text-gray-400 text-xs leading-relaxed mt-3 line-clamp-3">{{ staff.bio }}</p>
+          
+          <div class="mt-auto pt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span class="text-[10px] uppercase tracking-widest font-bold text-gray-300">Bidang Keahlian</span>
+            <p class="text-xs text-gray-500 mt-1">Katalogisasi, Layanan Digital</p>
+          </div>
         </div>
       </div>
-    </footer>
+    </div>
+  </div>
+</section>
+
+    <!-- Repositori -->
+  <section class="bg-orange-500 py-16 md:py-24 px-6 md:px-12 text-white overflow-hidden">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+      
+      <!-- Bagian Teks (Kiri) -->
+      <div class="w-full lg:w-5/12 text-left space-y-6 z-10 bg-orange-500 p-10">
+        <h3 class="text-2xl md:text-4xl font-bold leading-tight">
+          Mau lihat hasil karya tulis milik siswa maupun guru? Bisa! Kami menyediakan repositori karya SMK 1 Gunungputri.
+        </h3>
+        
+        <button class="bg-white text-gray-900 px-8 py-4 rounded-full font-bold flex items-center gap-3 text-sm md:text-base shadow-lg hover:shadow-2xl transition-all group">
+          Cari Tahu Repository Karya 
+          <span class="group-hover:translate-x-2 transition-transform">→</span>
+        </button>
+      </div>
+
+      <!-- Bagian Slider Polaroid (Kanan) -->
+      <div class="w-full lg:w-7/12 z-0">
+        <swiper
+          :modules="modules"
+          :slides-per-view="2"
+          :centered-slides="true"
+          :loop="true"
+          :space-between="30"
+          :autoplay="{
+            delay: 2500,
+            disableOnInteraction: false,
+          }"
+          :breakpoints="{
+            '768': {
+              slidesPerView: 3,
+              spaceBetween: 40
+            }
+          }"
+          class="repo-swiper"
+        >
+          <swiper-slide v-for="(img, i) in bookCovers" :key="i" v-slot="{ isActive }">
+            <!-- Container Polaroid -->
+            <div 
+              class="transition-all duration-700 ease-in-out transform"
+              :class="isActive ? 'scale-110 rotate-0 opacity-100' : 'scale-75 -rotate-3 opacity-60'"
+            >
+              <div class="bg-white p-3 pb-10 shadow-2xl">
+                <img 
+                  :src="img" 
+                  class="w-full h-48 md:h-80 object-cover border border-gray-100" 
+                  alt="Karya Tulis"
+                >
+                <!-- Area Putih Bawah Polaroid -->
+                <div class="mt-4 h-2 bg-gray-50 rounded-full w-3/4 mx-auto"></div>
+              </div>
+            </div>
+          </swiper-slide>
+        </swiper>
+      </div>
+
+    </div>
+  </section>
+
+    <!-- Artikel & Event -->
+    <section class="max-w-7xl mx-auto px-4 py-12 font-sans">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-800">Artikel dan Event Kami</h2>
+        <a href="#" class="bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md">
+          More <span class="text-xl">→</span>
+        </a>
+      </div>
+
+      <div class="flex gap-4 mb-8">
+        <button
+          @click="activeTab = 'artikel'"
+          :class="activeTab === 'artikel' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
+          class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
+        >
+          Artikel
+        </button>
+        <button
+          @click="activeTab = 'event'"
+          :class="activeTab === 'event' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
+          class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
+        >
+          Event
+        </button>
+      </div>
+
+      <div class="relative group">
+        <div
+          ref="slider"
+          class="flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth pb-8"
+          @scroll="handleScroll"
+        >
+          <div
+            v-for="(item, index) in filteredItems"
+            :key="index"
+            class="min-w-[320px] md:min-w-[400px] bg-white rounded-2xl shadow-xl border border-gray-100 p-6 snap-start flex-shrink-0 hover:shadow-2xl transition-shadow"
+          >
+            <div class="relative mb-5 overflow-hidden rounded-xl border-2 border-orange-200">
+              <img src="https://via.placeholder.com/400x240" class="w-full h-48 object-cover hover:scale-105 transition duration-500" alt="Artikel">
+            </div>
+            <span class="bg-orange-500 text-white text-[10px] px-4 py-1.5 rounded-full uppercase font-black tracking-wider">
+              {{ item.category }}
+            </span>
+            <h3 class="mt-4 font-bold text-gray-900 leading-snug text-lg">
+              {{ item.title }}
+            </h3>
+            <p class="mt-3 text-sm text-gray-500 line-clamp-3 leading-relaxed">
+              {{ item.desc }}
+            </p>
+            <a href="#" class="inline-block mt-5 text-orange-500 font-extrabold text-sm hover:underline">
+              Klik untuk baca >>
+            </a>
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-3 mt-6">
+          <button
+            v-for="(_, i) in filteredItems"
+            :key="i"
+            @click="scrollToIndex(i)"
+            class="w-3.5 h-3.5 rounded-full border-2 border-orange-500 transition-all duration-300"
+            :class="currentIndex === i ? 'bg-orange-500 scale-110' : 'bg-transparent'"
+          ></button>
+        </div>
+      </div>
+
+      <!-- CTA Formulir -->
+      <div class="mt-24 bg-orange-500 rounded-3xl p-10 md:p-14 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-2xl">
+        <div class="z-10 text-center md:text-left">
+          <h2 class="text-3xl md:text-4xl font-black text-white mb-8 leading-tight">
+            Punya pertanyaan dan saran<br class="hidden md:block"> untuk kami kedepannya?
+          </h2>
+          <a href="#" class="bg-white text-gray-800 px-10 py-4 rounded-full font-black flex items-center gap-4 w-fit mx-auto md:mx-0 hover:shadow-lg transition transform hover:-translate-y-1">
+            BUAT FORMULIR
+            <span class="bg-orange-500 text-white rounded-full w-7 h-7 flex items-center justify-center">→</span>
+          </a>
+        </div>
+
+        <div class="mt-12 md:mt-0 relative group">
+          <div class="bg-blue-300 w-56 h-40 rounded-2xl rotate-[-8deg] flex items-center justify-center shadow-2xl transform group-hover:rotate-0 transition duration-500">
+            <div class="w-12 h-1.5 bg-blue-400 rounded-full"></div>
+          </div>
+          <span class="absolute -top-10 -right-4 text-yellow-300 text-6xl font-black opacity-90 drop-shadow-md">??</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+        <FooterSection />
+
+
     <AuthModal :show="showAuthModal" @close="showAuthModal = false" />
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
 import Navbar from '@/Components/Navbar.vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { ref } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import AuthModal from '@/Components/AuthModal.vue';
+import FooterSection from '@/Components/FooterSection.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Autoplay } from 'swiper/modules';
 
+// Import CSS Swiper
+import 'swiper/css';
+
+const modules = [Autoplay];
+
+// Data gambar mockup
+const bookCovers = [
+  '/image/ily.jpeg',
+  '/image/ht.jpeg',
+  '/image/nb.jpg',
+  '/image/tk.jpg',
+  '/image/sp.jpeg'
+];
+
+// Masukkan ikon yang akan dipakai
+library.add(faYoutube);
 const showAuthModal = ref(false);
 
 const features = [
@@ -296,13 +573,126 @@ const fiturList = [
 ]
 
 function select(i) { activeIndex.value = i }
+
+const activeTab = ref('artikel');
+const slider = ref(null);
+const currentIndex = ref(0);
+
+const data = {
+  artikel: [
+    { title: 'SMKN 1 Gunungputri rubuh, siswa diliburkan sementara waktu', category: 'Sekolah', desc: 'Is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry standard.' },
+    { title: 'Update Kurikulum PPLG 2026', category: 'Kurikulum', desc: 'Is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.' },
+    { title: 'Lomba UI/UX antar SMK se-Bogor', category: 'Lomba', desc: 'Is simply dummy text of the printing and typesetting industry.' },
+    { title: 'Kunjungan Industri ke Google Indonesia', category: 'Industri', desc: 'Siswa SMK melihat langsung ekosistem kerja profesional.' },
+  ],
+  event: [
+    { title: 'Grand Opening RR.CO Waste Center', category: 'Event', desc: 'Peresmian pusat pengelolaan limbah digital daerah Gunungputri.' },
+    { title: 'Webinar Flutter & Dart SMKN 1', category: 'Edukasi', desc: 'Belajar mobile development bersama expert.' },
+  ]
+};
+
+const filteredItems = computed(() => data[activeTab.value]);
+
+// Logika Scroll untuk indikator
+const handleScroll = (e) => {
+  const scrollLeft = e.target.scrollLeft;
+  const cardWidth = 424; // Lebar kartu + gap
+  currentIndex.value = Math.round(scrollLeft / cardWidth);
+};
+
+const scrollToIndex = (index) => {
+  const cardWidth = 424;
+  slider.value.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
+};
+
+const staffList = [
+  {
+    name: 'Ahmad Fauzi',
+    role: 'Kepala Perpustakaan',
+    bio: 'Memimpin layanan perpustakaan dengan pengalaman lebih dari 10 tahun.',
+    photo: '/image/j.jpeg'
+  },
+  {
+    name: 'Siti Nurhaliza',
+    role: 'Pustakawan Ahli',
+    bio: 'Ahli dalam katalogisasi, referensi, dan pengembangan koleksi.',
+    photo: '/image/o.jpeg'
+  },
+  {
+    name: 'Budi Santoso',
+    role: 'Teknisi Sistem',
+    bio: 'Mengelola sistem informasi perpustakaan dan layanan digital.',
+    photo: '/image/j.jpeg'
+  },
+  {
+    name: 'Dewi Lestari',
+    role: 'Layanan Sirkulasi',
+    bio: 'Menjamin kelancaran peminjaman dan pengembalian buku.',
+    photo: '/image/o.jpeg'
+  }
+];
+
+// --- Carousel Profil ---
+
+const activeProfileSlide = ref(0)
+let profileInterval = null
+
+const profileSlides = [
+  {
+    title: 'Sejarah Singkat',
+    content: 'Perpustakaan SMKN 1 Gunungputri hadir sejak tahun 2005 untuk mendukung visi sekolah dalam mencetak generasi cerdas dan inovatif melalui ketersediaan literasi berkualitas.'
+  },
+  {
+    title: 'Visi & Misi Kami',
+    content: [
+      'Pusat literasi digital SMK terbaik',
+      'Akses koleksi fisik & digital 24/7',
+      'Pengembangan minat bakat siswa',
+      'Sistem peminjaman berbasis barcode'
+    ]
+  },
+  {
+    title: 'Tatanan Pengurus',
+    content: [
+      'Kepala: Ahmad Fauzi, M.Pd',
+      'Pustakawan: Siti Nurhaliza',
+      'Teknisi: Budi Santoso',
+      'Sirkulasi: Dewi Lestari'
+    ]
+  }
+]
+
+const startAutoSlide = () => {
+  stopAutoSlide()
+  profileInterval = setInterval(() => {
+    activeProfileSlide.value = (activeProfileSlide.value + 1) % profileSlides.length
+  }, 7000) // 7 detik agar user sempat membaca
+}
+
+const stopAutoSlide = () => {
+  if (profileInterval) clearInterval(profileInterval)
+}
+
+const goToSlide = (index) => {
+  activeProfileSlide.value = index
+  startAutoSlide() // Reset timer setelah klik manual
+}
+
+onMounted(() => {
+  startAutoSlide()
+})
+
+onBeforeUnmount(() => {
+  stopAutoSlide()
+});
+
 </script>
 
 <style>
 *, *::before, *::after { box-sizing: border-box; }
 
 .sf {
-  --bg:        #F97316;
+  --bg:        #d47a3c;
   --surface:   #EA580C;
   --orange:    #FFFFFF;
   --orange-lo: rgba(255,255,255,.15);
@@ -318,7 +708,6 @@ function select(i) { activeIndex.value = i }
 .sf {
   margin: 0;
   padding: 60px 16px 120px;
-  background: var(--bg);
   position: relative;
   font-family: 'Syne', sans-serif;
   overflow: hidden;
@@ -379,6 +768,7 @@ function select(i) { activeIndex.value = i }
   margin-bottom: 28px;
   opacity: 0.85;
 }
+
 .sf__kicker-pip {
   display: block; width: 20px; height: 1px; background: var(--text);
 }
@@ -437,7 +827,10 @@ function select(i) { activeIndex.value = i }
 
 .v { display: flex; flex-direction: column; align-items: center; gap: 24px; width: 100%; }
 
-.v--scan {}
+.v--scan {
+
+}
+
 .v__scan-wrap { position: relative; display: inline-flex; }
 .v__scan-frame {
   width: 160px; height: 160px;
@@ -726,5 +1119,58 @@ function select(i) { activeIndex.value = i }
 
 .sf__item.is-active .sf__desc p {
   transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .sf__body {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.repo-swiper {
+  width: 100%;
+  padding: 50px 0;
+  overflow: visible !important;
+}
+
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.5s ease;
+}
+
+/* Membuat efek bayangan polaroid lebih nyata */
+.bg-white {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Pastikan section tidak memiliki padding horizontal terlalu sempit di mobile */
+@media (max-width: 640px) {
+  .text-2xl {
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
 }
 </style>

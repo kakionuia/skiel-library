@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Http\Controllers\ContentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -295,3 +296,5 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/api/contents', [ContentController::class, 'index']);

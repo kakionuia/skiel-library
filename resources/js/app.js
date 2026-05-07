@@ -7,6 +7,12 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+library.add(faYoutube);
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -55,3 +61,4 @@ document.addEventListener('DOMContentLoaded', function() {
 // Override default browser behavior
 window.defaultStatus = '';
 window.status = '';
+

@@ -3,13 +3,13 @@
     :class="[
       'fixed top-0 left-0 right-0 z-[100] transition-all duration-500 px-8 py-4 flex items-center justify-between',
       isScrolled 
-        ? 'bg-orange-600 shadow-2xl py-3 border-b border-orange-400' 
+        ? 'bg-orange-500 shadow-xl shadow-neutral-350 py-3 border-b border-orange-400' 
         : 'bg-transparent py-6'
     ]"
   >
     <div class="flex items-center gap-3 group cursor-pointer">
-      <div class="bg-white p-1.5 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-300">
-        <img src="/logo-smk.png" alt="Logo" class="w-8 h-8">
+      <div class="bg-white p-1.5 rounded-full shadow-sm group-hover:scale-110 transition-transform duration-300">
+        <img :src="$page.props.logoUrl" alt="Logo" class="w-8 h-8">
       </div>
       <div class="flex flex-col">
         <h1 :class="['font-black leading-none transition-colors duration-500', isScrolled ? 'text-white' : 'text-orange-600']">

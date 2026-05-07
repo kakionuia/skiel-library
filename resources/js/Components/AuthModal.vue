@@ -27,18 +27,68 @@
             </div>
           </Transition>
 
-          <form @submit.prevent="handleSubmit" class="space-y-5">
+          <form @submit.prevent="handleSubmit" class="space-y-5 overflow-auto">
             <div v-if="!isLogin" class="space-y-2">
               <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Nama Lengkap</label>
-              <input v-model="form.name" type="text" placeholder="Aurel Filza" class="auth-input" :disabled="isSubmitting">
+              <input v-model="form.name" type="text" placeholder="Nama Lengkap Anda" class="auth-input" :disabled="isSubmitting">
               <p v-if="errors.name" class="error-msg">{{ errors.name }}</p>
             </div>
 
             <div class="space-y-2">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">NISN</label>
+              <input v-model="form.nisn" type="text" placeholder="ex: 2425*******" class="auth-input" :disabled="isSubmitting">
+              <p v-if="errors.nisn" class="error-msg">{{ errors.nisn }}</p>
+            </div>
+
+            <!-- KELAS & JURUSAN (hanya saat daftar) -->
+            <div v-if="!isLogin" class="space-y-2">
+              <div class="flex gap-3">
+                <!-- Pilih Kelas -->
+                <div class="flex-1">
+                  <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1 mb-1">Kelas</label>
+                  <select v-model="form.kelas" class="auth-input" :disabled="isSubmitting">
+                    <option value="" disabled selected hidden>Pilih Kelas</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                  <p v-if="errors.kelas" class="error-msg">{{ errors.kelas }}</p>
+                </div>
+
+                <!-- Pilih Jurusan -->
+                <div class="flex-[2]">
+                  <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1 mb-1">Jurusan</label>
+                  <select v-model="form.jurusan" class="auth-input" :disabled="isSubmitting">
+                    <option value="" disabled selected hidden>Pilih Jurusan</option>
+                    <option value="Elektro 1">Elektro 1</option>
+                    <option value="Elektro 2">Elektro 2</option>
+                    <option value="Elektro 3">Elektro 3</option>
+                    <option value="Elektro 4">Elektro 4</option>
+                    <option value="Mesin 1">Mesin 1</option>
+                    <option value="Mesin 2">Mesin 2</option>
+                    <option value="Mesin 3">Mesin 3</option>
+                    <option value="Kimia 1">Kimia 1</option>
+                    <option value="Kimia 2">Kimia 2</option>
+                    <option value="Kimia 3">Kimia 3</option>
+                    <option value="Las 1">Las 1</option>
+                    <option value="Las 2">Las 2</option>
+                    <option value="Las 3">Las 3</option>
+                    <option value="RPL 1">RPL 1</option>
+                    <option value="RPL 2">RPL 2</option>
+                    <option value="RPL 3">RPL 3</option>
+                    <option value="RPL 4">RPL 4</option>
+                  </select>
+                  <p v-if="errors.jurusan" class="error-msg">{{ errors.jurusan }}</p>
+                </div>
+              </div>
+            </div>
+            <!-- END KELAS & JURUSAN -->
+
+           <div class="space-y-2">
               <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Email Sekolah</label>
               <input v-model="form.email" type="email" placeholder="name@smkn1gputri.sch.id" class="auth-input" :disabled="isSubmitting">
               <p v-if="errors.email" class="error-msg">{{ errors.email }}</p>
-            </div>
+           </div>
 
             <div class="space-y-2">
               <div class="flex justify-between items-center ml-1">
@@ -93,8 +143,11 @@ const isSubmitting = ref(false);
 const form = useForm({
   name: '',
   email: '',
+  nisn: '',
   password: '',
   password_confirmation: '',
+  kelas: '',    // <-- tambahan field kelas
+  jurusan: '',  // <-- tambahan field jurusan
   remember: false,
 });
 
@@ -123,7 +176,6 @@ const handleSubmit = () => {
     },
     onError: (err) => {
       isSubmitting.value = false;
-      // Ambil pesan error pertama
       formError.value = Object.values(err)[0];
     },
     onFinish: () => {

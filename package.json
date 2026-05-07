@@ -21,8 +21,13 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^7.2.0",
+        "@fortawesome/free-brands-svg-icons": "^7.2.0",
+        "@fortawesome/free-solid-svg-icons": "^7.2.0",
+        "@fortawesome/vue-fontawesome": "^3.2.0",
         "@heroicons/vue": "^2.2.0",
         "aos": "^2.3.4",
-        "sweetalert2": "^11.26.24"
+        "sweetalert2": "^11.26.24",
+        "swiper": "^12.1.4"
     }
 }

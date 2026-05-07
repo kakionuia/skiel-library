@@ -16,14 +16,31 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): Response
+    // Di controller ProfileController
+public function edit(Request $request)
     {
+        $user = $request->user();
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
+            'recentActivities' => $user->borrows()->latest()->take(5)->get()->map(fn($b) => [
+    'id'          => $b->id,
+    'description' => 'Meminjam buku "'.$b->book->judul.'"',
+    'created_at'  => $b->created_at->format('d M Y'),
+]),
+            'recentBooks' => $user->peminjaman()  // sekarang method ini ada
+                                   ->with('buku') // asumsikan Peminjaman punya relasi 'buku'
+                                   ->latest()
+                                   ->take(3)
+                                   ->get()
+                                   ->map(fn($p) => [
+                                       'id' => $p->id,
+                                       'judul' => $p->buku->judul ?? 'Tanpa Judul',
+                                       'tanggal_baca' => $p->created_at->format('d M Y'),
+                                   ]),
         ]);
     }
-
     /**
      * Update the user's profile information.
      */

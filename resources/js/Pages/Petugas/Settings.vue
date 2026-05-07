@@ -21,7 +21,7 @@
           <section class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
             <div class="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
               <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-orange-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-100">
+                <div class="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-100">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                 </div>
                 <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Informasi Personal</h2>
@@ -42,7 +42,7 @@
                 <input type="text" class="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-500/20 text-sm font-medium transition-all">
               </div>
               <div class="md:col-span-2 pt-4">
-                <button class="px-8 py-3.5 bg-orange-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-orange-700 shadow-xl shadow-orange-100 transition-all">
+                <button class="px-8 py-3.5 bg-orange-500 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-orange-700 shadow-xl shadow-orange-100 transition-all">
                   Simpan Perubahan Profil
                 </button>
               </div>
@@ -82,7 +82,7 @@
         </div>
 
         <div class="xl:col-span-4">
-          <section class="bg-orange-900 rounded-[2.5rem] shadow-2xl shadow-orange-200 p-8 sticky top-32">
+          <section class="bg-orange-500 rounded-[2.5rem] shadow-2xl shadow-orange-200 p-8 sticky top-32">
             <h2 class="text-white text-xl font-black mb-2 tracking-tight">Parameter Sistem</h2>
             <p class="text-orange-300 text-xs mb-8">Aturan baku peminjaman buku yang berlaku secara global.</p>
             

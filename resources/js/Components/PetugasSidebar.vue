@@ -127,6 +127,7 @@ const handleLogout = () => {
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-slate-200 rounded-full;
 }

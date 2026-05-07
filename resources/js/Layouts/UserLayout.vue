@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-    <!-- Top Navigation -->
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -8,7 +7,7 @@
             📚
           </div>
           <div>
-            <h1 class="text-lg font-bold text-slate-900">LibraSync</h1>
+            <h1 class="text-lg font-bold text-slate-900">SKIE-Library</h1>
             <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Perpustakaan Digital</p>
           </div>
         </div>

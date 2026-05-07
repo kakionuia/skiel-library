@@ -57,18 +57,15 @@ div:hover,
     pointer-events: auto !important;
 }
 
-/* Sembunyikan semua tooltip */
 [title] {
     title: none !important;
     pointer-events: none !important;
 }
 
-/* Block status bar */
 body {
     overflow: auto !important;
 }
 
-/* Hilangkan hover effect bawaan browser */
 a:focus,
 button:focus,
 div:focus {

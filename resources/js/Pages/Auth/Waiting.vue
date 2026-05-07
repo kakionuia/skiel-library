@@ -1,22 +1,20 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50">
     <div class="max-w-md w-full p-8 bg-white rounded-lg shadow-sm border border-gray-200 text-center">
-      <!-- Header Icon -->
       <div class="mb-6">
         <div class="mx-auto w-16 h-16 rounded-full flex items-center justify-center animate-pulse"
-          :class="user.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100'">
+          :class="user.status === 'rejected' ? 'bg-red-100' : 'bg-orange-100'">
           <svg v-if="user.status === 'rejected'" class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2" />
           </svg>
-          <svg v-else class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg v-else class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
       </div>
 
-      <!-- Status Badge -->
       <div class="mb-4">
-        <span v-if="user.status === 'pending'" class="inline-block px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
+        <span v-if="user.status === 'pending'" class="inline-block px-4 py-2 bg-orange-200 text-orange-600 rounded-full text-sm font-semibold">
           Menunggu Persetujuan
         </span>
         <span v-else-if="user.status === 'rejected'" class="inline-block px-4 py-2 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
@@ -24,13 +22,12 @@
         </span>
       </div>
 
-      <!-- Title and Message -->
       <h1 class="text-xl font-bold text-gray-900 mb-2">
         <span v-if="user.status === 'rejected'">Akun Anda Ditolak</span>
         <span v-else>Menunggu Persetujuan</span>
       </h1>
       
-      <div class="space-y-3 text-left mb-6 p-4 bg-gray-50 rounded-lg">
+      <div class="space-y-3 text-left mb-4 p-4 bg-gray-50 rounded-lg">
         <div>
           <p class="text-xs text-gray-500 font-medium">NAMA</p>
           <p class="text-gray-900 font-semibold">{{ user.name }}</p>
@@ -56,7 +53,7 @@
       <p v-if="user.status === 'rejected'" class="text-red-600 text-sm mb-4">
         Maaf, aplikasi Anda untuk membuat akun telah ditolak oleh admin. Jika Anda ingin mencoba lagi, silakan buat akun baru.
       </p>
-      <p v-else class="text-gray-600 text-sm mb-4">
+      <p v-else class="text-gray-800 text-sm mb-4">
         Akun Anda sedang dalam proses verifikasi oleh admin. Mohon tunggu beberapa saat hingga akun Anda disetujui.
       </p>
 
@@ -85,11 +82,20 @@
           {{ isDeleting ? 'Menghapus...' : 'Hapus Akun' }}
         </button>
 
+        <!-- Tombol Keluar Akun baru -->
+        <button
+          @click="logout"
+          :disabled="isLoggingOut"
+          class="w-full px-4 py-2 text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+        >
+          {{ isLoggingOut ? 'Keluar...' : 'Keluar Akun' }}
+        </button>
+
         <div v-if="statusMessage" :class="[
           'mt-4 p-3 rounded-lg text-sm font-medium',
           statusType === 'success' ? 'bg-green-100 text-green-800 border border-green-300' :
           statusType === 'error' ? 'bg-red-100 text-red-800 border border-red-300' :
-          'bg-blue-100 text-blue-800 border border-blue-300'
+          'bg-yellow-100 text-yellow-800 border border-yellow-300'
         ]">
           {{ statusMessage }}
         </div>
@@ -99,7 +105,6 @@
         Sistem akan otomatis mengecek setiap {{ autoCheckInterval / 1000 }} detik
       </p>
     </div>
-
   </div>
 </template>
 
@@ -117,6 +122,7 @@ const props = defineProps({
 
 const isChecking = ref(false);
 const isDeleting = ref(false);
+const isLoggingOut = ref(false); // state untuk tombol logout
 const statusMessage = ref('');
 const statusType = ref('');
 const autoCheckInterval = 30000; // 30 seconds
@@ -199,6 +205,16 @@ const deleteAccount = async () => {
     statusType.value = 'error';
     isDeleting.value = false;
   }
+};
+
+// Fungsi logout baru
+const logout = () => {
+  isLoggingOut.value = true;
+  router.post('/logout', {}, {
+    onFinish: () => {
+      isLoggingOut.value = false;
+    }
+  });
 };
 
 onMounted(() => {

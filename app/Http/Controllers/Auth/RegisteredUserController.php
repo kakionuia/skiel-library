@@ -30,26 +30,31 @@ class RegisteredUserController extends Controller
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'nisn' => 'required|string|max:20|unique:users,nisn',   // <-- validasi NISN
+        'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'kelas' => 'required|string|in:10,11,12',                // <-- validasi kelas
+        'jurusan' => 'required|string|in:Elektro 1,Elektro 2,Elektro 3,Elektro 4,Mesin 1,Mesin 2,Mesin 3,Kimia 1,Kimia 2,Kimia 3,Las 1,Las 2,Las 3,RPL 1,RPL 2,RPL 3,RPL 4',
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'anggota',
-            'status' => 'pending',
-        ]);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'nisn' => $request->nisn,
+        'kelas' => $request->kelas,
+        'jurusan' => $request->jurusan,
+        'role' => 'anggota',
+        'status' => 'pending',
+    ]);
 
-        event(new Registered($user));
+    event(new Registered($user));
 
-        Auth::login($user);
+    Auth::login($user);
 
-        // Redirect to waiting page after registration
-        return redirect(route('waiting'));
-    }
+    return redirect(route('waiting'));
+}
 }

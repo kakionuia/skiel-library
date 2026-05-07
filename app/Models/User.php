@@ -7,11 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +27,7 @@ class User extends Authenticatable
         'status',
         'nisn',
         'kelas',
-        'phone',
+        'jurusan',
         'borrow_restricted',
     ];
 
@@ -104,11 +105,6 @@ class User extends Authenticatable
         return $this->hasMany(Suggestion::class);
     }
 
-    public function activities()
-    {
-        return $this->hasMany(Activity::class);
-    }
-
     public function bookRequests()
     {
         return $this->hasMany(BookRequest::class, 'petugas_id');
@@ -128,4 +124,15 @@ class User extends Authenticatable
     {
         return $this->borrows()->with('book')->orderBy('created_at', 'desc')->limit($limit)->get();
     }
+
+    // Hapus method ini
+public function peminjaman()
+{
+    return $this->hasMany(Peminjaman::class);
+}
+
+public function activities()
+{
+    return $this->hasMany(Activity::class);
+}
 }
