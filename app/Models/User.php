@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -85,54 +84,88 @@ class User extends Authenticatable
         return $this->status === 'rejected';
     }
 
+    // ========== RELATIONSHIPS ==========
+    
     public function borrows()
     {
-        return $this->hasMany(Borrow::class);
+        return $this->hasMany(\App\Models\Borrow::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    // Alias untuk loans (biar konsisten)
+    public function loans()
+    {
+        return $this->transactions();
+    }
+
+    // Peminjaman aktif
+    public function activeLoans()
+    {
+        return $this->transactions()->whereIn('status', ['approved', 'borrowed']);
+    }
+
+    // Peminjaman menunggu
+    public function pendingLoans()
+    {
+        return $this->transactions()->where('status', 'pending');
+    }
+
+    // Riwayat peminjaman
+    public function loanHistory()
+    {
+        return $this->transactions()->where('status', 'returned');
     }
 
     public function reviews()
     {
-        return $this->hasMany(Review::class);
+        return $this->hasMany(\App\Models\Review::class);
     }
 
     public function complaints()
     {
-        return $this->hasMany(Complaint::class);
+        return $this->hasMany(\App\Models\Complaint::class);
     }
 
     public function suggestions()
     {
-        return $this->hasMany(Suggestion::class);
+        return $this->hasMany(\App\Models\Suggestion::class);
     }
 
     public function bookRequests()
     {
-        return $this->hasMany(BookRequest::class, 'petugas_id');
+        return $this->hasMany(\App\Models\BookRequest::class, 'petugas_id');
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(\App\Models\Activity::class);
     }
 
     public function lateBorrows()
     {
-        return $this->hasMany(Borrow::class)->where('status', 'borrowed')->where('due_date', '<', now());
+        return $this->hasMany(\App\Models\Borrow::class)
+            ->whereIn('status', ['approved', 'borrowed'])
+            ->where('due_date', '<', now());
     }
 
     public function totalLateFee()
     {
-        return $this->borrows()->where('status', '!=', 'returned')->sum('late_fee');
+        return $this->borrows()
+            ->where('status', '!=', 'returned')
+            ->where('due_date', '<', now())
+            ->sum('late_fee');
     }
 
     public function recentBorrows($limit = 3)
     {
-        return $this->borrows()->with('book')->orderBy('created_at', 'desc')->limit($limit)->get();
+        return $this->borrows()
+            ->with('book')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
     }
-
-    // Hapus method ini
-public function peminjaman()
-{
-    return $this->hasMany(Peminjaman::class);
-}
-
-public function activities()
-{
-    return $this->hasMany(Activity::class);
-}
 }

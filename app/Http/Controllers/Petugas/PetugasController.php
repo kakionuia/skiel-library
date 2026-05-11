@@ -308,68 +308,109 @@ class PetugasController extends Controller
 
     // Borrows Management - Kelola Peminjaman
     public function borrows()
-    {
-        $borrows = Borrow::with(['user', 'book'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function($borrow) {
-                return [
-                    'id' => $borrow->id,
-                    'member_name' => $borrow->user?->name ?? 'Unknown',
-                    'member_id' => $borrow->user?->id ?? 'N/A',
-                    'book_title' => $borrow->book?->title ?? 'Unknown',
-                    'book_isbn' => $borrow->book?->isbn ?? 'N/A',
-                    'borrowed_date' => $borrow->borrow_date,
-                    'due_date' => $borrow->due_date,
-                    'status' => $borrow->status,
-                ];
-            });
+{
+    $borrows = Borrow::with(['user', 'book'])
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function($borrow) {
+            // Status text untuk display
+            $statusText = match($borrow->status) {
+                'pending' => 'Menunggu Persetujuan',
+                'approved' => 'Disetujui',
+                'borrowed' => 'Aktif',
+                'returned' => 'Dikembalikan',
+                'overdue' => 'Terlambat',
+                'lost' => 'Hilang',
+                'rejected' => 'Ditolak',
+                default => $borrow->status
+            };
 
-        // Stats
-        $activeCount = Borrow::where('status', 'borrowed')->count();
-        $overdueCount = Borrow::where('status', 'borrowed')
-            ->where('due_date', '<', now())
-            ->count();
-        $totalBorrowData = Borrow::where('status', 'borrowed')->get();
-        $avgDuration = $totalBorrowData->count() > 0
-            ? round($totalBorrowData->avg(function($b) {
-                return now()->diffInDays($b->borrow_date);
-            }))
-            : 0;
-        $totalBorrowers = Borrow::where('status', 'borrowed')->distinct('user_id')->count('user_id');
+            return [
+                'id' => $borrow->id,
+                'member_name' => $borrow->user?->name ?? 'Unknown',
+                'member_id' => $borrow->user?->nisn ?? $borrow->user?->id ?? 'N/A',
+                'book_title' => $borrow->book?->title ?? 'Unknown',
+                'book_isbn' => $borrow->book?->isbn ?? 'N/A',
+                'borrow_date' => $borrow->borrow_date,
+                'due_date' => $borrow->due_date,
+                'return_date' => $borrow->return_date,
+                'status' => $borrow->status,
+                'status_text' => $statusText,
+                'quantity' => $borrow->quantity ?? 1,
+                'late_days' => $borrow->late_days ?? 0,
+                'late_fee' => $borrow->late_fee ?? 0,
+                'notes' => $borrow->notes,
+            ];
+        });
 
-        return inertia('Petugas/Borrows/Index', [
-            'stats' => [
-                'activeCount' => $activeCount,
-                'overdueCount' => $overdueCount,
-                'avgDuration' => $avgDuration,
-                'totalBorrowers' => $totalBorrowers,
-            ],
-            'borrows' => $borrows,
-        ]);
+    // Stats
+    $activeCount = Borrow::whereIn('status', ['approved', 'borrowed'])->count();
+    $overdueCount = Borrow::whereIn('status', ['approved', 'borrowed'])
+        ->where('due_date', '<', now())
+        ->count();
+    
+    // Rata-rata durasi pinjaman
+    $totalBorrowData = Borrow::whereIn('status', ['approved', 'borrowed'])->get();
+    $avgDuration = $totalBorrowData->count() > 0
+        ? round($totalBorrowData->avg(function($b) {
+            return now()->diffInDays($b->borrow_date ?? $b->created_at);
+        }))
+        : 0;
+    
+    $totalBorrowers = Borrow::whereIn('status', ['approved', 'borrowed', 'returned'])
+        ->distinct('user_id')
+        ->count('user_id');
+
+    return inertia('Petugas/Borrows/Index', [
+        'stats' => [
+            'activeCount' => $activeCount,
+            'overdueCount' => $overdueCount,
+            'avgDuration' => $avgDuration,
+            'totalBorrowers' => $totalBorrowers,
+        ],
+        'borrows' => $borrows,
+    ]);
+}
+
+// Update processReturn method dengan perhitungan denda:
+public function processReturn(Request $request, Borrow $borrow)
+{
+    $request->validate([
+        'return_date' => 'required|date',
+    ]);
+
+    $returnDate = \Carbon\Carbon::parse($request->return_date);
+    $lateDays = 0;
+    $lateFee = 0;
+
+    // Hitung keterlambatan
+    if ($returnDate->gt($borrow->due_date)) {
+        $lateDays = $returnDate->diffInDays($borrow->due_date);
+        $lateFee = $lateDays * 1000; // Rp1000 per hari (bisa disesuaikan)
     }
 
-    public function processReturn(Request $request, Borrow $borrow)
-    {
-        $request->validate([
-            'return_date' => 'required|date',
-        ]);
+    $borrow->update([
+        'return_date' => $returnDate,
+        'status' => 'returned',
+        'late_days' => $lateDays,
+        'late_fee' => $lateFee,
+    ]);
 
-        $borrow->update([
-            'return_date' => $request->return_date,
-            'status' => 'returned',
-        ]);
-
-        // Update book availability
-        $book = $borrow->book;
-        $book->update([
-            'available_quantity' => $book->available_quantity + 1,
-        ]);
-
-        Activity::log(Auth::id(), 'return', "Memproses pengembalian buku: {$book->title}");
-
-        return back()->with('success', 'Buku berhasil dikembalikan.');
+    // Kembalikan stok buku
+    $book = $borrow->book;
+    if ($book) {
+        $book->increment('available_quantity', $borrow->quantity ?? 1);
     }
+
+    Activity::log(Auth::id(), 'return', "Memproses pengembalian buku: {$book?->title}");
+
+    $message = 'Buku berhasil dikembalikan.';
+    if ($lateDays > 0) {
+        $message .= " Terlambat {$lateDays} hari. Denda: Rp " . number_format($lateFee, 0, ',', '.');
+    }
+
+    return back()->with('success', $message);
+}
 
     // Reports - Laporan Harian
     public function reports()

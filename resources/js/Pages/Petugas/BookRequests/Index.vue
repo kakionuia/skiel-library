@@ -110,6 +110,9 @@
 
 <script setup>
 import PetugasSidebar from '@/Components/PetugasSidebar.vue';
+import { router } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
+import { confirmDialog, successAlert } from '@/Utils/sweetAlert';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
@@ -162,11 +165,55 @@ const filterButtonClass = (status) => {
     : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100';
 };
 
-const approveRequest = (request) => {
-  console.log('Approve request:', request);
-};
+async function approveRequest(request) {
+  const result = await confirmDialog({
+    title: 'Setujui Permintaan Buku?',
+    html: `<p class="text-sm mb-3">Permintaan buku <strong>${request.title}</strong> dari <strong>${request.user_name}</strong> akan disetujui.</p>`,
+    confirmButtonText: 'Ya, Setujui',
+  });
 
-const rejectRequest = (request) => {
-  console.log('Reject request:', request);
-};
+  if (result) {
+    router.post(route('petugas.book-requests.approve', request.id), {}, {
+      onSuccess: () => {
+        successAlert({
+          title: 'Berhasil!',
+          text: 'Permintaan berhasil disetujui.',
+        });
+      },
+      onError: (errors) => {
+        Swal.fire({
+          title: 'Gagal!',
+          text: errors.error || 'Gagal menyetujui permintaan.',
+          icon: 'error',
+        });
+      }
+    });
+  }
+}
+
+async function rejectRequest(request) {
+  const result = await confirmDialog({
+    title: 'Tolak Permintaan Buku?',
+    html: `<p class="text-sm">Permintaan buku <strong>${request.title}</strong> dari <strong>${request.user_name}</strong> akan ditolak.</p>`,
+    confirmButtonText: 'Ya, Tolak',
+  });
+
+  if (result) {
+    router.post(route('petugas.book-requests.reject', request.id), {}, {
+      onSuccess: () => {
+        successAlert({
+          title: 'Berhasil!',
+          text: 'Permintaan berhasil ditolak.',
+        });
+      },
+      onError: (errors) => {
+        Swal.fire({
+          title: 'Gagal!',
+          text: errors.error || 'Gagal menolak permintaan.',
+          icon: 'error',
+        });
+      }
+    });
+  }
+}
 </script>

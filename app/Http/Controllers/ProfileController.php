@@ -16,31 +16,45 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    // Di controller ProfileController
-public function edit(Request $request)
+    public function edit(Request $request): Response
     {
-        $user = $request->user();
+        $user = Auth::user();
+        
+        $recentBorrows = $user->borrows()
+            ->with('book')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $activeBorrows = $user->borrows()
+            ->with('book')
+            ->whereIn('status', ['approved', 'borrowed'])
+            ->orderBy('due_date', 'asc')
+            ->get();
+
+        $totalBorrows = $user->borrows()->count();
+        
+        $overdueCount = $user->borrows()
+            ->whereIn('status', ['approved', 'borrowed'])
+            ->where('due_date', '<', now())
+            ->count();
+
+        $totalFines = $user->borrows()
+            ->where('status', '!=', 'returned')
+            ->where('due_date', '<', now())
+            ->sum('late_fee') ?? 0;
 
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
-            'recentActivities' => $user->borrows()->latest()->take(5)->get()->map(fn($b) => [
-    'id'          => $b->id,
-    'description' => 'Meminjam buku "'.$b->book->judul.'"',
-    'created_at'  => $b->created_at->format('d M Y'),
-]),
-            'recentBooks' => $user->peminjaman()  // sekarang method ini ada
-                                   ->with('buku') // asumsikan Peminjaman punya relasi 'buku'
-                                   ->latest()
-                                   ->take(3)
-                                   ->get()
-                                   ->map(fn($p) => [
-                                       'id' => $p->id,
-                                       'judul' => $p->buku->judul ?? 'Tanpa Judul',
-                                       'tanggal_baca' => $p->created_at->format('d M Y'),
-                                   ]),
+            'recentBorrows' => $recentBorrows,
+            'activeBorrows' => $activeBorrows,
+            'totalBorrows' => $totalBorrows,
+            'overdueCount' => $overdueCount,
+            'totalFines' => (int)$totalFines,
         ]);
     }
+
     /**
      * Update the user's profile information.
      */

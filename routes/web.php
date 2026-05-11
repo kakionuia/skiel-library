@@ -6,6 +6,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WaitingController;
 use App\Http\Controllers\Auth\StatusCheckController;
 use App\Http\Controllers\Auth\AccountDeletionController;
+use App\Http\Controllers\BorrowController;
+use App\Http\Controllers\BookQueueController;
 use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\Complaint;
@@ -81,6 +83,24 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     
     // Activity Logs
     Route::get('/activity-logs', [AdminController::class, 'activityLogs'])->name('activity-logs');
+    
+    // Book Management (Admin can add and manage books + categories)
+    Route::get('/books', [AdminController::class, 'books'])->name('books');
+    Route::get('/books/create', [AdminController::class, 'createBook'])->name('books.create');
+    Route::post('/books', [AdminController::class, 'storeBook'])->name('books.store');
+    Route::get('/books/{book}/edit', [AdminController::class, 'editBook'])->name('books.edit');
+    Route::put('/books/{book}', [AdminController::class, 'updateBook'])->name('books.update');
+    Route::delete('/books/{book}', [AdminController::class, 'destroyBook'])->name('books.destroy');
+    
+    // Category Management (Admin can add and delete categories)
+    Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');
+    Route::delete('/categories/{category}', [AdminController::class, 'destroyCategory'])->name('categories.destroy');
+    
+    // Admin Borrow Management
+    Route::post('/borrows/{borrow}/approve', [BorrowController::class, 'approve'])->name('borrows.approve');
+    Route::post('/borrows/{borrow}/reject', [BorrowController::class, 'reject'])->name('borrows.reject');
+    Route::post('/borrows/{borrow}/confirm-pickup', [BorrowController::class, 'confirmPickup'])->name('borrows.confirm-pickup');
+    Route::post('/borrows/{borrow}/return', [BorrowController::class, 'returnBook'])->name('borrows.return');
 });
 
 // Petugas Routes
@@ -95,21 +115,26 @@ Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('pet
     Route::put('/books/{book}', [PetugasController::class, 'updateBook'])->name('books.update');
     Route::delete('/books/{book}', [PetugasController::class, 'destroyBook'])->name('books.destroy');
     
-    // Book Submissions - Pengajuan Buku
+    // Book Submissions
     Route::get('/submissions', [PetugasController::class, 'mySubmissions'])->name('submissions');
     
     // Book Requests
     Route::get('/book-requests', [PetugasController::class, 'bookRequests'])->name('book-requests');
     Route::post('/book-requests', [PetugasController::class, 'storeBookRequest'])->name('book-requests.store');
     
-    // Borrows - Kelola Peminjaman
+    // Borrows Management
     Route::get('/borrows', [PetugasController::class, 'borrows'])->name('borrows');
     Route::post('/borrows/{borrow}/return', [PetugasController::class, 'processReturn'])->name('borrows.return');
+    
+    // Borrow Approve/Reject untuk Petugas
+    Route::post('/borrows/{borrow}/approve', [BorrowController::class, 'approve'])->name('borrows.approve');
+    Route::post('/borrows/{borrow}/reject', [BorrowController::class, 'reject'])->name('borrows.reject');
+    Route::post('/borrows/{borrow}/confirm-pickup', [BorrowController::class, 'confirmPickup'])->name('borrows.confirm-pickup');
     
     // Late Returns
     Route::get('/late-returns', [PetugasController::class, 'lateReturns'])->name('late-returns');
     
-    // Reports - Laporan Harian
+    // Reports
     Route::get('/reports', [PetugasController::class, 'reports'])->name('reports');
     
     // Activity Logs
@@ -120,14 +145,16 @@ Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('pet
     Route::post('/settings', [PetugasController::class, 'updateSettings'])->name('settings.update');
 });
 
-// User Routes (must be approved)
+// ========== USER ROUTES (approved users only) ==========
 Route::middleware(['auth', 'verified', 'approved'])->group(function () {
+    
+    // Dashboard
     Route::get('/dashboard', function () {
         $user = Auth::user();
 
         $activeBorrows = Borrow::with('book')
             ->where('user_id', $user->id)
-            ->where('status', 'borrowed')
+            ->whereIn('status', ['approved', 'borrowed'])
             ->orderBy('due_date', 'asc')
             ->get();
 
@@ -135,15 +162,29 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
-            ->get();
+            ->get()
+            ->map(fn ($borrow) => [
+                'id' => $borrow->id,
+                'status' => $borrow->status,
+                'status_text' => ucfirst($borrow->status),
+                'due_date' => $borrow->due_date,
+                'return_date' => $borrow->return_date,
+                'book' => [
+                    'id' => $borrow->book?->id,
+                    'title' => $borrow->book?->title,
+                    'author' => $borrow->book?->author,
+                    'publisher' => $borrow->book?->publisher,
+                    'cover_url' => $borrow->book?->cover_image ? asset('storage/' . $borrow->book->cover_image) : null,
+                ],
+            ]);
 
         $overdueCount = Borrow::where('user_id', $user->id)
-            ->where('status', 'borrowed')
+            ->whereIn('status', ['approved', 'borrowed'])
             ->where('due_date', '<', now())
             ->count();
 
         $totalFines = Borrow::where('user_id', $user->id)
-            ->where('status', 'borrowed')
+            ->where('status', '!=', 'returned')
             ->where('due_date', '<', now())
             ->sum('late_fee') ?? 0;
 
@@ -210,10 +251,10 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
                 ->whereNotNull('category')
                 ->distinct('category')
                 ->count('category'),
-            'activeLoans' => Borrow::where('status', 'borrowed')->count(),
+            'activeLoans' => Borrow::whereIn('status', ['approved', 'borrowed'])->count(),
             'todayLoans' => Borrow::whereDate('borrow_date', now()->toDateString())->count(),
             'todayReturns' => Borrow::whereDate('return_date', now()->toDateString())->count(),
-            'libraryOverdue' => Borrow::where('status', 'borrowed')
+            'libraryOverdue' => Borrow::whereIn('status', ['approved', 'borrowed'])
                 ->where('due_date', '<', now())
                 ->count(),
         ];
@@ -227,7 +268,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             'totalFines' => (int)$totalFines,
             'maxBooksPerUser' => 3,
             'maxLoanDays' => 7,
-            'finePerDay' => 5000,
+            'finePerDay' => 1000,
             'availableBooks' => $availableBooks,
             'popularBooks' => $popularBooks,
             'latestReviews' => $latestReviews,
@@ -238,6 +279,149 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         ]);
     })->name('dashboard');
 
+    // ========== BOOK DETAIL ROUTE ==========
+    Route::get('/books/{book}', function (Book $book) {
+        // Hanya buku yang approved yang bisa diakses
+        if ($book->status !== 'approved') {
+            abort(404);
+        }
+
+        $book->loadAvg('reviews', 'rating')->loadCount(['reviews', 'borrows']);
+
+        $activeBorrow = Borrow::where('user_id', Auth::id())
+            ->where('book_id', $book->id)
+            ->whereIn('status', ['pending', 'approved', 'borrowed'])
+            ->latest()
+            ->first();
+        
+        $bookData = [
+            'id' => $book->id,
+            'title' => $book->title,
+            'author' => $book->author,
+            'publisher' => $book->publisher,
+            'year' => $book->year,
+            'isbn' => $book->isbn,
+            'category' => $book->category ?: 'Umum',
+            'quantity' => (int) $book->quantity,
+            'available_quantity' => (int) $book->available_quantity,
+            'description' => $book->description,
+            'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+            'average_rating' => round((float) ($book->reviews_avg_rating ?? 0), 1),
+            'reviews_count' => $book->reviews_count ?? 0,
+            'borrows_count' => $book->borrows_count ?? 0,
+        ];
+        
+        // Get reviews
+        $reviews = Review::with('user:id,name,kelas,jurusan')
+            ->where('book_id', $book->id)
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(function($review) {
+                return [
+                    'id' => $review->id,
+                    'user_name' => $review->user?->name ?? 'Anonymous',
+                    'user_class' => trim(($review->user?->kelas ?? '') . ' ' . ($review->user?->jurusan ?? '')),
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                    'created_at' => $review->created_at,
+                ];
+            });
+
+        $otherBooks = Book::query()
+            ->where('status', 'approved')
+            ->where('id', '!=', $book->id)
+            ->inRandomOrder()
+            ->limit(4)
+            ->get()
+            ->map(fn ($otherBook) => [
+                'id' => $otherBook->id,
+                'title' => $otherBook->title,
+                'author' => $otherBook->author,
+                'category' => $otherBook->category ?: 'Umum',
+                'available_quantity' => (int) $otherBook->available_quantity,
+                'cover_image' => $otherBook->cover_image ? asset('storage/' . $otherBook->cover_image) : null,
+            ]);
+        
+        return Inertia::render('User/BookDetail', [
+            'book' => $bookData,
+            'reviews' => $reviews,
+            'otherBooks' => $otherBooks,
+            'activeBorrow' => $activeBorrow ? [
+                'id' => $activeBorrow->id,
+                'status' => $activeBorrow->status,
+                'status_text' => ucfirst($activeBorrow->status),
+            ] : null,
+        ]);
+    })->name('books.show');
+
+    Route::get('/books/{book}/review', function (Book $book) {
+        if ($book->status !== 'approved') {
+            abort(404);
+        }
+
+        $hasReturnedBorrow = Borrow::where('user_id', Auth::id())
+            ->where('book_id', $book->id)
+            ->where('status', 'returned')
+            ->exists();
+
+        abort_unless($hasReturnedBorrow, 403);
+
+        $existingReview = Review::where('user_id', Auth::id())
+            ->where('book_id', $book->id)
+            ->first();
+
+        return Inertia::render('User/ReviewBook', [
+            'book' => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'publisher' => $book->publisher,
+                'category' => $book->category ?: 'Umum',
+                'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+            ],
+            'existingReview' => $existingReview ? [
+                'rating' => $existingReview->rating,
+                'comment' => $existingReview->comment,
+            ] : null,
+        ]);
+    })->name('books.review.create');
+
+    // ========== BORROW ROUTES ==========
+    Route::post('/borrow', [BorrowController::class, 'store'])->name('borrow.store');
+    Route::get('/borrow/create/{book}', function (Book $book) {
+        if ($book->status !== 'approved') {
+            abort(404);
+        }
+        return Inertia::render('User/BorrowBook', [
+            'book' => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'publisher' => $book->publisher,
+                'year' => $book->year,
+                'isbn' => $book->isbn,
+                'category' => $book->category ?: 'Umum',
+                'available_quantity' => (int) $book->available_quantity,
+                'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+            ]
+        ]);
+    })->name('borrow.create');
+    Route::get('/my-loans', [BorrowController::class, 'myLoans'])->name('borrow.my-loans');
+    Route::get('/my-queue', [BookQueueController::class, 'myQueue'])->name('queue.my-queue');
+    Route::get('/borrow/{borrow}', [BorrowController::class, 'show'])->name('borrow.show');
+    Route::post('/borrow/{borrow}/return', [BorrowController::class, 'returnBook'])->name('borrow.return');
+    Route::get('/borrow/{borrow}/print', [BorrowController::class, 'printProof'])->name('borrow.print');
+    Route::post('/borrow/{borrow}/extend', [BorrowController::class, 'extend'])->name('borrow.extend');
+    Route::delete('/borrow/{borrow}', [BorrowController::class, 'cancel'])->name('borrow.cancel');
+
+    // ========== BOOK QUEUE ROUTES ==========
+    Route::post('/queue/add', [BookQueueController::class, 'store'])->name('queue.store');
+    Route::delete('/queue/{queue}', [BookQueueController::class, 'cancel'])->name('queue.cancel');
+    Route::get('/api/queue/position', [BookQueueController::class, 'getPosition'])->name('queue.position');
+    Route::get('/api/queue/book/{book}', [BookQueueController::class, 'bookQueueInfo'])->name('queue.info');
+
+    // ========== COMPLAINTS ==========
     Route::post('/dashboard/complaints', function (Request $request) {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
@@ -254,6 +438,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         return back()->with('success', 'Keluhan berhasil dikirim.');
     })->name('dashboard.complaints.store');
 
+    // ========== SUGGESTIONS ==========
     Route::post('/dashboard/suggestions', function (Request $request) {
         $validated = $request->validate([
             'content' => 'required|string|max:2000',
@@ -268,6 +453,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         return back()->with('success', 'Saran berhasil dikirim.');
     })->name('dashboard.suggestions.store');
 
+    // ========== REVIEWS ==========
     Route::post('/dashboard/reviews', function (Request $request) {
         $validated = $request->validate([
             'book_id' => 'required|exists:books,id',
@@ -276,6 +462,13 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         ]);
 
         $book = Book::where('status', 'approved')->findOrFail($validated['book_id']);
+
+        $hasReturnedBorrow = Borrow::where('user_id', Auth::id())
+            ->where('book_id', $book->id)
+            ->where('status', 'returned')
+            ->exists();
+
+        abort_unless($hasReturnedBorrow, 403);
 
         Review::updateOrCreate(
             ['user_id' => Auth::id(), 'book_id' => $book->id],
@@ -289,12 +482,15 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     })->name('dashboard.reviews.store');
 });
 
+// ========== PROFILE ROUTES ==========
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
 
+// ========== CONTENT API ==========
 Route::get('/api/contents', [ContentController::class, 'index']);
+
+require __DIR__.'/auth.php';

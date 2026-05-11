@@ -512,4 +512,197 @@ class AdminController extends Controller
             'filters' => ['role' => $role],
         ]);
     }
+
+    // Book Management (Admin specific)
+    public function books()
+    {
+        $books = Book::where('status', '!=', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // Get distinct categories
+        $categories = Book::distinct()
+            ->pluck('category')
+            ->filter(fn ($cat) => !empty($cat))
+            ->values();
+
+        // Transform books data
+        $booksData = $books->map(function ($book) {
+            return [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'isbn' => $book->isbn,
+                'category' => $book->category,
+                'quantity' => $book->quantity,
+                'available_quantity' => $book->available_quantity,
+                'status' => $book->status,
+                'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+                'created_at' => $book->created_at,
+            ];
+        });
+
+        return inertia('Admin/Books/Index', [
+            'books' => $booksData,
+            'categories' => $categories,
+            'pagination' => [
+                'current_page' => $books->currentPage(),
+                'last_page' => $books->lastPage(),
+                'total' => $books->total(),
+            ],
+        ]);
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+        ]);
+
+        // Just return success - categories are stored in the books table as a string
+        Activity::log(Auth::id(), 'create_category', "Menambahkan kategori: {$request->name}");
+
+        return back()->with('success', 'Kategori berhasil ditambahkan.');
+    }
+
+    public function destroyCategory(Request $request, $categoryName)
+    {
+        $categoryName = urldecode($categoryName);
+        
+        // Check if any books have this category
+        $booksCount = Book::where('category', $categoryName)->count();
+        
+        if ($booksCount > 0) {
+            return back()->with('error', 'Tidak dapat menghapus kategori yang memiliki buku. Ubah kategori buku terlebih dahulu.');
+        }
+
+        Activity::log(Auth::id(), 'delete_category', "Menghapus kategori: {$categoryName}");
+
+        return back()->with('success', 'Kategori berhasil dihapus.');
+    }
+
+    public function storeBook(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'author' => 'required|string|max:255',
+            'isbn' => 'nullable|string|max:20|unique:books,isbn',
+            'publisher' => 'nullable|string|max:255',
+            'year' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'category' => 'required|string|max:100',
+            'quantity' => 'required|integer|min:1',
+            'description' => 'nullable|string',
+            'cover_image' => 'nullable|image|max:5120',
+        ]);
+
+        $coverImagePath = null;
+        if ($request->hasFile('cover_image')) {
+            $coverImagePath = $request->file('cover_image')->store('book-covers', 'public');
+        }
+
+        $book = Book::create([
+            'title' => $request->title,
+            'author' => $request->author,
+            'isbn' => $request->isbn,
+            'publisher' => $request->publisher ?? '-',
+            'year' => $request->year,
+            'category' => $request->category,
+            'quantity' => $request->quantity,
+            'available_quantity' => $request->quantity,
+            'description' => $request->description,
+            'cover_image' => $coverImagePath,
+            'status' => 'approved',
+            'created_by' => Auth::id(),
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        Activity::log(Auth::id(), 'create_book', "Menambahkan buku: {$book->title}");
+
+        return back()->with('success', 'Buku berhasil ditambahkan.');
+    }
+
+    public function editBook(Book $book)
+    {
+        // Get distinct categories
+        $categories = Book::distinct()
+            ->pluck('category')
+            ->filter(fn ($cat) => !empty($cat))
+            ->values();
+
+        return inertia('Admin/Books/Edit', [
+            'book' => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'isbn' => $book->isbn,
+                'publisher' => $book->publisher,
+                'year' => $book->year,
+                'category' => $book->category,
+                'quantity' => $book->quantity,
+                'available_quantity' => $book->available_quantity,
+                'description' => $book->description,
+                'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
+                'status' => $book->status,
+            ],
+            'categories' => $categories,
+        ]);
+    }
+
+    public function updateBook(Request $request, Book $book)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'author' => 'required|string|max:255',
+            'isbn' => 'nullable|string|max:20|unique:books,isbn,' . $book->id,
+            'publisher' => 'nullable|string|max:255',
+            'year' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'category' => 'required|string|max:100',
+            'quantity' => 'required|integer|min:1',
+            'description' => 'nullable|string',
+            'cover_image' => 'nullable|image|max:5120',
+        ]);
+
+        $coverImagePath = $book->cover_image;
+        if ($request->hasFile('cover_image')) {
+            // Delete old image
+            if ($book->cover_image) {
+                \Storage::disk('public')->delete($book->cover_image);
+            }
+            $coverImagePath = $request->file('cover_image')->store('book-covers', 'public');
+        }
+
+        $book->update([
+            'title' => $request->title,
+            'author' => $request->author,
+            'isbn' => $request->isbn,
+            'publisher' => $request->publisher ?? '-',
+            'year' => $request->year,
+            'category' => $request->category,
+            'quantity' => $request->quantity,
+            'description' => $request->description,
+            'cover_image' => $coverImagePath,
+        ]);
+
+        Activity::log(Auth::id(), 'update_book', "Mengupdate buku: {$book->title}");
+
+        return back()->with('success', 'Buku berhasil diupdate.');
+    }
+
+    public function destroyBook(Book $book)
+    {
+        $bookTitle = $book->title;
+        
+        // Delete cover image
+        if ($book->cover_image) {
+            \Storage::disk('public')->delete($book->cover_image);
+        }
+        
+        $book->delete();
+
+        Activity::log(Auth::id(), 'delete_book', "Menghapus buku: {$bookTitle}");
+
+        return back()->with('success', 'Buku berhasil dihapus.');
+    }
 }
+
