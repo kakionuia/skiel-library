@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Book extends Model
 {
@@ -34,6 +35,16 @@ class Book extends Model
         'quantity' => 'integer',
         'available_quantity' => 'integer',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            // Generate unique book_id if not provided
+            if (!$model->book_id) {
+                $model->book_id = 'BK-' . date('YmdHis') . '-' . Str::random(4);
+            }
+        });
+    }
 
     public function borrows()
     {

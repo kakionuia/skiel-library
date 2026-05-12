@@ -93,8 +93,8 @@ class PetugasController extends Controller
                 ];
             });
 
-        // Merge for display
-        $books = $approvedBooks->merge($pendingBooks);
+        // Combine books for display using array_merge
+        $books = array_merge($approvedBooks->toArray(), $pendingBooks->toArray());
 
         return inertia('Petugas/Books/Index', [
             'books' => $books,

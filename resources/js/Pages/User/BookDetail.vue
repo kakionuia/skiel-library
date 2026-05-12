@@ -103,7 +103,7 @@
 
           <div class="pt-4">
             <button 
-              v-if="book.available_quantity > 0"
+              v-if="book.available_quantity > 0 && !props.activeBorrow"
               @click="handleBorrowClick"
               class="w-full sm:w-auto px-10 py-4 rounded-lg font-bold text-base tracking-wide transition-all duration-200 block text-center bg-[#D37B3B] text-white hover:bg-orange-700 active:scale-[0.99] shadow-lg shadow-orange-700/10"
             >
@@ -111,15 +111,23 @@
             </button>
 
             <button 
+              v-else-if="book.available_quantity > 0 && props.activeBorrow"
+              disabled
+              class="w-full sm:w-auto px-10 py-4 rounded-lg font-bold text-base tracking-wide transition-all duration-200 block text-center bg-slate-200 text-slate-400 cursor-not-allowed opacity-50"
+            >
+              Sudah Dipinjam
+            </button>
+
+            <button 
               v-else
               @click="addToQueue"
-              :disabled="isInQueue || isAddingQueue"
+              :disabled="isInQueue || isAddingQueue || props.activeBorrow"
               class="w-full sm:w-auto px-10 py-4 rounded-lg font-bold text-base tracking-wide transition-all duration-200 block text-center text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="isInQueue 
+              :class="isInQueue || props.activeBorrow
                 ? 'bg-slate-100 text-slate-500 border border-slate-200' 
                 : 'bg-slate-900 hover:bg-black'"
             >
-              {{ isInQueue ? `Posisi Antre: #${userQueuePosition}` : 'Antre Buku Ini' }}
+              {{ isInQueue ? `Posisi Antre: #${userQueuePosition}` : (props.activeBorrow ? 'Sudah Dipinjam' : 'Antre Buku Ini') }}
             </button>
           </div>
 
@@ -296,15 +304,30 @@ async function addToQueue() {
 
     if (!response.ok) {
       const error = await response.json();
-      alert(error.message || 'Gagal menambahkan ke antrian');
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: error.message || 'Gagal menambahkan ke antrian',
+        confirmButtonColor: '#D37B3B'
+      });
       return;
     }
 
     await checkQueueStatus();
-    alert('Anda berhasil bergabung dalam antrian!');
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Anda berhasil bergabung dalam antrian buku ini',
+      confirmButtonColor: '#D37B3B'
+    });
   } catch (error) {
     console.error('Error adding to queue:', error);
-    alert('Terjadi kesalahan saat menambahkan ke antrian');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Terjadi kesalahan saat menambahkan ke antrian',
+      confirmButtonColor: '#D37B3B'
+    });
   } finally {
     isAddingQueue.value = false;
   }

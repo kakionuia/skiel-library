@@ -73,87 +73,103 @@
               {{ errors.submit }}
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div class="space-y-2.5">
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Tanggal Pengambilan <span class="text-orange-500">*</span>
-                </label>
-                <input
-                  v-model="form.borrow_date"
-                  type="date"
-                  :min="today"
-                  required
-                  class="w-full px-5 py-3.5 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 focus:border-orange-500 focus:bg-white rounded-xl text-sm font-bold text-slate-800 outline-none transition duration-200"
-                  @change="resetDueDate"
-                />
-              </div>
-
-              <div class="space-y-2.5">
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Batas Pengembalian <span class="text-orange-500">*</span>
-                </label>
-                <div class="relative flex items-center">
-                  <input
-                    v-model="form.due_date"
-                    type="date"
-                    :min="form.borrow_date || today"
-                    required
-                    class="w-full px-5 py-3.5 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 focus:border-orange-500 focus:bg-white rounded-xl text-sm font-bold text-slate-800 outline-none transition duration-200"
-                  />
-                  <span class="absolute right-4 text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-100 uppercase tracking-wider">
-                    {{ borrowDuration }} Hari
-                  </span>
+            <div v-if="book.available_quantity === 0" class="p-6 bg-blue-50 border border-blue-200 rounded-2xl space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-sm text-blue-900">Buku Sedang Habis</h4>
+                  <p class="text-xs text-blue-700 mt-1">Buku ini sedang tidak tersedia. Anda dapat masuk antrian untuk mendapatkan notifikasi saat buku tersedia.</p>
                 </div>
               </div>
             </div>
 
-            <div class="space-y-2.5">
-              <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
-                Jumlah Eksplorasi <span class="text-orange-500">*</span>
-              </label>
-              <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-2 max-w-xs">
-                <button 
-                  type="button"
-                  @click="decreaseQuantity"
-                  :disabled="form.quantity <= 1"
-                  class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition font-black text-sm text-slate-600 shadow-sm"
-                >
-                  &minus;
-                </button>
-                <input
-                  v-model.number="form.quantity"
-                  type="number"
-                  min="1"
-                  :max="book.available_quantity"
-                  required
-                  class="flex-1 bg-transparent border-0 outline-none text-center font-bold text-sm text-slate-800 pointer-events-none"
-                />
-                <button 
-                  type="button"
-                  @click="increaseQuantity"
-                  :disabled="form.quantity >= book.available_quantity"
-                  class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition font-black text-sm text-slate-600 shadow-sm"
-                >
-                  &#43;
-                </button>
-              </div>
-            </div>
+            <template v-if="book.available_quantity > 0">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2.5">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Tanggal Pengambilan <span class="text-orange-500">*</span>
+                  </label>
+                  <input
+                    v-model="form.borrow_date"
+                    type="date"
+                    :min="today"
+                    required
+                    class="w-full px-5 py-3.5 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 focus:border-orange-500 focus:bg-white rounded-xl text-sm font-bold text-slate-800 outline-none transition duration-200"
+                    @change="resetDueDate"
+                  />
+                </div>
 
-            <div class="space-y-2.5">
-              <div class="flex justify-between items-center">
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Catatan Tambahan
-                </label>
-                <span class="text-[10px] font-bold text-slate-400">{{ form.notes.length }}/500</span>
+                <div class="space-y-2.5">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Batas Pengembalian <span class="text-orange-500">*</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <input
+                      v-model="form.due_date"
+                      type="date"
+                      :min="form.borrow_date || today"
+                      required
+                      class="w-full px-5 py-3.5 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 focus:border-orange-500 focus:bg-white rounded-xl text-sm font-bold text-slate-800 outline-none transition duration-200"
+                    />
+                    <span class="absolute right-4 text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-100 uppercase tracking-wider">
+                      {{ borrowDuration }} Hari
+                    </span>
+                  </div>
+                </div>
               </div>
-              <textarea
-                v-model="form.notes"
-                rows="4"
-                maxlength="500"
-                class="w-full px-5 py-4 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 focus:border-orange-500 focus:bg-white rounded-xl text-sm font-semibold text-slate-700 outline-none transition duration-200 resize-none"
-                placeholder="Tulis keperluan atau pesan tambahan disini..."
-              />
-            </div>
+
+              <div class="space-y-2.5">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Jumlah Eksplorasi <span class="text-orange-500">*</span>
+                </label>
+                <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-2 max-w-xs">
+                  <button 
+                    type="button"
+                    @click="decreaseQuantity"
+                    :disabled="form.quantity <= 1"
+                    class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition font-black text-sm text-slate-600 shadow-sm"
+                  >
+                    &minus;
+                  </button>
+                  <input
+                    v-model.number="form.quantity"
+                    type="number"
+                    min="1"
+                    :max="book.available_quantity"
+                    required
+                    class="flex-1 bg-transparent border-0 outline-none text-center font-bold text-sm text-slate-800 pointer-events-none"
+                  />
+                  <button 
+                    type="button"
+                    @click="increaseQuantity"
+                    :disabled="form.quantity >= book.available_quantity"
+                    class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition font-black text-sm text-slate-600 shadow-sm"
+                  >
+                    &#43;
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-2.5">
+                <div class="flex justify-between items-center">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Catatan Tambahan
+                  </label>
+                  <span class="text-[10px] font-bold text-slate-400">{{ form.notes.length }}/500</span>
+                </div>
+                <textarea
+                  v-model="form.notes"
+                  rows="4"
+                  maxlength="500"
+                  class="w-full px-5 py-4 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 focus:border-orange-500 focus:bg-white rounded-xl text-sm font-semibold text-slate-700 outline-none transition duration-200 resize-none"
+                  placeholder="Tulis keperluan atau pesan tambahan disini..."
+                />
+              </div>
+            </template>
 
             <div class="p-6 bg-orange-50/40 border border-orange-100/40 rounded-2xl space-y-4">
               <div class="flex items-center gap-3">
@@ -179,17 +195,33 @@
                 Batal
               </Link>
               
-              <button
-                type="submit"
-                :disabled="isSubmitting"
-                class="inline-flex items-center gap-2.5 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-md shadow-orange-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg v-if="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                <span>{{ isSubmitting ? 'Memproses...' : 'Kirim Pengajuan' }}</span>
-              </button>
+              <div class="flex gap-3">
+                <template v-if="book.available_quantity > 0">
+                  <button
+                    type="submit"
+                    :disabled="isSubmitting"
+                    class="inline-flex items-center gap-2.5 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-md shadow-orange-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg v-if="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    <span>{{ isSubmitting ? 'Memproses...' : 'Kirim Pengajuan' }}</span>
+                  </button>
+                </template>
+                <template v-else>
+                  <button
+                    type="button"
+                    @click="queueBook"
+                    class="inline-flex items-center gap-2.5 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-md shadow-blue-500/10 active:scale-95"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m0-6h-6"/>
+                    </svg>
+                    <span>⏳ Masuk Antrian</span>
+                  </button>
+                </template>
+              </div>
             </div>
 
           </form>
@@ -201,7 +233,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
+import { dangerConfirm, successAlert } from '@/Utils/sweetAlert';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
   book: {
@@ -263,6 +297,7 @@ function decreaseQuantity() {
 
 function submitBorrow() {
   errors.value = {};
+  
   isSubmitting.value = true;
 
   form.post(route('borrow.store'), {
@@ -270,9 +305,60 @@ function submitBorrow() {
       window.location.href = '/my-loans?success=1';
     },
     onError: (error) => {
-      errors.value = error;
       isSubmitting.value = false;
+      if (error.error && error.error.includes('batas maksimal')) {
+        // Show SweetAlert for 3-book limit
+        Swal.fire({
+          title: '⚠️ Batas Peminjaman Tercapai',
+          html: `<p class="text-sm mb-3">Anda sudah mencapai batas maksimal peminjaman <strong>(3 buku)</strong>.</p><p class="text-sm text-slate-600">Kembalikan salah satu buku Anda terlebih dahulu untuk dapat meminjam buku lainnya.</p>`,
+          icon: 'warning',
+          confirmButtonText: 'Lihat Peminjaman Saya',
+          confirmButtonColor: '#E67E22',
+          showCancelButton: true,
+          cancelButtonText: 'Batal',
+          cancelButtonColor: '#94a3b8',
+          reverseButtons: false
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/my-loans';
+          }
+        });
+      } else {
+        // Show generic error
+        errors.value = error;
+      }
     }
   });
+}
+
+async function queueBook() {
+  const result = await dangerConfirm({
+    title: 'Masuk Antrian Buku?',
+    html: `<p class="text-sm mb-3">Tambahkan <strong>${props.book.title}</strong> ke antrian buku Anda?</p><p class="text-xs text-slate-500">Anda akan menerima notifikasi ketika buku tersedia.</p>`,
+    confirmButtonText: 'Ya, Masuk Antrian',
+  });
+
+  if (result) {
+    router.post(route('queue.store'), {
+      book_id: props.book.id
+    }, {
+      onSuccess: () => {
+        successAlert({
+          title: 'Berhasil!',
+          text: 'Buku berhasil ditambahkan ke antrian. Anda akan menerima notifikasi saat buku tersedia.',
+        });
+        setTimeout(() => {
+          window.location.href = '/my-queue';
+        }, 1500);
+      },
+      onError: (errors) => {
+        Swal.fire({
+          title: 'Gagal!',
+          text: errors.error || 'Gagal menambahkan ke antrian.',
+          icon: 'error',
+        });
+      }
+    });
+  }
 }
 </script>

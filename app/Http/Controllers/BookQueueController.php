@@ -60,8 +60,10 @@ class BookQueueController extends Controller
      */
     public function cancel(BookQueue $queue)
     {
-        // Authorize
-        $this->authorize('delete', $queue);
+        // Authorize - only queue owner can cancel
+        if (Auth::id() !== $queue->user_id) {
+            abort(403, 'Unauthorized');
+        }
 
         $bookId = $queue->book_id;
         $cancelledPosition = $queue->position;

@@ -8,17 +8,18 @@ use App\Http\Controllers\Auth\StatusCheckController;
 use App\Http\Controllers\Auth\AccountDeletionController;
 use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\BookQueueController;
+use App\Http\Controllers\ArticleController;
 use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\Complaint;
 use App\Models\Review;
 use App\Models\Suggestion;
+use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use App\Http\Controllers\ContentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -38,9 +39,41 @@ Route::middleware(['auth', 'pending'])->post('/delete-account', [AccountDeletion
 // API endpoint to check approval status
 Route::middleware('auth')->get('/api/check-approval-status', [StatusCheckController::class, 'checkApprovalStatus']);
 
+// API endpoint for articles (public)
+Route::get('/api/articles', function () {
+    $articles = \App\Models\Article::where('status', 'approved')
+        ->with('author')
+        ->latest('published_at')
+        ->limit(10)
+        ->get()
+        ->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'title' => $article->title,
+                'slug' => $article->slug,
+                'excerpt' => $article->excerpt,
+                'content' => $article->content,
+                'category' => $article->category,
+                'featured_image' => $article->featured_image,
+                'author' => $article->author->name ?? 'Admin',
+                'published_at' => $article->published_at?->format('Y-m-d'),
+                'desc' => $article->excerpt,
+            ];
+        });
+
+    return response()->json(['data' => $articles]);
+});
+
+// Public articles listing
+Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+
+// Public article detail by slug
+Route::get('/articles/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
+
 // Admin Routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/download-report', [AdminController::class, 'downloadReport'])->name('download-report');
     
     // Accounts
     Route::get('/accounts', [AdminController::class, 'accounts'])->name('accounts');
@@ -101,6 +134,16 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/borrows/{borrow}/reject', [BorrowController::class, 'reject'])->name('borrows.reject');
     Route::post('/borrows/{borrow}/confirm-pickup', [BorrowController::class, 'confirmPickup'])->name('borrows.confirm-pickup');
     Route::post('/borrows/{borrow}/return', [BorrowController::class, 'returnBook'])->name('borrows.return');
+    
+    // Article Management
+    Route::get('/articles', [ArticleController::class, 'admin'])->name('articles');
+    Route::get('/articles/create', [ArticleController::class, 'adminCreate'])->name('articles.create');
+    Route::post('/articles', [ArticleController::class, 'adminStore'])->name('articles.store');
+    Route::get('/articles/{article}/edit', [ArticleController::class, 'adminEdit'])->name('articles.edit');
+    Route::put('/articles/{article}', [ArticleController::class, 'adminUpdate'])->name('articles.update');
+    Route::delete('/articles/{article}', [ArticleController::class, 'adminDestroy'])->name('articles.destroy');
+    Route::post('/articles/{article}/approve', [ArticleController::class, 'approve'])->name('articles.approve');
+    Route::post('/articles/{article}/reject', [ArticleController::class, 'reject'])->name('articles.reject');
 });
 
 // Petugas Routes
@@ -143,6 +186,14 @@ Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('pet
     // Settings
     Route::get('/settings', [PetugasController::class, 'settings'])->name('settings');
     Route::post('/settings', [PetugasController::class, 'updateSettings'])->name('settings.update');
+    
+    // Article Management
+    Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
+    Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
+    Route::get('/articles/my', [ArticleController::class, 'myArticles'])->name('articles.my');
+    Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+    Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
 // ========== USER ROUTES (approved users only) ==========
@@ -194,9 +245,10 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             ->where('status', 'approved')
             ->withAvg('reviews', 'rating')
             ->withCount(['reviews', 'borrows'])
-            ->orderByDesc('available_quantity')
+            // Order by available quantity first (tersedia di atas), then by popularity (borrows count)
+            ->orderByRaw('CASE WHEN available_quantity > 0 THEN 0 ELSE 1 END ASC')
+            ->orderByDesc('borrows_count')
             ->orderBy('title')
-            ->limit(12)
             ->get()
             ->map(fn ($book) => [
                 'id' => $book->id,
@@ -490,7 +542,41 @@ Route::middleware('auth')->group(function () {
 });
 
 
-// ========== CONTENT API ==========
-Route::get('/api/contents', [ContentController::class, 'index']);
+// ========== ARTICLE ROUTES (PUBLIC) ==========
+Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+Route::get('/articles/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
+
+// ========== DEBUG ROUTE ==========
+Route::get('/debug/books', function() {
+    $books = Book::where('status', 'approved')
+        ->select('id', 'title', 'available_quantity', 'quantity', 'status', 'category')
+        ->orderBy('available_quantity', 'DESC')
+        ->limit(100)
+        ->get();
+    
+    return response()->json([
+        'total' => Book::where('status', 'approved')->count(),
+        'out_of_stock' => Book::where('status', 'approved')->where('available_quantity', 0)->count(),
+        'books' => $books
+    ]);
+})->name('debug.books');
+
+Route::get('/debug/book/{id}', function($id) {
+    $book = Book::find($id);
+    if (!$book) {
+        return response()->json(['error' => 'Book not found'], 404);
+    }
+    
+    return response()->json([
+        'id' => $book->id,
+        'title' => $book->title,
+        'quantity' => $book->quantity,
+        'available_quantity' => $book->available_quantity,
+        'status' => $book->status,
+        'category' => $book->category,
+        'created_at' => $book->created_at,
+        'borrows' => $book->borrows()->select('id', 'status')->get()
+    ]);
+})->name('debug.book.detail');
 
 require __DIR__.'/auth.php';

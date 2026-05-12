@@ -406,90 +406,109 @@
 
     <!-- Artikel & Event -->
     <section class="max-w-7xl mx-auto px-4 py-12 font-sans">
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold text-gray-800">Artikel dan Event Kami</h2>
-        <a href="#" class="bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md">
-          More <span class="text-xl">→</span>
-        </a>
-      </div>
+  <div class="flex justify-between items-center mb-8">
+    <h2 class="text-2xl font-bold text-gray-800">Artikel dan Event Kami</h2>
+    <a href="#" class="bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md">
+      More <span class="text-xl">→</span>
+    </a>
+  </div>
 
-      <div class="flex gap-4 mb-8">
-        <button
-          @click="activeTab = 'artikel'"
-          :class="activeTab === 'artikel' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
-          class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
-        >
-          Artikel
-        </button>
-        <button
-          @click="activeTab = 'event'"
-          :class="activeTab === 'event' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
-          class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
-        >
-          Event
-        </button>
-      </div>
+  <div class="flex gap-4 mb-8">
+    <button
+      @click="activeTab = 'artikel'"
+      :class="activeTab === 'artikel' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
+      class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
+    >
+      Artikel
+    </button>
+    <button
+      @click="activeTab = 'event'"
+      :class="activeTab === 'event' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
+      class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
+    >
+      Event
+    </button>
+  </div>
 
-      <div class="relative group">
-        <div
-          ref="slider"
-          class="flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth pb-8"
-          @scroll="handleScroll"
+  <div class="relative group">
+    <div
+      ref="slider"
+      class="flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth pb-8"
+      @scroll="handleScroll"
+    >
+      <div
+        v-for="(item, index) in filteredItems"
+        :key="index"
+        class="min-w-[320px] md:min-w-[360px] w-[320px] md:w-[360px] bg-white rounded-2xl shadow-xl border border-gray-100 p-6 snap-start flex-shrink-0 hover:shadow-2xl transition-shadow flex flex-col group cursor-pointer"
+      >
+        <Link
+          :href="route('articles.show', item.slug)"
+          class="flex flex-col h-full"
         >
-          <div
-            v-for="(item, index) in filteredItems"
-            :key="index"
-            class="min-w-[320px] md:min-w-[400px] bg-white rounded-2xl shadow-xl border border-gray-100 p-6 snap-start flex-shrink-0 hover:shadow-2xl transition-shadow"
-          >
-            <div class="relative mb-5 overflow-hidden rounded-xl border-2 border-orange-200">
-              <img src="https://via.placeholder.com/400x240" class="w-full h-48 object-cover hover:scale-105 transition duration-500" alt="Artikel">
-            </div>
-            <span class="bg-orange-500 text-white text-[10px] px-4 py-1.5 rounded-full uppercase font-black tracking-wider">
-              {{ item.category }}
-            </span>
-            <h3 class="mt-4 font-bold text-gray-900 leading-snug text-lg">
-              {{ item.title }}
-            </h3>
-            <p class="mt-3 text-sm text-gray-500 line-clamp-3 leading-relaxed">
-              {{ item.desc }}
-            </p>
-            <a href="#" class="inline-block mt-5 text-orange-500 font-extrabold text-sm hover:underline">
-              Klik untuk baca >>
-            </a>
+          <!-- Image Container - Fixed Height -->
+          <div class="relative mb-5 overflow-hidden rounded-xl border-2 border-orange-200 flex-shrink-0" style="height: 200px;">
+            <img 
+              :src="item.featured_image || 'https://via.placeholder.com/400x240'" 
+              class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+              :alt="item.title"
+            >
           </div>
-        </div>
-
-        <div class="flex justify-center gap-3 mt-6">
-          <button
-            v-for="(_, i) in filteredItems"
-            :key="i"
-            @click="scrollToIndex(i)"
-            class="w-3.5 h-3.5 rounded-full border-2 border-orange-500 transition-all duration-300"
-            :class="currentIndex === i ? 'bg-orange-500 scale-110' : 'bg-transparent'"
-          ></button>
-        </div>
+          
+          <!-- Category Badge -->
+          <span class="bg-orange-500 text-white text-[10px] px-4 py-1.5 rounded-full uppercase font-black tracking-wider w-fit flex-shrink-0">
+            {{ item.category }}
+          </span>
+          
+          <!-- Title - Fixed Height with line-clamp -->
+          <h3 class="mt-4 font-bold text-gray-900 leading-snug text-lg line-clamp-2 group-hover:text-orange-600 transition flex-shrink-0" style="min-height: 3.5rem;">
+            {{ item.title }}
+          </h3>
+          
+          <!-- Excerpt - Flexible but controlled -->
+          <p class="mt-3 text-sm text-gray-500 line-clamp-3 leading-relaxed flex-grow" style="min-height: 4.5rem;">
+            {{ item.excerpt || item.desc }}
+          </p>
+          
+          <!-- Read More Link - Always at bottom -->
+          <span class="pt-4 inline-block text-orange-500 font-extrabold text-sm group-hover:underline flex-shrink-0 mt-auto">
+            Klik untuk baca →
+          </span>
+        </Link>
       </div>
+    </div>
 
-      <!-- CTA Formulir -->
-      <div class="mt-24 bg-orange-500 rounded-3xl p-10 md:p-14 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-2xl">
-        <div class="z-10 text-center md:text-left">
-          <h2 class="text-3xl md:text-4xl font-black text-white mb-8 leading-tight">
-            Punya pertanyaan dan saran<br class="hidden md:block"> untuk kami kedepannya?
-          </h2>
-          <a href="#" class="bg-white text-gray-800 px-10 py-4 rounded-full font-black flex items-center gap-4 w-fit mx-auto md:mx-0 hover:shadow-lg transition transform hover:-translate-y-1">
-            BUAT FORMULIR
-            <span class="bg-orange-500 text-white rounded-full w-7 h-7 flex items-center justify-center">→</span>
-          </a>
-        </div>
+    <!-- Navigation Dots -->
+    <div class="flex justify-center gap-3 mt-6">
+      <button
+        v-for="(_, i) in filteredItems"
+        :key="i"
+        @click="scrollToIndex(i)"
+        class="w-3.5 h-3.5 rounded-full border-2 border-orange-500 transition-all duration-300"
+        :class="currentIndex === i ? 'bg-orange-500 scale-110' : 'bg-transparent'"
+      ></button>
+    </div>
+  </div>
 
-        <div class="mt-12 md:mt-0 relative group">
-          <div class="bg-blue-300 w-56 h-40 rounded-2xl rotate-[-8deg] flex items-center justify-center shadow-2xl transform group-hover:rotate-0 transition duration-500">
-            <div class="w-12 h-1.5 bg-blue-400 rounded-full"></div>
-          </div>
-          <span class="absolute -top-10 -right-4 text-yellow-300 text-6xl font-black opacity-90 drop-shadow-md">??</span>
-        </div>
+  <!-- CTA Formulir -->
+  <div class="mt-24 bg-orange-500 rounded-3xl p-10 md:p-14 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-2xl">
+    <div class="z-10 text-center md:text-left">
+      <h2 class="text-3xl md:text-4xl font-black text-white mb-8 leading-tight">
+        Punya pertanyaan dan saran<br class="hidden md:block"> untuk kami kedepannya?
+      </h2>
+      <a href="#" class="bg-white text-gray-800 px-10 py-4 rounded-full font-black flex items-center gap-4 w-fit mx-auto md:mx-0 hover:shadow-lg transition transform hover:-translate-y-1">
+        BUAT FORMULIR
+        <span class="bg-orange-500 text-white rounded-full w-7 h-7 flex items-center justify-center">→</span>
+      </a>
+    </div>
+
+    <div class="mt-12 md:mt-0 relative group">
+      <div class="bg-blue-300 w-56 h-40 rounded-2xl rotate-[-8deg] flex items-center justify-center shadow-2xl transform group-hover:rotate-0 transition duration-500">
+        <div class="w-12 h-1.5 bg-blue-400 rounded-full"></div>
       </div>
-    </section>
+      <span class="absolute -top-10 -right-4 text-yellow-300 text-6xl font-black opacity-90 drop-shadow-md">??</span>
+    </div>
+  </div>
+</section>
 
     <!-- Footer -->
         <FooterSection />
@@ -506,6 +525,7 @@ import 'aos/dist/aos.css';
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import AuthModal from '@/Components/AuthModal.vue';
 import FooterSection from '@/Components/FooterSection.vue';
+import { Link } from '@inertiajs/vue3';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
@@ -577,21 +597,36 @@ function select(i) { activeIndex.value = i }
 const activeTab = ref('artikel');
 const slider = ref(null);
 const currentIndex = ref(0);
+const articles = ref([]);
+const articlesLoading = ref(true);
+
+// Fetch real articles from API
+onMounted(async () => {
+  try {
+    const response = await fetch('/api/articles');
+    if (response.ok) {
+      const result = await response.json();
+      articles.value = result.data || [];
+    }
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+  } finally {
+    articlesLoading.value = false;
+  }
+});
 
 const data = {
-  artikel: [
-    { title: 'SMKN 1 Gunungputri rubuh, siswa diliburkan sementara waktu', category: 'Sekolah', desc: 'Is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry standard.' },
-    { title: 'Update Kurikulum PPLG 2026', category: 'Kurikulum', desc: 'Is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.' },
-    { title: 'Lomba UI/UX antar SMK se-Bogor', category: 'Lomba', desc: 'Is simply dummy text of the printing and typesetting industry.' },
-    { title: 'Kunjungan Industri ke Google Indonesia', category: 'Industri', desc: 'Siswa SMK melihat langsung ekosistem kerja profesional.' },
-  ],
-  event: [
-    { title: 'Grand Opening RR.CO Waste Center', category: 'Event', desc: 'Peresmian pusat pengelolaan limbah digital daerah Gunungputri.' },
-    { title: 'Webinar Flutter & Dart SMKN 1', category: 'Edukasi', desc: 'Belajar mobile development bersama expert.' },
-  ]
+  artikel: articles,
+  event: articles.value.filter(a => a.category === 'event'),
 };
 
-const filteredItems = computed(() => data[activeTab.value]);
+const filteredItems = computed(() => {
+  if (activeTab.value === 'artikel') {
+    return articles.value.filter(a => a.category === 'artikel' || a.category === 'berita').slice(0, 6);
+  } else {
+    return articles.value.slice(0, 3);
+  }
+});
 
 // Logika Scroll untuk indikator
 const handleScroll = (e) => {

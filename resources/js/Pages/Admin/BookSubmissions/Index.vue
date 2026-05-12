@@ -1,77 +1,84 @@
 <template>
   <AuthenticatedLayout title="Pengajuan Buku">
-    <div class="py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-slate-50/50 py-8 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto">
         
         <div class="mb-8">
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Pengajuan Buku Petugas</h1>
-          <p class="mt-2 text-sm text-gray-500">Kelola pengajuan penambahan buku dari petugas. Tinjau dan setujui untuk menambahkan buku ke perpustakaan.</p>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Manajemen Koleksi</p>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900 mt-1">Pengajuan Buku Petugas</h1>
+          <p class="mt-2 text-sm text-slate-500 max-w-2xl">Tinjau, verifikasi, dan kelola usulan penambahan koleksi buku baru yang diajukan oleh staf petugas perpustakaan.</p>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50/50 border-b border-gray-200">
+              <thead class="bg-slate-50/70 border-b border-slate-200">
                 <tr>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Buku</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Petugas</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Jumlah</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Status</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400">Tanggal</th>
-                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-gray-400 text-right">Aksi</th>
+                  <th class="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">Informasi Buku</th>
+                  <th class="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">Staf Pengaju</th>
+                  <th class="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">Jumlah</th>
+                  <th class="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
+                  <th class="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">Tanggal Input</th>
+                  <th class="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Opsi Tindakan</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
-                <tr v-for="book in submissions.data" :key="book.id" class="hover:bg-gray-50/50 transition-colors">
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="book in submissions.data" :key="book.id" class="hover:bg-slate-50/40 transition-colors">
                   <td class="px-6 py-4">
-                    <div class="font-semibold text-gray-900">{{ book.title }}</div>
-                    <div class="text-xs text-gray-500">{{ book.author }} • {{ book.year || '-' }}</div>
-                    <div class="text-xs text-gray-400 mt-1">{{ book.isbn || 'No ISBN' }}</div>
+                    <div class="font-semibold text-slate-900">{{ book.title }}</div>
+                    <div class="text-xs text-slate-500 mt-0.5">{{ book.author }} • {{ book.year || '-' }}</div>
+                    <div class="text-[11px] font-mono text-slate-400 mt-1 bg-slate-50 px-1.5 py-0.5 rounded inline-block border border-slate-100">{{ book.isbn || 'No ISBN' }}</div>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="text-sm text-gray-900">{{ book.petugas?.name || '-' }}</div>
-                    <div class="text-xs text-gray-500">{{ book.petugas?.email }}</div>
+                    <div class="text-sm font-medium text-slate-800">{{ book.petugas?.name || '-' }}</div>
+                    <div class="text-xs text-slate-400 mt-0.5">{{ book.petugas?.email }}</div>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="text-sm font-medium text-gray-900">{{ book.quantity }}</div>
+                    <div class="text-sm font-semibold text-slate-800">{{ book.quantity }} <span class="text-xs text-slate-400 font-normal">eks.</span></div>
                   </td>
                   <td class="px-6 py-4">
                     <span :class="{
-                      'bg-amber-100 text-amber-700 ring-1 ring-amber-200': book.status === 'pending',
-                      'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200': book.status === 'approved',
-                      'bg-rose-100 text-rose-700 ring-1 ring-rose-200': book.status === 'rejected',
-                    }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight">
+                      'bg-orange-50 border-orange-200 text-orange-600': book.status === 'pending',
+                      'bg-slate-50 border-slate-200 text-slate-600': book.status === 'approved',
+                      'bg-white border-slate-200 text-slate-400': book.status === 'rejected',
+                    }" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide border">
+                      <span v-if="book.status === 'pending'" class="w-1 h-1 bg-orange-500 rounded-full mr-1.5"></span>
                       {{ book.status }}
                     </span>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="text-sm text-gray-600">{{ formatDate(book.created_at) }}</div>
+                    <div class="text-xs text-slate-500 font-medium">{{ formatDate(book.created_at) }}</div>
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div v-if="book.status === 'pending'" class="flex justify-end gap-2">
-                      <Link :href="route('admin.book-submissions.show', book.id)" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                      <Link :href="route('admin.book-submissions.show', book.id)" class="bg-white border border-slate-200 text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:shadow-sm transition-all">
                         Detail
                       </Link>
-                      <button @click="approveSubmission(book)" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                      <button @click="approveSubmission(book)" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:shadow-sm transition-all">
                         Setuju
                       </button>
-                      <button @click="rejectSubmission(book)" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                      <button @click="rejectSubmission(book)" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:shadow-sm transition-all">
                         Tolak
                       </button>
                     </div>
-                    <Link v-else :href="route('admin.book-submissions.show', book.id)" class="text-xs text-orange-600 hover:text-orange-700 font-medium">
-                      Lihat Detail
+                    <Link v-else :href="route('admin.book-submissions.show', book.id)" class="text-xs text-orange-600 hover:text-orange-700 font-bold transition-colors">
+                      Lihat Detail →
                     </Link>
                   </td>
                 </tr>
                 <tr v-if="submissions.data?.length === 0">
-                  <td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada pengajuan buku yang tertunda.</td>
+                  <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                    <svg class="w-8 h-8 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span class="text-sm font-medium">Tidak ada berkas pengajuan buku yang tersedia.</span>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div v-if="submissions.data?.length" class="px-6 py-4 border-t border-gray-100">
-            <p class="text-sm text-gray-500">Menampilkan {{ submissions.data.length }} dari {{ submissions.total }} data</p>
+          <div v-if="submissions.data?.length" class="px-6 py-4 border-t border-slate-100 bg-slate-50/30">
+            <p class="text-xs font-medium text-slate-400">Menampilkan {{ submissions.data.length }} dari {{ submissions.total }} entri data</p>
           </div>
         </div>
 

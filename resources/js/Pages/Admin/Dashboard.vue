@@ -16,7 +16,7 @@
               </p>
             </div>
             <div class="mt-4 md:mt-0 flex space-x-3">
-               <button class="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-all">
+               <button @click="downloadReport" class="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-all">
                 Download Report
               </button>
             </div>
@@ -186,6 +186,11 @@ const maxBorrow = computed(() => {
 
 const formatNumber = (num) => {
   return new Intl.NumberFormat('id-ID').format(num || 0);
+};
+
+const downloadReport = () => {
+  // Navigate to download endpoint
+  window.location.href = '/admin/download-report';
 };
 </script>
 
