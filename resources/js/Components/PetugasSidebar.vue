@@ -90,8 +90,19 @@ const handleLogout = () => {
             <!-- User Info -->
             <div class="p-4 border-t border-slate-100 bg-slate-50/50">
                 <div class="flex items-center gap-3 mb-4 p-2">
-                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center border border-orange-200 shadow-sm">
-                        <span class="text-sm font-bold text-orange-700">{{ $page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                    <!-- Profile Photo or Initial Avatar -->
+                    <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-orange-200 shadow-sm bg-gradient-to-br from-orange-100 to-orange-50">
+                        <!-- Show Profile Photo if exists -->
+                        <img 
+                            v-if="$page.props.auth?.user?.profile_photo_url" 
+                            :src="$page.props.auth.user.profile_photo_url" 
+                            :alt="$page.props.auth?.user?.name"
+                            class="w-full h-full object-cover"
+                        >
+                        <!-- Show Initial if no photo -->
+                        <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-500">
+                            <span class="text-sm font-bold text-white">{{ $page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                        </div>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold text-slate-900 truncate">{{ $page.props.auth?.user?.name || 'User' }}</p>

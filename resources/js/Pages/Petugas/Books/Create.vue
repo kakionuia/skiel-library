@@ -59,16 +59,16 @@
               <input v-model="form.year" type="number" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
 
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Kategori</label>
-              <select v-model="form.category" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
-                <option value="">Pilih kategori</option>
-                <option value="Fiksi">Fiksi</option>
-                <option value="Non-Fiksi">Non-Fiksi</option>
-                <option value="Referensi">Referensi</option>
-                <option value="Cerita Anak">Cerita Anak</option>
-              </select>
-            </div>
+            <select 
+                v-model="form.category" 
+                class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all"
+                :class="{ 'border-red-500 focus:ring-red-500/20 focus:border-red-500': errors.category }"
+              >
+                <option value="">Pilih Kategori...</option>
+                <option v-for="category in categories" :key="category.id" :value="category.name">
+                  {{ category.name }}
+                </option>
+            </select>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Jumlah Eksemplar</label>

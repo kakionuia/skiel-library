@@ -313,7 +313,7 @@ function submitBorrow() {
           html: `<p class="text-sm mb-3">Anda sudah mencapai batas maksimal peminjaman <strong>(3 buku)</strong>.</p><p class="text-sm text-slate-600">Kembalikan salah satu buku Anda terlebih dahulu untuk dapat meminjam buku lainnya.</p>`,
           icon: 'warning',
           confirmButtonText: 'Lihat Peminjaman Saya',
-          confirmButtonColor: '#E67E22',
+          confirmButtonColor: '#ea580c',
           showCancelButton: true,
           cancelButtonText: 'Batal',
           cancelButtonColor: '#94a3b8',

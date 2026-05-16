@@ -200,7 +200,7 @@
       </div>
     </section>
 
-<section class="py-20 md:py-32 px-6 md:px-12 max-w-7xl mx-auto" data-aos="fade-up">
+<section id="profil" class="py-20 md:py-32 px-6 md:px-12 max-w-7xl mx-auto" data-aos="fade-up">
   <div class="flex flex-col md:flex-row items-center gap-16 lg:gap-24">
     
     <!-- Bagian Teks Carousel (Kiri) -->
@@ -405,12 +405,15 @@
   </section>
 
     <!-- Artikel & Event -->
-    <section class="max-w-7xl mx-auto px-4 py-12 font-sans">
+<section class="max-w-7xl mx-auto px-4 py-12 font-sans">
   <div class="flex justify-between items-center mb-8">
     <h2 class="text-2xl font-bold text-gray-800">Artikel dan Event Kami</h2>
-    <a href="#" class="bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md">
-      More <span class="text-xl">→</span>
-    </a>
+    <Link 
+      :href="route('articles.index')" 
+      class="bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md"
+    >
+      Lihat Semua <span class="text-xl">→</span>
+    </Link>
   </div>
 
   <div class="flex gap-4 mb-8">
@@ -445,13 +448,14 @@
           :href="route('articles.show', item.slug)"
           class="flex flex-col h-full"
         >
-          <!-- Image Container - Fixed Height -->
+          <!-- Image Container -->
           <div class="relative mb-5 overflow-hidden rounded-xl border-2 border-orange-200 flex-shrink-0" style="height: 200px;">
             <img 
-              :src="item.featured_image || 'https://via.placeholder.com/400x240'" 
+              :src="getArticleImage(item.featured_image)" 
               class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
               :alt="item.title"
-            >
+              @error="(e) => e.target.src = 'https://via.placeholder.com/400x240?text=No+Image'"
+            />
           </div>
           
           <!-- Category Badge -->
@@ -459,17 +463,17 @@
             {{ item.category }}
           </span>
           
-          <!-- Title - Fixed Height with line-clamp -->
+          <!-- Title -->
           <h3 class="mt-4 font-bold text-gray-900 leading-snug text-lg line-clamp-2 group-hover:text-orange-600 transition flex-shrink-0" style="min-height: 3.5rem;">
             {{ item.title }}
           </h3>
           
-          <!-- Excerpt - Flexible but controlled -->
+          <!-- Excerpt -->
           <p class="mt-3 text-sm text-gray-500 line-clamp-3 leading-relaxed flex-grow" style="min-height: 4.5rem;">
-            {{ item.excerpt || item.desc }}
+            {{ item.excerpt || 'Baca selengkapnya...' }}
           </p>
           
-          <!-- Read More Link - Always at bottom -->
+          <!-- Read More -->
           <span class="pt-4 inline-block text-orange-500 font-extrabold text-sm group-hover:underline flex-shrink-0 mt-auto">
             Klik untuk baca →
           </span>
@@ -477,8 +481,8 @@
       </div>
     </div>
 
-    <!-- Navigation Dots -->
-    <div class="flex justify-center gap-3 mt-6">
+    <!-- Navigation Dots - HANYA MUNCUL JIKA ITEM > 2 -->
+    <div v-if="filteredItems.length > 2" class="flex justify-center gap-3 mt-6">
       <button
         v-for="(_, i) in filteredItems"
         :key="i"
@@ -531,13 +535,18 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay } from 'swiper/modules';
-
-// Import CSS Swiper
 import 'swiper/css';
 
 const modules = [Autoplay];
 
-// Data gambar mockup
+// Props - MENERIMA DATA DARI CONTROLLER
+const props = defineProps({
+  latestArticles: {
+    type: Array,
+    default: () => []
+  }
+});
+
 const bookCovers = [
   '/image/ily.jpeg',
   '/image/ht.jpeg',
@@ -546,42 +555,35 @@ const bookCovers = [
   '/image/sp.jpeg'
 ];
 
-// Masukkan ikon yang akan dipakai
 library.add(faYoutube);
 const showAuthModal = ref(false);
-
-const features = [
-  { title: 'Scan Barcode', desc: 'Pinjam buku cepat dengan scan dari HP.' },
-  { title: 'Notifikasi', desc: 'Dapatkan info ketersediaan buku real-time.' },
-  { title: 'Sistem Poin', desc: 'Kumpulkan poin setiap kali membaca.' }
-];
 
 onMounted(() => {
   AOS.init({ duration: 1000, once: true });
 });
 
-const activeIndex = ref(0)
+const activeIndex = ref(0);
 
 const reviewList = [
   { s: '⭐⭐⭐⭐⭐', t: '"Luar biasa, sangat inspiratif!"' },
   { s: '⭐⭐⭐⭐',   t: '"Wajib baca semua pelajar."' },
-]
+];
 
 const dataRows = [
   { e: '📚', t: 'Matematika Diskrit', s: 'Dipinjam',     c: 'orange' },
   { e: '✅', t: 'Bumi — Tere Liye',   s: 'Dikembalikan', c: 'green'  },
   { e: '⏳', t: 'Clean Code',          s: '2 hari lagi',  c: 'warn'   },
-]
+];
 
-const notifChips = ['📬 Buku tersedia!', '⏰ Jatuh tempo besok', '🎉 Event literasi baru']
+const notifChips = ['📬 Buku tersedia!', '⏰ Jatuh tempo besok', '🎉 Event literasi baru'];
 
 const historyItems = [
   { d: '12 Mar 2025', t: 'Harry Potter & The Chamber' },
   { d: '5 Feb 2025',  t: 'Bumi — Tere Liye' },
   { d: '20 Jan 2025', t: 'Atomic Habits' },
-]
+];
 
-const badges = ['🎖 Pembaca Aktif', '🏅 Tepat Waktu', '🎟 Event Access']
+const badges = ['🎖 Pembaca Aktif', '🏅 Tepat Waktu', '🎟 Event Access'];
 
 const fiturList = [
   { no: '01', title: 'Scan barcode buku',                  desc: 'Foto dan scan barcode yang ada di buku dengan kamera handphone untuk peminjaman buku secara cepat tanpa antre di meja petugas.' },
@@ -590,137 +592,83 @@ const fiturList = [
   { no: '04', title: 'Riwayat & tenggat peminjaman',        desc: 'Pantau semua buku yang pernah kamu pinjam, lengkap dengan tanggal peminjaman dan tenggat pengembalian agar tidak terlambat.' },
   { no: '05', title: 'Sistem poin & event',                 desc: 'Dapatkan poin setiap kali meminjam buku tepat waktu. Tukarkan poin untuk reward menarik atau ikuti event literasi eksklusif.' },
   { no: '06', title: 'Forum review & repositori karya',     desc: 'Bagikan ulasanmu tentang buku yang sudah dibaca dan temukan repositori karya tulis ilmiah maupun kreatif dari seluruh siswa.' },
-]
+];
 
-function select(i) { activeIndex.value = i }
+function select(i) { activeIndex.value = i; }
 
 const activeTab = ref('artikel');
 const slider = ref(null);
 const currentIndex = ref(0);
-const articles = ref([]);
-const articlesLoading = ref(true);
 
-// Fetch real articles from API
-onMounted(async () => {
-  try {
-    const response = await fetch('/api/articles');
-    if (response.ok) {
-      const result = await response.json();
-      articles.value = result.data || [];
-    }
-  } catch (error) {
-    console.error('Error fetching articles:', error);
-  } finally {
-    articlesLoading.value = false;
-  }
-});
-
-const data = {
-  artikel: articles,
-  event: articles.value.filter(a => a.category === 'event'),
+// Gunakan data dari props (dari controller) langsung
+const getArticleImage = (path) => {
+  if (!path) return 'https://via.placeholder.com/400x240?text=No+Image';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (path.startsWith('storage/')) return `/${path}`;
+  if (path.startsWith('/')) return path;
+  return `/storage/${path}`;
 };
 
 const filteredItems = computed(() => {
+  const items = props.latestArticles || [];
   if (activeTab.value === 'artikel') {
-    return articles.value.filter(a => a.category === 'artikel' || a.category === 'berita').slice(0, 6);
-  } else {
-    return articles.value.slice(0, 3);
+    return items.filter(a => a.category === 'artikel' || a.category === 'berita').slice(0, 10);
   }
+  return items.filter(a => a.category === 'event').slice(0, 10);
 });
 
-// Logika Scroll untuk indikator
-const handleScroll = (e) => {
-  const scrollLeft = e.target.scrollLeft;
-  const cardWidth = 424; // Lebar kartu + gap
+const handleScroll = () => {
+  if (!slider.value) return;
+  const scrollLeft = slider.value.scrollLeft;
+  const cardWidth = 384;
   currentIndex.value = Math.round(scrollLeft / cardWidth);
 };
 
 const scrollToIndex = (index) => {
-  const cardWidth = 424;
+  if (!slider.value) return;
+  const cardWidth = 384;
   slider.value.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
 };
 
 const staffList = [
-  {
-    name: 'Ahmad Fauzi',
-    role: 'Kepala Perpustakaan',
-    bio: 'Memimpin layanan perpustakaan dengan pengalaman lebih dari 10 tahun.',
-    photo: '/image/j.jpeg'
-  },
-  {
-    name: 'Siti Nurhaliza',
-    role: 'Pustakawan Ahli',
-    bio: 'Ahli dalam katalogisasi, referensi, dan pengembangan koleksi.',
-    photo: '/image/o.jpeg'
-  },
-  {
-    name: 'Budi Santoso',
-    role: 'Teknisi Sistem',
-    bio: 'Mengelola sistem informasi perpustakaan dan layanan digital.',
-    photo: '/image/j.jpeg'
-  },
-  {
-    name: 'Dewi Lestari',
-    role: 'Layanan Sirkulasi',
-    bio: 'Menjamin kelancaran peminjaman dan pengembalian buku.',
-    photo: '/image/o.jpeg'
-  }
+  { name: 'Ahmad Fauzi', role: 'Kepala Perpustakaan', bio: 'Memimpin layanan perpustakaan dengan pengalaman lebih dari 10 tahun.', photo: '/image/j.jpeg' },
+  { name: 'Siti Nurhaliza', role: 'Pustakawan Ahli', bio: 'Ahli dalam katalogisasi, referensi, dan pengembangan koleksi.', photo: '/image/o.jpeg' },
+  { name: 'Budi Santoso', role: 'Teknisi Sistem', bio: 'Mengelola sistem informasi perpustakaan dan layanan digital.', photo: '/image/j.jpeg' },
+  { name: 'Dewi Lestari', role: 'Layanan Sirkulasi', bio: 'Menjamin kelancaran peminjaman dan pengembalian buku.', photo: '/image/o.jpeg' }
 ];
 
-// --- Carousel Profil ---
-
-const activeProfileSlide = ref(0)
-let profileInterval = null
+const activeProfileSlide = ref(0);
+let profileInterval = null;
 
 const profileSlides = [
-  {
-    title: 'Sejarah Singkat',
-    content: 'Perpustakaan SMKN 1 Gunungputri hadir sejak tahun 2005 untuk mendukung visi sekolah dalam mencetak generasi cerdas dan inovatif melalui ketersediaan literasi berkualitas.'
-  },
-  {
-    title: 'Visi & Misi Kami',
-    content: [
-      'Pusat literasi digital SMK terbaik',
-      'Akses koleksi fisik & digital 24/7',
-      'Pengembangan minat bakat siswa',
-      'Sistem peminjaman berbasis barcode'
-    ]
-  },
-  {
-    title: 'Tatanan Pengurus',
-    content: [
-      'Kepala: Ahmad Fauzi, M.Pd',
-      'Pustakawan: Siti Nurhaliza',
-      'Teknisi: Budi Santoso',
-      'Sirkulasi: Dewi Lestari'
-    ]
-  }
-]
+  { title: 'Sejarah Singkat', content: 'Perpustakaan SMKN 1 Gunungputri hadir sejak tahun 2005 untuk mendukung visi sekolah dalam mencetak generasi cerdas dan inovatif melalui ketersediaan literasi berkualitas.' },
+  { title: 'Visi & Misi Kami', content: ['Pusat literasi digital SMK terbaik', 'Akses koleksi fisik & digital 24/7', 'Pengembangan minat bakat siswa', 'Sistem peminjaman berbasis barcode'] },
+  { title: 'Tatanan Pengurus', content: ['Kepala: Ahmad Fauzi, M.Pd', 'Pustakawan: Siti Nurhaliza', 'Teknisi: Budi Santoso', 'Sirkulasi: Dewi Lestari'] }
+];
 
 const startAutoSlide = () => {
-  stopAutoSlide()
+  stopAutoSlide();
   profileInterval = setInterval(() => {
-    activeProfileSlide.value = (activeProfileSlide.value + 1) % profileSlides.length
-  }, 7000) // 7 detik agar user sempat membaca
-}
+    activeProfileSlide.value = (activeProfileSlide.value + 1) % profileSlides.length;
+  }, 7000);
+};
 
 const stopAutoSlide = () => {
-  if (profileInterval) clearInterval(profileInterval)
-}
+  if (profileInterval) clearInterval(profileInterval);
+};
 
 const goToSlide = (index) => {
-  activeProfileSlide.value = index
-  startAutoSlide() // Reset timer setelah klik manual
-}
+  activeProfileSlide.value = index;
+  startAutoSlide();
+};
 
 onMounted(() => {
-  startAutoSlide()
-})
-
-onBeforeUnmount(() => {
-  stopAutoSlide()
+  startAutoSlide();
 });
 
+onBeforeUnmount(() => {
+  stopAutoSlide();
+});
 </script>
 
 <style>

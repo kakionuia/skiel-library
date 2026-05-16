@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\BookRequest;
-use App\Models\Activity;
+use App\Models\SystemParameter;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -325,6 +326,20 @@ class PetugasController extends Controller
                 default => $borrow->status
             };
 
+            // DYNAMICALLY calculate late_fee for overdue borrowed items
+            $lateDays = 0;
+            $lateFee = 0;
+            
+            if (in_array($borrow->status, ['borrowed', 'approved']) && now()->gt($borrow->due_date)) {
+                $lateDays = now()->diffInDays($borrow->due_date);
+                $finePerDay = \App\Models\SystemParameter::getByKey('fine_per_day', 5000);
+                $lateFee = $lateDays * $finePerDay;
+            } elseif ($borrow->status === 'returned') {
+                // For returned items, use the stored late_days and late_fee
+                $lateDays = $borrow->late_days ?? 0;
+                $lateFee = $borrow->late_fee ?? 0;
+            }
+
             return [
                 'id' => $borrow->id,
                 'member_name' => $borrow->user?->name ?? 'Unknown',
@@ -337,8 +352,8 @@ class PetugasController extends Controller
                 'status' => $borrow->status,
                 'status_text' => $statusText,
                 'quantity' => $borrow->quantity ?? 1,
-                'late_days' => $borrow->late_days ?? 0,
-                'late_fee' => $borrow->late_fee ?? 0,
+                'late_days' => $lateDays,
+                'late_fee' => $lateFee,
                 'notes' => $borrow->notes,
             ];
         });
@@ -488,8 +503,22 @@ public function processReturn(Request $request, Borrow $borrow)
     // Settings
     public function settings()
     {
+        $parameters = SystemParameter::all();
+        
+        $formattedParams = [];
+        foreach ($parameters as $param) {
+            $formattedParams[] = [
+                'id' => $param->id,
+                'key' => $param->key,
+                'value' => $param->value,
+                'type' => $param->type,
+                'description' => $param->description,
+            ];
+        }
+
         return inertia('Petugas/Settings', [
             'user' => Auth::user(),
+            'parameters' => $formattedParams,
         ]);
     }
 
@@ -535,13 +564,16 @@ public function processReturn(Request $request, Borrow $borrow)
             'max_books_per_member' => 'required|integer|min:1|max:100',
         ]);
 
-        // Store settings di cache atau file config
-        cache()->put('library.max_borrow_days', $request->max_borrow_days, now()->addYear());
-        cache()->put('library.late_fee_per_day', $request->late_fee_per_day, now()->addYear());
-        cache()->put('library.max_books_per_member', $request->max_books_per_member, now()->addYear());
+        // Update SystemParameter table directly (not cache!)
+        SystemParameter::setValue('max_borrow_days', $request->max_borrow_days, 'integer', 'Jumlah hari maksimal peminjaman buku');
+        SystemParameter::setValue('fine_per_day', $request->late_fee_per_day, 'integer', 'Nominal denda per hari keterlambatan');
+        SystemParameter::setValue('max_books_per_member', $request->max_books_per_member, 'integer', 'Jumlah maksimal buku per member');
 
-        Activity::log(Auth::id(), 'update', 'Memperbarui parameter sistem perpustakaan');
+        // Clear cache untuk memastikan nilai baru di-load
+        cache()->forget('library.parameters');
 
-        return back()->with('success', 'Parameter sistem berhasil diperbarui.');
+        Activity::log(Auth::id(), 'update_parameter', 'Memperbarui parameter sistem: max_borrow_days=' . $request->max_borrow_days . ', fine_per_day=' . $request->late_fee_per_day);
+
+        return back()->with('success', 'Parameter sistem berhasil diperbarui. Perubahan langsung berlaku untuk semua perhitungan.');
     }
 }

@@ -17,6 +17,8 @@ const menus = [
     { name: 'Kelola Artikel', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v4m2 0h4a2 2 0 012 2v10a2 2 0 01-2 2h-4m-6-4h2m0 0h2m-2 0v2m0-2v-2m-2 0h-2', route: 'admin.articles' },
     { name: 'Pengajuan Buku', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', route: 'admin.book-submissions' },
     { name: 'Permintaan Buku', icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z', route: 'admin.book-requests' },
+    { name: 'Perpanjangan Pinjam', icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', route: 'admin.extensions.index' },
+    { name: 'Pembayaran Denda', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', route: 'admin.payments.pending' },
     { name: 'Tunggakan Siswa', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', route: 'admin.late-returns' },
     { name: 'Ulasan Buku', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', route: 'admin.reviews' },
     { name: 'Keluhan & Saran', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z', route: 'admin.complaints' },
@@ -68,12 +70,43 @@ const menus = [
                         <SidebarLink :href="route('admin.activity-logs', {role: 'admin'})" class="!py-2 !text-xs">Admin</SidebarLink>
                     </div>
                 </div>
+
+                <div class="pt-2">
+                    <button @click="activeSub = activeSub === 'settings' ? null : 'settings'"
+                        class="w-full flex items-center justify-between px-4 py-3 text-slate-600 font-semibold text-sm rounded-xl hover:bg-slate-50 transition-all group">
+                        <div class="flex items-center gap-4">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Pengaturan
+                        </div>
+                        <svg :class="{'rotate-180 text-orange-500': activeSub === 'settings'}" class="w-4 h-4 transition-transform duration-300 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    
+                    <div v-show="activeSub === 'settings'" class="pl-12 mt-1 space-y-1 overflow-hidden transition-all">
+                        <SidebarLink :href="route('admin.settings.system-parameters')" class="!py-2 !text-xs">Parameter Sistem</SidebarLink>
+                    </div>
+                </div>
             </nav>
 
             <div class="p-4 border-t border-slate-100 bg-slate-50/50">
                 <div class="flex items-center gap-3 mb-4 p-2">
-                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center border border-orange-200 shadow-sm">
-                        <span class="text-sm font-bold text-orange-700">{{ $page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'A' }}</span>
+                    <!-- Profile Photo or Initial Avatar -->
+                    <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-orange-200 shadow-sm bg-gradient-to-br from-orange-100 to-orange-50">
+                        <!-- Show Profile Photo if exists -->
+                        <img 
+                            v-if="$page.props.auth?.user?.profile_photo_url" 
+                            :src="$page.props.auth.user.profile_photo_url" 
+                            :alt="$page.props.auth?.user?.name"
+                            class="w-full h-full object-cover"
+                        >
+                        <!-- Show Initial if no photo -->
+                        <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-500">
+                            <span class="text-sm font-bold text-white">{{ $page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'A' }}</span>
+                        </div>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold text-slate-900 truncate">{{ $page.props.auth?.user?.name || 'Admin' }}</p>

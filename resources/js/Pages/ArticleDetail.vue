@@ -4,7 +4,7 @@
     <Navbar @open-auth="showAuthModal = true" />
 
     <!-- Hero Article Header -->
-    <div class="bg-gradient-to-r from-orange-600 to-orange-400 text-white py-16 md:py-24">
+    <div class="bg-gradient-to-r from-orange-600 to-orange-400 text-white py-28 md:py-32">
       <div class="max-w-4xl mx-auto px-4 md:px-8">
         <!-- Category Badge -->
         <div class="inline-flex items-center gap-2 mb-6">
@@ -35,14 +35,14 @@
     </div>
 
     <!-- Featured Image -->
-    <div v-if="article.featured_image" class="relative h-[400px] md:h-[500px] overflow-hidden">
-      <img 
-        :src="article.featured_image" 
-        :alt="article.title"
-        class="w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-black/20"></div>
-    </div>
+<div v-if="article.featured_image" class="relative w-full max-h-[500px] overflow-hidden bg-slate-100">
+  <img 
+    :src="getImageUrl(article.featured_image)" 
+    :alt="article.title"
+    class="w-full h-full max-h-[500px] object-cover"
+    @error="handleImageError"
+  />
+</div>
 
     <!-- Article Content -->
     <article class="max-w-3xl mx-auto px-4 md:px-8 py-16 md:py-24">
@@ -175,6 +175,36 @@ const props = defineProps({
 });
 
 const showAuthModal = ref(false);
+const imageError = ref(false);
+
+// FUNGSI UNTUK MENDAPATKAN URL GAMBAR YANG BENAR
+const getImageUrl = (path) => {
+  if (!path) return '/images/placeholder.jpg'; // Gambar default jika tidak ada
+  
+  // Jika sudah full URL, gunakan langsung
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // Jika path sudah mengandung 'storage/', gunakan dengan /
+  if (path.startsWith('storage/')) {
+    return `/${path}`;
+  }
+  
+  // Jika path dimulai dengan /, gunakan langsung
+  if (path.startsWith('/')) {
+    return path;
+  }
+  
+  // Default: tambahkan /storage/ di depan
+  return `/storage/${path}`;
+};
+
+const handleImageError = (e) => {
+  imageError.value = true;
+  // Optional: Set gambar default jika error
+  e.target.src = '/images/placeholder.jpg';
+};
 
 // Format date helper
 const formatDate = (dateString) => {

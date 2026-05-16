@@ -314,68 +314,79 @@
     <ReviewsSection :best-reviews="bestReviews" :recent-reviews="recentReviews" />
 
     <!-- ========== RIWAYAT SECTION ========== -->
-    <section class="p-4 md:p-8 bg-white">
-      <div class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-xl bg-orange-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+    <!-- ========== RIWAYAT SECTION ========== -->
+<section class="p-4 md:p-8 bg-white">
+  <div class="flex justify-between items-center mb-8">
+    <div class="flex items-center gap-3">
+      <div class="p-2.5 rounded-xl bg-orange-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Riwayat Pinjam Buku</h2>
+    </div>
+    <Link href="/my-loans" class="bg-[#e67e00] hover:bg-orange-700 text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all active:scale-95 inline-block">
+      Peminjaman Saya
+    </Link>
+  </div>
+
+  <!-- Empty State jika tidak ada data -->
+  <div v-if="history.length === 0" class="text-center py-16">
+    <div class="text-5xl mb-4">📋</div>
+    <h3 class="text-lg font-bold text-gray-900">Belum ada riwayat peminjaman</h3>
+    <p class="text-gray-500 text-sm mt-1">Mulai pinjam buku dan riwayat akan muncul di sini.</p>
+    <Link href="/dashboard" class="mt-4 inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all">
+      Jelajahi Buku
+    </Link>
+  </div>
+
+  <!-- Card Riwayat -->
+  <div v-else class="flex gap-4 md:gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory">
+    <Link
+      v-for="book in history"
+      :key="book.id"
+      :href="book.borrowId ? `/borrow/${book.borrowId}` : '/my-loans'"
+      class="min-w-[320px] md:min-w-[450px] border border-gray-200 rounded-2xl md:rounded-[2rem] p-4 md:p-5 flex gap-4 md:gap-5 snap-start hover:border-orange-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 bg-white group"
+    >
+      <img :src="book.cover" :alt="book.title" class="w-24 h-32 md:w-32 md:h-44 object-cover rounded-xl shadow-sm ring-1 ring-gray-100" />
+      <div class="flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base md:text-xl font-bold text-gray-900 leading-tight">{{ book.title }}</h3>
+            <span :class="['font-semibold text-xs uppercase tracking-wider px-2 py-1 rounded-full', book.statusColor]">
+              {{ book.status }}
+            </span>
           </div>
-          <h2 class="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Riwayat Pinjam Buku</h2>
+          <div class="text-xs md:text-sm space-y-1 text-gray-600 font-medium">
+            <p class="flex items-center gap-2">
+              <span class="text-gray-400 w-12 md:w-16">Penulis</span>
+              <span class="text-gray-800">{{ book.author }}</span>
+            </p>
+            <p class="flex items-center gap-2">
+              <span class="text-gray-400 w-12 md:w-16">Penerbit</span>
+              <span class="text-gray-800">{{ book.publisher }}</span>
+            </p>
+            <p v-if="book.dueDate" class="flex items-center gap-2">
+              <span class="text-gray-400 w-12 md:w-16">Tenggat</span>
+              <span class="font-semibold text-red-600 text-xs md:text-sm">{{ book.dueDate }}</span>
+            </p>
+          </div>
         </div>
-        <Link href="/my-loans" class="bg-[#e67e00] hover:bg-orange-700 text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all active:scale-95 inline-block">
-          Peminjaman Saya
-        </Link>
+        <div class="mt-3 md:mt-4">
+          <span v-if="book.isReviewed" class="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 md:px-4 py-1 rounded-lg text-xs md:text-sm font-semibold border border-orange-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Reviewed
+          </span>
+          <span v-else class="inline-flex items-center gap-2 bg-white text-orange-700 px-3 md:px-4 py-1 rounded-lg text-xs md:text-sm font-semibold border border-orange-200 group-hover:bg-orange-50">
+            Lihat detail
+          </span>
+        </div>
       </div>
-
-      <div class="flex gap-4 md:gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory">
-        <Link
-          v-for="book in history"
-          :key="book.id"
-          :href="book.borrowId ? `/borrow/${book.borrowId}` : '/my-loans'"
-          class="min-w-[320px] md:min-w-[450px] border border-gray-200 rounded-2xl md:rounded-[2rem] p-4 md:p-5 flex gap-4 md:gap-5 snap-start hover:border-orange-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 bg-white group"
-        >
-          <img :src="book.cover" :alt="book.title" class="w-24 h-32 md:w-32 md:h-44 object-cover rounded-xl shadow-sm ring-1 ring-gray-100" />
-          <div class="flex-1 flex flex-col justify-between">
-            <div>
-              <div class="flex justify-between items-start mb-3">
-                <h3 class="text-base md:text-xl font-bold text-gray-900 leading-tight">{{ book.title }}</h3>
-                <span :class="['font-semibold text-xs uppercase tracking-wider px-2 py-1 rounded-full', book.statusColor]">
-                  {{ book.status }}
-                </span>
-              </div>
-              <div class="text-xs md:text-sm space-y-1 text-gray-600 font-medium">
-                <p class="flex items-center gap-2">
-                  <span class="text-gray-400 w-12 md:w-16">Penulis</span>
-                  <span class="text-gray-800">{{ book.author }}</span>
-                </p>
-                <p class="flex items-center gap-2">
-                  <span class="text-gray-400 w-12 md:w-16">Penerbit</span>
-                  <span class="text-gray-800">{{ book.publisher }}</span>
-                </p>
-                <p v-if="book.dueDate" class="flex items-center gap-2">
-                  <span class="text-gray-400 w-12 md:w-16">Tenggat</span>
-                  <span class="font-semibold text-red-600 text-xs md:text-sm">{{ book.dueDate }}</span>
-                </p>
-              </div>
-            </div>
-            <div class="mt-3 md:mt-4">
-              <span v-if="book.isReviewed" class="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 md:px-4 py-1 rounded-lg text-xs md:text-sm font-semibold border border-orange-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Reviewed
-              </span>
-              <span v-else class="inline-flex items-center gap-2 bg-white text-orange-700 px-3 md:px-4 py-1 rounded-lg text-xs md:text-sm font-semibold border border-orange-200 group-hover:bg-orange-50">
-                Lihat detail
-              </span>
-            </div>
-          </div>
-        </Link>
-      </div>
-    </section>
-
+    </Link>
+  </div>
+</section>
     <!-- Toast Notification -->
     <div v-if="toast.show" class="fixed bottom-4 right-4 z-50 animate-slide-up">
       <div :class="['px-6 py-3 rounded-xl shadow-lg text-white', toast.type === 'success' ? 'bg-green-500' : 'bg-red-500']">
@@ -388,7 +399,7 @@
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import {
   QrCodeIcon,
@@ -400,6 +411,13 @@ import FooterSection from '@/Components/FooterSection.vue';
 import BookCard from '@/Components/BookCard.vue';
 import BestSellerSection from '@/Components/BestSellerSection.vue';
 import ReviewsSection from '@/Components/ReviewsSection.vue';
+
+const page = usePage();
+const user = computed(() => page.props.auth.user);
+const profilePhotoUrl = computed(() => user.value?.profile_photo_url || null);
+const userAvatar = computed(() => {
+  return profilePhotoUrl.value || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.value?.name || 'User')}&background=f97316&color=fff&size=128`;
+});
 
 // CONSTANTS
 const ALL_EXPECTED_CATEGORIES = ['Fiksi', 'Non Fiksi', 'Referensi', 'Cerita Anak'];
@@ -513,18 +531,6 @@ const bestSellerBooks = computed(() => {
   ];
 });
 
-// REVIEWS DATA
-const bestReviews = ref([
-  { id: 1, user: 'Elliot Zaky Iman', class: 'XI Las 2', bookTitle: 'Bintang', rating: 4.5, comment: 'Lorem Ipsum is simply dummy text...', image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1464601444i/30325492.jpg' },
-  { id: 2, user: 'Aurel Filza', class: 'XI RPL 1', bookTitle: 'Hujan', rating: 5, comment: 'Cerita yang sangat menyentuh...', image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1453303632i/28595941.jpg' }
-]);
-
-const recentReviews = ref([
-  { id: 1, user: 'Elliot Zaky Iman', title: 'Hujan - Tere Liye', rating: 4 },
-  { id: 2, user: 'Elliot Zaky Iman', title: 'Hujan - Tere Liye', rating: 4 },
-  { id: 3, user: 'Elliot Zaky Iman', title: 'Hujan - Tere Liye', rating: 4 }
-]);
-
 // STATE
 const heroSection = ref(null);
 const navbarSticky = ref(false);
@@ -539,10 +545,6 @@ const toast = ref({ show: false, message: '', type: 'success' });
 let intersectionObserver;
 
 // COMPUTED
-const userAvatar = computed(() => {
-  return props.user.profile_photo_url || `https://ui-avatars.com/api/?name=${props.user.name}&background=E67E22&color=white`;
-});
-
 const allCategories = computed(() => {
   const bookCategories = props.availableBooks
     .map(book => book.category)
@@ -685,16 +687,11 @@ onBeforeUnmount(() => {
   document.body.style.overflow = '';
 });
 
-// HISTORY DATA
-const fallbackHistory = [
-  { id: 1, title: 'Bintang', author: 'Tere Liye', publisher: 'Gramedia', status: 'Dikembalikan', statusColor: 'text-orange-700 bg-orange-50', cover: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1464601444i/30325492.jpg', isReviewed: true },
-  { id: 2, title: 'Hujan', author: 'Tere Liye', publisher: 'Gramedia', status: 'Dipinjam', statusColor: 'text-orange-900 bg-orange-100', cover: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1453303632i/28595941.jpg', dueDate: '15 Februari 2027', isReviewed: false },
-  { id: 3, title: 'Fantastic Beasts', author: 'J.K. Rowling', publisher: 'Gramedia', status: 'Dikembalikan', statusColor: 'text-orange-700 bg-orange-50', cover: 'https://m.media-amazon.com/images/I/918sSshA48L.jpg', isReviewed: true }
-];
-
 const history = computed(() => {
-  if (!props.recentBorrows?.length) return fallbackHistory;
+  // Jika tidak ada data dari database, kembalikan array kosong
+  if (!props.recentBorrows?.length) return [];
 
+  // Mapping data asli dari database
   return props.recentBorrows.map((borrow) => ({
     id: borrow.id,
     borrowId: borrow.id,

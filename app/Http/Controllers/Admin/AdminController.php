@@ -12,6 +12,7 @@ use App\Models\Complaint;
 use App\Models\Suggestion;
 use App\Models\BookRequest;
 use App\Models\Activity;
+use App\Models\SystemParameter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -126,7 +127,8 @@ class AdminController extends Controller
         $validated['created_by'] = Auth::id();
         $validated['status'] = 'approved';
 
-        Book::create($validated);
+        $book = Book::create($validated);
+        Activity::log(Auth::id(), 'create', "Menambahkan buku: {$book->title}");
 
         return redirect()->route('admin.books')->with('success', 'Buku berhasil ditambahkan');
     }
@@ -161,6 +163,7 @@ class AdminController extends Controller
         }
 
         $book->update($validated);
+        Activity::log(Auth::id(), 'update', "Mengubah data buku: {$book->title}");
 
         return redirect()->route('admin.books')->with('success', 'Buku berhasil diperbarui');
     }
@@ -172,6 +175,7 @@ class AdminController extends Controller
         ]);
 
         Category::create($validated);
+        Activity::log(Auth::id(), 'create', "Menambahkan kategori: {$validated['name']}");
 
         return back()->with('success', 'Kategori berhasil ditambahkan');
     }
@@ -181,13 +185,16 @@ class AdminController extends Controller
         $cat = Category::where('name', $category)->first();
         if ($cat) {
             $cat->delete();
+            Activity::log(Auth::id(), 'delete', "Menghapus kategori: {$category}");
         }
         return back()->with('success', 'Kategori berhasil dihapus');
     }
 
     public function destroyBook(Book $book)
     {
+        $bookTitle = $book->title;
         $book->delete();
+        Activity::log(Auth::id(), 'delete', "Menghapus buku: {$bookTitle}");
 
         return back()->with('success', 'Buku berhasil dihapus');
     }
@@ -205,6 +212,7 @@ class AdminController extends Controller
     public function approveBookRequest(BookRequest $bookRequest)
     {
         $bookRequest->update(['status' => 'approved']);
+        Activity::log(Auth::id(), 'approve', "Menyetujui permintaan buku: {$bookRequest->title}");
 
         return back()->with('success', 'Permintaan buku disetujui');
     }
@@ -212,6 +220,7 @@ class AdminController extends Controller
     public function rejectBookRequest(BookRequest $bookRequest)
     {
         $bookRequest->update(['status' => 'rejected']);
+        Activity::log(Auth::id(), 'reject', "Menolak permintaan buku: {$bookRequest->title}");
 
         return back()->with('success', 'Permintaan buku ditolak');
     }
@@ -269,20 +278,24 @@ class AdminController extends Controller
     public function approveBookSubmission(Book $book)
     {
         $book->update(['status' => 'approved']);
+        Activity::log(Auth::id(), 'approve', "Menyetujui pengajuan buku: {$book->title}");
 
         return back()->with('success', 'Buku disetujui');
     }
 
     public function rejectBookSubmission(Book $book)
     {
+        $reason = '';
         if (request()->has('rejection_reason')) {
+            $reason = request('rejection_reason');
             $book->update([
                 'status' => 'rejected',
-                'rejection_reason' => request('rejection_reason'),
+                'rejection_reason' => $reason,
             ]);
         } else {
             $book->update(['status' => 'rejected']);
         }
+        Activity::log(Auth::id(), 'reject', "Menolak pengajuan buku: {$book->title}" . ($reason ? " (Alasan: {$reason})" : ''));
 
         return back()->with('success', 'Buku ditolak');
     }
@@ -299,7 +312,9 @@ class AdminController extends Controller
 
     public function destroyReview(Review $review)
     {
+        $bookTitle = $review->book?->title ?? 'Unknown';
         $review->delete();
+        Activity::log(Auth::id(), 'delete', "Menghapus review buku: {$bookTitle}");
 
         return back()->with('success', 'Review dihapus');
     }
@@ -324,6 +339,7 @@ class AdminController extends Controller
     public function resolveComplaint(Complaint $complaint)
     {
         $complaint->update(['status' => 'resolved']);
+        Activity::log(Auth::id(), 'update', "Menyelesaikan keluhan dari: {$complaint->user?->name}");
 
         return back()->with('success', 'Keluhan diselesaikan');
     }
@@ -341,6 +357,7 @@ class AdminController extends Controller
     public function updateSuggestionStatus(Suggestion $suggestion)
     {
         $suggestion->update(['status' => 'processed']);
+        Activity::log(Auth::id(), 'update', "Memproses saran dari: {$suggestion->user?->name}");
 
         return back()->with('success', 'Saran diproses');
     }
@@ -396,7 +413,8 @@ class AdminController extends Controller
         $validated['status'] = 'approved';
         $validated['password'] = bcrypt($validated['password'] ?? 'password123');
 
-        User::create($validated);
+        $user = User::create($validated);
+        Activity::log(Auth::id(), 'create', "Menambahkan petugas: {$user->name}");
 
         return back()->with('success', 'Petugas berhasil ditambahkan');
     }
@@ -404,6 +422,7 @@ class AdminController extends Controller
     public function approveUser(User $user)
     {
         $user->update(['status' => 'approved']);
+        Activity::log(Auth::id(), 'approve', "Menyetujui anggota: {$user->name}");
 
         return back()->with('success', 'Anggota berhasil diverifikasi');
     }
@@ -417,6 +436,7 @@ class AdminController extends Controller
         $user->update([
             'status' => 'rejected',
         ]);
+        Activity::log(Auth::id(), 'reject', "Menolak anggota: {$user->name}");
 
         return back()->with('success', 'Anggota ditolak');
     }
@@ -444,6 +464,7 @@ class AdminController extends Controller
     public function restrictUser(User $user)
     {
         $user->update(['borrow_restricted' => true]);
+        Activity::log(Auth::id(), 'restrict', "Membatasi peminjaman anggota: {$user->name}");
 
         return back()->with('success', 'Anggota dibatasi peminjaman');
     }
@@ -451,13 +472,16 @@ class AdminController extends Controller
     public function unrestrictUser(User $user)
     {
         $user->update(['borrow_restricted' => false]);
+        Activity::log(Auth::id(), 'unrestrict', "Menghapus batasan peminjaman anggota: {$user->name}");
 
         return back()->with('success', 'Pembatasan anggota dihapus');
     }
 
     public function destroyUser(User $user)
     {
+        $userName = $user->name;
         $user->delete();
+        Activity::log(Auth::id(), 'delete', "Menghapus anggota: {$userName}");
 
         return back()->with('success', 'Anggota dihapus');
     }
@@ -467,5 +491,96 @@ class AdminController extends Controller
         return Inertia::render('Admin/Books/Create', [
             'categories' => $categories,
         ]);
+    }
+
+    /**
+     * Admin: Halaman pengaturan parameter sistem
+     */
+    public function systemParameters()
+    {
+        $parameters = SystemParameter::all();
+        
+        $formattedParams = [];
+        foreach ($parameters as $param) {
+            $formattedParams[] = [
+                'id' => $param->id,
+                'key' => $param->key,
+                'value' => $param->value,
+                'type' => $param->type,
+                'description' => $param->description,
+            ];
+        }
+
+        return Inertia::render('Admin/Settings/SystemParameters', [
+            'parameters' => $formattedParams,
+        ]);
+    }
+
+    /**
+     * Admin: Update parameter sistem
+     */
+    public function updateSystemParameter(Request $request, SystemParameter $parameter)
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
+
+        $request->validate([
+            'value' => 'required',
+        ]);
+
+        $oldValue = $parameter->value;
+        $parameter->update(['value' => (string) $request->value]);
+
+        Activity::log(Auth::id(), 'update_parameter', "Mengubah parameter '{$parameter->key}' dari '{$oldValue}' menjadi '{$parameter->value}'");
+
+        return back()->with('success', "Parameter '{$parameter->key}' berhasil diperbarui.");
+    }
+
+    /**
+     * Admin: Daftar permintaan perpanjangan peminjaman (delegation ke BorrowController)
+     */
+    public function extensionRequests()
+    {
+        $user = Auth::user();
+        
+        if (!in_array($user->role, ['admin', 'petugas'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $borrowController = new \App\Http\Controllers\BorrowController();
+        return $borrowController->extensionRequests(request());
+    }
+
+    /**
+     * Admin: Daftar pembayaran denda yang pending
+     */
+    public function pendingPayments()
+    {
+        $user = Auth::user();
+        
+        if (!in_array($user->role, ['admin', 'petugas'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $borrows = Borrow::where('payment_status', 'pending')
+            ->with(['user', 'book'])
+            ->orderBy('updated_at', 'desc')
+            ->paginate(20);
+
+        return Inertia::render('Admin/Payments/PendingPayments', [
+            'borrows' => $borrows,
+        ]);
+    }
+
+    /**
+     * Admin: Konfirmasi pembayaran tunai
+     */
+    public function confirmCashPayment(Borrow $borrow)
+    {
+        $borrowController = new \App\Http\Controllers\BorrowController();
+        return $borrowController->confirmCashPayment($borrow);
     }
 }

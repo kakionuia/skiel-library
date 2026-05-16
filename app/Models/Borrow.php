@@ -25,6 +25,10 @@ class Borrow extends Model
         'approved_at',
         'rejected_at',
         'rejection_reason',
+        'payment_method',
+        'payment_status',
+        'payment_date',
+        'extension_count',
     ];
 
     protected $casts = [
@@ -33,9 +37,11 @@ class Borrow extends Model
         'return_date' => 'date',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'payment_date' => 'datetime',
         'late_days' => 'integer',
         'late_fee' => 'decimal:2',
         'quantity' => 'integer',
+        'extension_count' => 'integer',
     ];
 
     protected $appends = ['status_color', 'status_text', 'can_borrow'];
@@ -55,6 +61,11 @@ class Borrow extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function extensions()
+    {
+        return $this->hasMany(BorrowExtension::class);
+    }
+
     public function isOverdue()
     {
         return in_array($this->status, ['approved', 'borrowed']) && now()->gt($this->due_date);
@@ -64,7 +75,8 @@ class Borrow extends Model
     {
         if ($this->isOverdue()) {
             $this->late_days = now()->diffInDays($this->due_date);
-            $this->late_fee = $this->late_days * 1000; // Rp1000 per hari
+            $finePerDay = SystemParameter::getByKey('fine_per_day', 5000);
+            $this->late_fee = $this->late_days * $finePerDay;
             $this->save();
         }
         return $this;

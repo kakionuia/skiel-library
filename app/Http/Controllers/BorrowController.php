@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Borrow;
+use App\Models\BorrowExtension;
 use App\Models\Activity;
+use App\Models\SystemParameter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -204,7 +206,8 @@ class BorrowController extends Controller
         // Hitung keterlambatan
         if ($returnDate->gt($borrow->due_date)) {
             $lateDays = $returnDate->diffInDays($borrow->due_date);
-            $lateFee = $lateDays * 1000; // Rp1000 per hari
+            $finePerDay = SystemParameter::getByKey('fine_per_day', 5000);
+            $lateFee = $lateDays * $finePerDay;
         }
 
         // Update peminjaman
@@ -369,9 +372,9 @@ class BorrowController extends Controller
     }
 
     /**
-     * User: Perpanjang peminjaman
+     * User: Mengajukan perpanjangan peminjaman (requires approval)
      */
-    public function extend(Borrow $borrow)
+    public function extend(Request $request, Borrow $borrow)
     {
         $user = Auth::user();
 
@@ -383,14 +386,106 @@ class BorrowController extends Controller
             return back()->withErrors(['error' => 'Hanya peminjaman yang sedang berjalan yang dapat diperpanjang.']);
         }
 
-        // Cek apakah sudah pernah diperpanjang (optional: maksimal 1x perpanjangan)
-        $newDueDate = $borrow->due_date->addDays(7);
+        // Get system settings
+        $maxExtensions = SystemParameter::getByKey('max_extensions', 2);
+        $extensionDays = SystemParameter::getByKey('extension_days', 7);
+
+        // Check if already at max extensions
+        if ($borrow->extension_count >= $maxExtensions) {
+            return back()->withErrors(['error' => "Anda sudah mencapai batas maksimal perpanjangan ({$maxExtensions} kali)."]);
+        }
+
+        $request->validate([
+            'requested_days' => 'required|integer|min:1|max:' . $extensionDays,
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        // Check if already has pending extension request
+        $existingRequest = BorrowExtension::where('borrow_id', $borrow->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($existingRequest) {
+            return back()->withErrors(['error' => 'Anda sudah memiliki permintaan perpanjangan yang menunggu persetujuan.']);
+        }
+
+        // Create extension request
+        $extension = BorrowExtension::create([
+            'borrow_id' => $borrow->id,
+            'status' => 'pending',
+            'requested_days' => $request->requested_days,
+            'reason' => $request->reason,
+        ]);
+
+        Activity::log(Auth::id(), 'borrow_extension_request', "Mengajukan perpanjangan peminjaman buku: {$borrow->book->title}");
+
+        return back()->with('success', 'Permintaan perpanjangan berhasil dikirim. Silakan tunggu persetujuan petugas.');
+    }
+
+    /**
+     * Petugas/Admin: Menyetujui perpanjangan peminjaman
+     */
+    public function approveExtension(BorrowExtension $extension)
+    {
+        $user = Auth::user();
+        
+        if (!$this->isLibrarian($user)) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($extension->status !== 'pending') {
+            return back()->withErrors(['error' => 'Permintaan perpanjangan ini sudah diproses sebelumnya.']);
+        }
+
+        $borrow = $extension->borrow;
+
+        if ($borrow->status !== 'borrowed') {
+            return back()->withErrors(['error' => 'Status peminjaman tidak valid untuk perpanjangan.']);
+        }
+
+        // Extend the due date
+        $newDueDate = $borrow->due_date->addDays($extension->requested_days);
+
+        $extension->update([
+            'status' => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
 
         $borrow->update([
             'due_date' => $newDueDate,
+            'extension_count' => $borrow->extension_count + 1,
         ]);
 
-        return back()->with('success', 'Peminjaman berhasil diperpanjang hingga ' . $newDueDate->format('d/m/Y'));
+        Activity::log($borrow->user_id, 'borrow_extension_approved', "Perpanjangan peminjaman buku disetujui hingga {$newDueDate->format('d/m/Y')}");
+
+        return back()->with('success', 'Perpanjangan peminjaman berhasil disetujui hingga ' . $newDueDate->format('d/m/Y'));
+    }
+
+    /**
+     * Petugas/Admin: Menolak perpanjangan peminjaman
+     */
+    public function rejectExtension(Request $request, BorrowExtension $extension)
+    {
+        $user = Auth::user();
+        
+        if (!$this->isLibrarian($user)) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($extension->status !== 'pending') {
+            return back()->withErrors(['error' => 'Permintaan perpanjangan ini sudah diproses sebelumnya.']);
+        }
+
+        $extension->update([
+            'status' => 'rejected',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        Activity::log($extension->borrow->user_id, 'borrow_extension_rejected', 'Perpanjangan peminjaman buku ditolak');
+
+        return back()->with('success', 'Permintaan perpanjangan berhasil ditolak.');
     }
 
     /**
@@ -414,7 +509,7 @@ class BorrowController extends Controller
     }
 
     /**
-     * User: Halaman bayar denda
+     * User: Halaman bayar denda dengan opsi QRIS dan tunai
      */
     public function payFine(Borrow $borrow)
     {
@@ -428,13 +523,28 @@ class BorrowController extends Controller
             return back()->withErrors(['error' => 'Tidak ada denda untuk dibayar.']);
         }
 
-        return Inertia::render('User/PayFine', [
-            'borrow' => $borrow,
+        return Inertia::render('User/Fine/PayFine', [
+            'borrow' => [
+                'id' => $borrow->id,
+                'book_id' => $borrow->book_id,
+                'late_days' => $borrow->late_days,
+                'late_fee' => $borrow->late_fee,
+                'book' => [
+                    'id' => $borrow->book->id,
+                    'title' => $borrow->book->title,
+                    'author' => $borrow->book->author,
+                ],
+                'user' => [
+                    'id' => $borrow->user->id,
+                    'name' => $borrow->user->name,
+                    'email' => $borrow->user->email,
+                ]
+            ],
         ]);
     }
 
     /**
-     * User: Proses pembayaran denda
+     * User: Proses pembayaran denda (QRIS atau tunai)
      */
     public function processPayment(Request $request, Borrow $borrow)
     {
@@ -444,14 +554,33 @@ class BorrowController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // TODO: Integrasikan dengan payment gateway
-        // For now, just mark as paid
-        
-        $borrow->update([
-            'late_fee' => 0,
+        $request->validate([
+            'payment_method' => 'required|in:qris,cash',
         ]);
 
-        return redirect('/my-loans')->with('success', 'Denda berhasil dibayar.');
+        if ($request->payment_method === 'qris') {
+            // Update borrow with QRIS payment details
+            $borrow->update([
+                'payment_method' => 'qris',
+                'payment_status' => 'pending',
+            ]);
+            
+            Activity::log($borrow->user_id, 'fine_payment_qris', "Mengajukan pembayaran denda via QRIS sebesar Rp " . number_format($borrow->late_fee, 0, ',', '.'));
+            
+            return redirect()->route('fine.qris', ['borrow' => $borrow->id]);
+        } else if ($request->payment_method === 'cash') {
+            // Mark as pending cash payment (akan dikonfirmasi oleh petugas)
+            $borrow->update([
+                'payment_method' => 'cash',
+                'payment_status' => 'pending',
+            ]);
+
+            Activity::log($borrow->user_id, 'fine_payment_cash', "Mengajukan pembayaran denda tunai sebesar Rp " . number_format($borrow->late_fee, 0, ',', '.'));
+
+            return back()->with('success', 'Pembayaran denda tunai berhasil diajukan. Harap bayar ke petugas perpustakaan.');
+        }
+
+        return back()->withErrors(['error' => 'Metode pembayaran tidak valid.']);
     }
 
     /**
@@ -478,6 +607,94 @@ class BorrowController extends Controller
     public function printProof(Borrow $borrow)
     {
         return $this->proof($borrow);
+    }
+
+    /**
+     * Petugas/Admin: Konfirmasi pembayaran denda tunai
+     */
+    public function confirmCashPayment(Borrow $borrow)
+    {
+        $user = Auth::user();
+
+        if (!$this->isLibrarian($user)) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($borrow->payment_method !== 'cash' || $borrow->payment_status !== 'pending') {
+            return back()->withErrors(['error' => 'Pembayaran ini tidak valid untuk dikonfirmasi.']);
+        }
+
+        $borrow->update([
+            'payment_status' => 'confirmed',
+            'payment_date' => now(),
+        ]);
+
+        Activity::log($borrow->user_id, 'fine_payment_confirmed', 'Pembayaran denda tunai dikonfirmasi oleh petugas');
+
+        return back()->with('success', 'Pembayaran denda tunai berhasil dikonfirmasi.');
+    }
+
+    /**
+     * Admin/Petugas: Tampilkan daftar extension requests yang pending
+     */
+    public function extensionRequests(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$this->isLibrarian($user)) {
+            abort(403, 'Unauthorized');
+        }
+
+        $query = BorrowExtension::with(['borrow', 'borrow.user', 'borrow.book', 'approvedBy'])
+            ->where('status', 'pending');
+
+        if ($request->search) {
+            $search = $request->search;
+            $query->whereHas('borrow.user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })->orWhereHas('borrow.book', function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%");
+            });
+        }
+
+        $extensions = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        return Inertia::render('Admin/BorrowExtensions/Index', [
+            'extensions' => $extensions,
+            'filters' => $request->only(['search']),
+        ]);
+    }
+
+    /**
+     * User: Tampilkan halaman QRIS payment
+     */
+    public function showQrisPayment(Borrow $borrow)
+    {
+        $user = Auth::user();
+
+        if ($borrow->user_id !== $user->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($borrow->payment_method !== 'qris' || $borrow->payment_status !== 'pending') {
+            return back()->withErrors(['error' => 'Tidak ada pembayaran QRIS yang tertunda.']);
+        }
+
+        $borrow->load(['user', 'book']);
+
+        return Inertia::render('User/Fine/QrisPayment', [
+            'borrow' => [
+                'id' => $borrow->id,
+                'late_fee' => $borrow->late_fee,
+                'late_days' => $borrow->late_days,
+                'book' => [
+                    'id' => $borrow->book->id,
+                    'title' => $borrow->book->title,
+                    'author' => $borrow->book->author,
+                ]
+            ],
+            'qrisCode' => 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=SKIEL-LIBRARY-FINE-' . $borrow->id . '-' . time(),
+        ]);
     }
 
     

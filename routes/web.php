@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\StatusCheckController;
 use App\Http\Controllers\Auth\AccountDeletionController;
 use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\BookQueueController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ArticleController;
 use App\Models\Book;
 use App\Models\Borrow;
@@ -21,14 +22,12 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->name('home');
+/*
+|--------------------------------------------------------------------------
+| WELCOME / HOME ROUTE
+|--------------------------------------------------------------------------
+*/
+Route::get('/', [ArticleController::class, 'welcome'])->name('home');
 
 // Waiting page for unapproved accounts
 Route::middleware(['auth', 'pending'])->get('/waiting', [WaitingController::class, 'index'])->name('waiting');
@@ -54,7 +53,7 @@ Route::get('/api/articles', function () {
                 'excerpt' => $article->excerpt,
                 'content' => $article->content,
                 'category' => $article->category,
-                'featured_image' => $article->featured_image,
+                'featured_image' => $article->featured_image ? asset('storage/' . $article->featured_image) : null,
                 'author' => $article->author->name ?? 'Admin',
                 'published_at' => $article->published_at?->format('Y-m-d'),
                 'desc' => $article->excerpt,
@@ -64,13 +63,19 @@ Route::get('/api/articles', function () {
     return response()->json(['data' => $articles]);
 });
 
-// Public articles listing
+/*
+|--------------------------------------------------------------------------
+| PUBLIC ARTICLE ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-
-// Public article detail by slug
 Route::get('/articles/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
 
-// Admin Routes
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/download-report', [AdminController::class, 'downloadReport'])->name('download-report');
@@ -117,7 +122,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     // Activity Logs
     Route::get('/activity-logs', [AdminController::class, 'activityLogs'])->name('activity-logs');
     
-    // Book Management (Admin can add and manage books + categories)
+    // Book Management
     Route::get('/books', [AdminController::class, 'books'])->name('books');
     Route::get('/books/create', [AdminController::class, 'createBook'])->name('books.create');
     Route::post('/books', [AdminController::class, 'storeBook'])->name('books.store');
@@ -125,7 +130,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/books/{book}', [AdminController::class, 'updateBook'])->name('books.update');
     Route::delete('/books/{book}', [AdminController::class, 'destroyBook'])->name('books.destroy');
     
-    // Category Management (Admin can add and delete categories)
+    // Category Management
     Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');
     Route::delete('/categories/{category}', [AdminController::class, 'destroyCategory'])->name('categories.destroy');
     
@@ -134,6 +139,15 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/borrows/{borrow}/reject', [BorrowController::class, 'reject'])->name('borrows.reject');
     Route::post('/borrows/{borrow}/confirm-pickup', [BorrowController::class, 'confirmPickup'])->name('borrows.confirm-pickup');
     Route::post('/borrows/{borrow}/return', [BorrowController::class, 'returnBook'])->name('borrows.return');
+    
+    // Borrow Extension Approval/Rejection
+    Route::post('/borrow-extensions/{extension}/approve', [BorrowController::class, 'approveExtension'])->name('extensions.approve');
+    Route::post('/borrow-extensions/{extension}/reject', [BorrowController::class, 'rejectExtension'])->name('extensions.reject');
+    Route::get('/borrow-extensions', [AdminController::class, 'extensionRequests'])->name('extensions.index');
+    
+    // Payment Management
+    Route::get('/payments/pending', [AdminController::class, 'pendingPayments'])->name('payments.pending');
+    Route::post('/payments/{borrow}/confirm-cash', [AdminController::class, 'confirmCashPayment'])->name('payments.confirm-cash');
     
     // Article Management
     Route::get('/articles', [ArticleController::class, 'admin'])->name('articles');
@@ -144,9 +158,17 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::delete('/articles/{article}', [ArticleController::class, 'adminDestroy'])->name('articles.destroy');
     Route::post('/articles/{article}/approve', [ArticleController::class, 'approve'])->name('articles.approve');
     Route::post('/articles/{article}/reject', [ArticleController::class, 'reject'])->name('articles.reject');
+    
+    // System Parameters
+    Route::get('/settings/system-parameters', [AdminController::class, 'systemParameters'])->name('settings.system-parameters');
+    Route::put('/settings/system-parameters/{parameter}', [AdminController::class, 'updateSystemParameter'])->name('settings.system-parameters.update');
 });
 
-// Petugas Routes
+/*
+|--------------------------------------------------------------------------
+| PETUGAS ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('petugas.')->group(function () {
     Route::get('/dashboard', [PetugasController::class, 'dashboard'])->name('dashboard');
     
@@ -169,10 +191,14 @@ Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('pet
     Route::get('/borrows', [PetugasController::class, 'borrows'])->name('borrows');
     Route::post('/borrows/{borrow}/return', [PetugasController::class, 'processReturn'])->name('borrows.return');
     
-    // Borrow Approve/Reject untuk Petugas
+    // Borrow Approve/Reject
     Route::post('/borrows/{borrow}/approve', [BorrowController::class, 'approve'])->name('borrows.approve');
     Route::post('/borrows/{borrow}/reject', [BorrowController::class, 'reject'])->name('borrows.reject');
     Route::post('/borrows/{borrow}/confirm-pickup', [BorrowController::class, 'confirmPickup'])->name('borrows.confirm-pickup');
+    
+    // Borrow Extension
+    Route::post('/borrow-extensions/{extension}/approve', [BorrowController::class, 'approveExtension'])->name('extensions.approve');
+    Route::post('/borrow-extensions/{extension}/reject', [BorrowController::class, 'rejectExtension'])->name('extensions.reject');
     
     // Late Returns
     Route::get('/late-returns', [PetugasController::class, 'lateReturns'])->name('late-returns');
@@ -196,7 +222,11 @@ Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('pet
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
-// ========== USER ROUTES (approved users only) ==========
+/*
+|--------------------------------------------------------------------------
+| USER ROUTES (approved users only)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     
     // Dashboard
@@ -245,7 +275,6 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             ->where('status', 'approved')
             ->withAvg('reviews', 'rating')
             ->withCount(['reviews', 'borrows'])
-            // Order by available quantity first (tersedia di atas), then by popularity (borrows count)
             ->orderByRaw('CASE WHEN available_quantity > 0 THEN 0 ELSE 1 END ASC')
             ->orderByDesc('borrows_count')
             ->orderBy('title')
@@ -331,9 +360,8 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         ]);
     })->name('dashboard');
 
-    // ========== BOOK DETAIL ROUTE ==========
+    // Book Detail
     Route::get('/books/{book}', function (Book $book) {
-        // Hanya buku yang approved yang bisa diakses
         if ($book->status !== 'approved') {
             abort(404);
         }
@@ -363,7 +391,6 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             'borrows_count' => $book->borrows_count ?? 0,
         ];
         
-        // Get reviews
         $reviews = Review::with('user:id,name,kelas,jurusan')
             ->where('book_id', $book->id)
             ->latest()
@@ -439,7 +466,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         ]);
     })->name('books.review.create');
 
-    // ========== BORROW ROUTES ==========
+    // Borrow Routes
     Route::post('/borrow', [BorrowController::class, 'store'])->name('borrow.store');
     Route::get('/borrow/create/{book}', function (Book $book) {
         if ($book->status !== 'approved') {
@@ -466,14 +493,19 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     Route::get('/borrow/{borrow}/print', [BorrowController::class, 'printProof'])->name('borrow.print');
     Route::post('/borrow/{borrow}/extend', [BorrowController::class, 'extend'])->name('borrow.extend');
     Route::delete('/borrow/{borrow}', [BorrowController::class, 'cancel'])->name('borrow.cancel');
+    
+    // Fine Payment
+    Route::get('/borrow/{borrow}/fine', [BorrowController::class, 'payFine'])->name('fine.pay');
+    Route::post('/borrow/{borrow}/fine/process', [BorrowController::class, 'processPayment'])->name('fine.process');
+    Route::get('/borrow/{borrow}/fine/qris', [BorrowController::class, 'showQrisPayment'])->name('fine.qris');
 
-    // ========== BOOK QUEUE ROUTES ==========
+    // Book Queue
     Route::post('/queue/add', [BookQueueController::class, 'store'])->name('queue.store');
     Route::delete('/queue/{queue}', [BookQueueController::class, 'cancel'])->name('queue.cancel');
     Route::get('/api/queue/position', [BookQueueController::class, 'getPosition'])->name('queue.position');
     Route::get('/api/queue/book/{book}', [BookQueueController::class, 'bookQueueInfo'])->name('queue.info');
 
-    // ========== COMPLAINTS ==========
+    // Complaints
     Route::post('/dashboard/complaints', function (Request $request) {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
@@ -490,7 +522,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         return back()->with('success', 'Keluhan berhasil dikirim.');
     })->name('dashboard.complaints.store');
 
-    // ========== SUGGESTIONS ==========
+    // Suggestions
     Route::post('/dashboard/suggestions', function (Request $request) {
         $validated = $request->validate([
             'content' => 'required|string|max:2000',
@@ -505,7 +537,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         return back()->with('success', 'Saran berhasil dikirim.');
     })->name('dashboard.suggestions.store');
 
-    // ========== REVIEWS ==========
+    // Reviews
     Route::post('/dashboard/reviews', function (Request $request) {
         $validated = $request->validate([
             'book_id' => 'required|exists:books,id',
@@ -532,21 +564,38 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
 
         return back()->with('success', 'Ulasan buku berhasil disimpan.');
     })->name('dashboard.reviews.store');
+
+    // Book Reviews
+    Route::get('/books/{book}/reviews', [ReviewController::class, 'bookReviews'])->name('books.reviews');
+    Route::post('/reviews/{review}/like', [ReviewController::class, 'toggleLike'])->name('reviews.like');
+    Route::post('/reviews/{review}/bookmark', [ReviewController::class, 'toggleBookmark'])->name('reviews.bookmark');
+    Route::post('/reviews/{review}/comment', [ReviewController::class, 'addComment'])->name('reviews.comment.store');
+    Route::delete('/review-comments/{comment}', [ReviewController::class, 'deleteComment'])->name('reviews.comment.delete');
+    Route::get('/my-reviews-likes', [ReviewController::class, 'myLikedReviews'])->name('reviews.my-likes');
+    Route::get('/my-reviews-bookmarks', [ReviewController::class, 'myBookmarkedReviews'])->name('reviews.my-bookmarks');
+    Route::get('/my-review-comments', [ReviewController::class, 'myReviewComments'])->name('reviews.my-comments');
+    Route::get('/reviews-showcase', [ReviewController::class, 'showcase'])->name('reviews.showcase');
 });
 
-// ========== PROFILE ROUTES ==========
+/*
+|--------------------------------------------------------------------------
+| PROFILE ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Profile Photo Routes
+    Route::post('/profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('profile.photo.update');
+    Route::delete('/profile/photo', [ProfileController::class, 'destroyProfilePhoto'])->name('profile.photo.destroy');
 });
-
-
-// ========== ARTICLE ROUTES (PUBLIC) ==========
-Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-Route::get('/articles/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
-
-// ========== DEBUG ROUTE ==========
+/*
+|--------------------------------------------------------------------------
+| DEBUG ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::get('/debug/books', function() {
     $books = Book::where('status', 'approved')
         ->select('id', 'title', 'available_quantity', 'quantity', 'status', 'category')

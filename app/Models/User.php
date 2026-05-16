@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -28,6 +29,7 @@ class User extends Authenticatable
         'kelas',
         'jurusan',
         'borrow_restricted',
+        'profile_photo_path', // Tambahkan ini
     ];
 
     /**
@@ -54,6 +56,28 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Get the user's profile photo URL.
+     */
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if ($this->profile_photo_path) {
+            // Return relative URL for cross-domain compatibility
+            return '/storage/' . $this->profile_photo_path;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the user's initial for avatar fallback.
+     */
+    public function getInitialAttribute(): string
+    {
+        return strtoupper(mb_substr($this->name, 0, 1));
+    }
+
+    // ... sisa method yang sudah ada tetap dipertahankan
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

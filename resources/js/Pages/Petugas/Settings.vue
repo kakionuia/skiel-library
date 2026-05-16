@@ -132,9 +132,16 @@
 
 <script setup>
 import PetugasSidebar from '@/Components/PetugasSidebar.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { successAlert } from '@/Utils/sweetAlert';
+
+const props = defineProps({
+  parameters: {
+    type: Array,
+    default: () => []
+  }
+});
 
 const settingsForm = ref({
   max_borrow_days: 7,
@@ -142,12 +149,27 @@ const settingsForm = ref({
   max_books_per_member: 3,
 });
 
+onMounted(() => {
+  // Load values from props (from database)
+  if (props.parameters && props.parameters.length > 0) {
+    props.parameters.forEach(param => {
+      if (param.key === 'max_borrow_days') {
+        settingsForm.value.max_borrow_days = parseInt(param.value);
+      } else if (param.key === 'fine_per_day') {
+        settingsForm.value.late_fee_per_day = parseInt(param.value);
+      } else if (param.key === 'max_books_per_member') {
+        settingsForm.value.max_books_per_member = parseInt(param.value);
+      }
+    });
+  }
+});
+
 const updateParameters = () => {
   router.post(route('petugas.settings.update'), settingsForm.value, {
     onSuccess: () => {
       successAlert({
         title: 'Parameter diperbarui',
-        text: 'Pengaturan sistem berhasil disimpan.',
+        text: 'Pengaturan sistem berhasil disimpan dan langsung berlaku.',
       });
     },
   });

@@ -136,13 +136,24 @@ const handleImageUpload = (e) => {
   const file = e.target.files[0]
   if (file) {
     form.featured_image = file
+    // Tambahkan: clear error jika ada
+    if (form.errors.featured_image) {
+      delete form.errors.featured_image
+    }
   }
 }
 
 const submitForm = () => {
-  form.post(route('admin.articles.store'), {
+  // Gunakan transform untuk memastikan data dikirim dengan benar
+  form.transform(data => ({
+    ...data,
+    featured_image: data.featured_image instanceof File ? data.featured_image : undefined
+  })).post(route('admin.articles.store'), {
     onSuccess: () => {
       form.reset()
+    },
+    onError: (errors) => {
+      console.log('Validation errors:', errors)
     }
   })
 }

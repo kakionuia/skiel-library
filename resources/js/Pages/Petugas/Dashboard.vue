@@ -177,6 +177,14 @@
                     </span>
                     <svg class="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                   </Link>
+
+                  <Link :href="route('reviews.showcase')" class="flex items-center justify-between w-full p-4 bg-white/10 hover:bg-white text-white hover:text-orange-600 rounded-2xl transition-all duration-300 font-bold text-sm border border-white/20 hover:border-white group/btn">
+                    <span class="flex items-center gap-3">
+                      <span class="text-lg">⭐</span>
+                      Ulasan Terbaik & Terbaru
+                    </span>
+                    <svg class="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                  </Link>
                 </div>
               </div>
             </div>

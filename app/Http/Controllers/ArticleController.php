@@ -66,14 +66,12 @@ class ArticleController extends Controller
         $validated['slug'] = $slug;
         $validated['author_id'] = Auth::id();
 
-        // If status is approved, set published_at to now and approved info
         if ($validated['status'] === 'approved') {
             $validated['published_at'] = now();
             $validated['approved_by'] = Auth::id();
             $validated['approved_at'] = now();
         }
 
-        // Handle featured image
         if ($request->hasFile('featured_image')) {
             $path = $request->file('featured_image')->store('articles', 'public');
             $validated['featured_image'] = $path;
@@ -112,12 +110,10 @@ class ArticleController extends Controller
             'status' => 'in:draft,pending,approved'
         ]);
 
-        // Only regenerate slug if title changed
         if ($validated['title'] !== $article->title) {
             $validated['slug'] = Article::generateSlug($validated['title']);
         }
 
-        // Handle featured image
         if ($request->hasFile('featured_image')) {
             if ($article->featured_image) {
                 \Storage::disk('public')->delete($article->featured_image);
@@ -126,7 +122,6 @@ class ArticleController extends Controller
             $validated['featured_image'] = $path;
         }
 
-        // If status changed to approved
         if ($article->status !== 'approved' && $validated['status'] === 'approved') {
             $validated['published_at'] = now();
             $validated['approved_by'] = Auth::id();
@@ -193,23 +188,70 @@ class ArticleController extends Controller
     }
 
     /**
-     * FRONTEND: Display published articles list
+     * FRONTEND: Display published articles list (HALAMAN ALL ARTICLES)
      */
     public function index(Request $request)
     {
         $articles = Article::published()
+            ->with('author:id,name')
             ->when($request->search, function($query) use ($request) {
                 return $query->where('title', 'LIKE', '%' . $request->search . '%')
                     ->orWhere('excerpt', 'LIKE', '%' . $request->search . '%');
             })
-            ->when($request->category, function($query) use ($request) {
+            ->when($request->category && $request->category !== 'all', function($query) use ($request) {
                 return $query->where('category', $request->category);
             })
-            ->paginate(12);
+            ->when($request->sort, function($query) use ($request) {
+                switch ($request->sort) {
+                    case 'oldest':
+                        return $query->orderBy('published_at', 'asc');
+                    case 'title_asc':
+                        return $query->orderBy('title', 'asc');
+                    case 'title_desc':
+                        return $query->orderBy('title', 'desc');
+                    case 'latest':
+                    default:
+                        return $query->orderBy('published_at', 'desc');
+                }
+            }, function($query) {
+                return $query->orderBy('published_at', 'desc');
+            })
+            ->get()
+            ->map(function ($article) {
+                if ($article->featured_image) {
+                    $article->featured_image = asset('storage/' . $article->featured_image);
+                }
+                // Calculate read time
+                $wordCount = str_word_count(strip_tags($article->content ?? ''));
+                $article->readTime = max(1, ceil($wordCount / 200));
+                return $article;
+            });
 
-        return Inertia::render('Frontend/Articles/Index', [
+        return Inertia::render('Articles/Index', [
             'articles' => $articles,
-            'filters' => $request->only(['search', 'category'])
+            'filters' => $request->only(['search', 'category', 'sort', 'page'])
+        ]);
+    }
+
+    /**
+     * FRONTEND: Welcome page data
+     */
+    public function welcome()
+    {
+        $latestArticles = Article::published()
+            ->with('author:id,name')
+            ->orderBy('published_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($article) {
+                if ($article->featured_image) {
+                    $article->featured_image = asset('storage/' . $article->featured_image);
+                }
+                return $article;
+            });
+
+        return Inertia::render('Welcome', [
+            'latestArticles' => $latestArticles
         ]);
     }
 
@@ -218,9 +260,13 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        // Only allow viewing approved articles
         if ($article->status !== 'approved' && (!Auth::check() || !Auth::user()->is_admin)) {
             abort(404);
+        }
+
+        // Set full URL for featured image
+        if ($article->featured_image) {
+            $article->featured_image = asset('storage/' . $article->featured_image);
         }
 
         $relatedArticles = Article::published()
@@ -228,7 +274,13 @@ class ArticleController extends Controller
             ->where('id', '!=', $article->id)
             ->orderBy('published_at', 'desc')
             ->limit(3)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                if ($item->featured_image) {
+                    $item->featured_image = asset('storage/' . $item->featured_image);
+                }
+                return $item;
+            });
 
         return Inertia::render('ArticleDetail', [
             'article' => $article->load('author'),
@@ -260,9 +312,8 @@ class ArticleController extends Controller
         $slug = Article::generateSlug($validated['title']);
         $validated['slug'] = $slug;
         $validated['author_id'] = Auth::id();
-        $validated['status'] = 'pending'; // Always pending for petugas
+        $validated['status'] = 'pending';
 
-        // Handle featured image
         if ($request->hasFile('featured_image')) {
             $path = $request->file('featured_image')->store('articles', 'public');
             $validated['featured_image'] = $path;
@@ -322,12 +373,10 @@ class ArticleController extends Controller
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        // Only regenerate slug if title changed
         if ($validated['title'] !== $article->title) {
             $validated['slug'] = Article::generateSlug($validated['title']);
         }
 
-        // Handle featured image
         if ($request->hasFile('featured_image')) {
             if ($article->featured_image) {
                 \Storage::disk('public')->delete($article->featured_image);

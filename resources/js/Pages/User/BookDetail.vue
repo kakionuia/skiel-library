@@ -134,12 +134,12 @@
           <div class="border-t border-slate-100 pt-8">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Ulasan Buku</h3>
-              <button class="text-xs font-bold text-[#D37B3B] hover:text-orange-700 flex items-center gap-1 transition-colors">
+              <Link :href="route('books.reviews', book.id)" class="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 transition-colors">
                 Selengkapnya
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                 </svg>
-              </button>
+              </Link>
             </div>
 
             <div v-if="reviews.length > 0" class="space-y-4">
@@ -267,7 +267,7 @@ function handleBorrowClick() {
     title: 'Buku Sudah Dalam Proses',
     text: messages[props.activeBorrow.status] || 'Buku ini sudah ada dalam daftar peminjaman kamu.',
     icon: 'info',
-    confirmButtonColor: '#D37B3B',
+    confirmButtonColor: '#ea580c',
     confirmButtonText: 'Lihat Rak Buku',
     showCancelButton: true,
     cancelButtonText: 'Tetap di Sini'
@@ -308,7 +308,7 @@ async function addToQueue() {
         icon: 'error',
         title: 'Gagal',
         text: error.message || 'Gagal menambahkan ke antrian',
-        confirmButtonColor: '#D37B3B'
+        confirmButtonColor: '#ea580c'
       });
       return;
     }
@@ -318,7 +318,7 @@ async function addToQueue() {
       icon: 'success',
       title: 'Berhasil!',
       text: 'Anda berhasil bergabung dalam antrian buku ini',
-      confirmButtonColor: '#D37B3B'
+      confirmButtonColor: '#ea580c'
     });
   } catch (error) {
     console.error('Error adding to queue:', error);
@@ -326,7 +326,7 @@ async function addToQueue() {
       icon: 'error',
       title: 'Error',
       text: 'Terjadi kesalahan saat menambahkan ke antrian',
-      confirmButtonColor: '#D37B3B'
+      confirmButtonColor: '#ea580c'
     });
   } finally {
     isAddingQueue.value = false;

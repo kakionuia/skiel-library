@@ -4,10 +4,10 @@
       <div class="mb-6">
         <div class="mx-auto w-16 h-16 rounded-full flex items-center justify-center animate-pulse"
           :class="user.status === 'rejected' ? 'bg-red-100' : 'bg-orange-100'">
-          <svg v-if="user.status === 'rejected'" class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg v-if="user.status === 'rejected'" class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2" />
           </svg>
-          <svg v-else class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg v-else class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -40,7 +40,7 @@
           <p class="text-xs text-gray-500 font-medium">STATUS AKUN</p>
           <p class="text-gray-900 font-semibold capitalize">
             <span v-if="user.status === 'rejected'" class="text-red-600">Ditolak</span>
-            <span v-else class="text-yellow-600">Menunggu Verifikasi</span>
+            <span v-else class="text-orange-600">Menunggu Verifikasi</span>
           </p>
         </div>
         <div v-if="user.created_at">
@@ -77,7 +77,7 @@
         <button
           @click="confirmDeleteAccount"
           :disabled="isDeleting"
-          class="w-full px-4 py-2 text-red-700 border-2 border-red-300 rounded-lg hover:bg-red-50 transition-colors font-medium"
+          class="w-full px-4 py-2 text-red-700 border-2 border-orange-500 rounded-lg hover:bg-red-50 transition-colors font-medium"
         >
           {{ isDeleting ? 'Menghapus...' : 'Hapus Akun' }}
         </button>
@@ -95,7 +95,7 @@
           'mt-4 p-3 rounded-lg text-sm font-medium',
           statusType === 'success' ? 'bg-green-100 text-green-800 border border-green-300' :
           statusType === 'error' ? 'bg-red-100 text-red-800 border border-red-300' :
-          'bg-yellow-100 text-yellow-800 border border-yellow-300'
+          'bg-orange-100 text-orange-800 border border-orange-500'
         ]">
           {{ statusMessage }}
         </div>
