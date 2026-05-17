@@ -27,8 +27,16 @@ class Borrow extends Model
         'rejection_reason',
         'payment_method',
         'payment_status',
+        'payment_due_date',
         'payment_date',
         'extension_count',
+        'is_damaged',
+        'damage_type',
+        'damage_description',
+        'damage_images',
+        'additional_fine',
+        'staff_comment',
+        'damage_status',
     ];
 
     protected $casts = [
@@ -37,9 +45,12 @@ class Borrow extends Model
         'return_date' => 'date',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'payment_due_date' => 'datetime',
         'payment_date' => 'datetime',
         'late_days' => 'integer',
         'late_fee' => 'decimal:2',
+        'additional_fine' => 'decimal:2',
+        'is_damaged' => 'boolean',
         'quantity' => 'integer',
         'extension_count' => 'integer',
     ];
@@ -74,7 +85,7 @@ class Borrow extends Model
     public function calculateLateFee()
     {
         if ($this->isOverdue()) {
-            $this->late_days = now()->diffInDays($this->due_date);
+            $this->late_days = (int) $this->due_date->startOfDay()->diffInDays(now()->startOfDay());
             $finePerDay = SystemParameter::getByKey('fine_per_day', 5000);
             $this->late_fee = $this->late_days * $finePerDay;
             $this->save();

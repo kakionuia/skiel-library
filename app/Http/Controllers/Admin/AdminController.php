@@ -364,39 +364,41 @@ class AdminController extends Controller
 
     // Late Returns
     public function lateReturns()
-    {
-        $lateReturns = Borrow::where('status', 'borrowed')
-            ->where('due_date', '<', now())
-            ->with('user', 'book')
-            ->latest()
-            ->paginate(10);
+{
+    $lateReturns = Borrow::whereIn('status', ['approved', 'borrowed'])
+        ->where('due_date', '<', now())
+        ->with(['user', 'book'])
+        ->latest()
+        ->paginate(10);
+    
+    // Calculate dynamic late fees
+    $lateReturns->getCollection()->transform(function ($borrow) {
+        $borrow->calculateLateFee();
+        return $borrow;
+    });
 
-        return Inertia::render('Admin/LateReturns/Index', [
-            'lateReturns' => $lateReturns,
-        ]);
-    }
-
-    public function showLateReturn(User $user)
-    {
-        $lateReturns = $user->borrows()
-            ->where('status', 'borrowed')
-            ->where('due_date', '<', now())
-            ->with('book')
-            ->get();
-
-        return Inertia::render('Admin/UserLateReturns', [
-            'user' => $user,
-            'lateReturns' => $lateReturns,
-        ]);
-    }
+    return Inertia::render('Admin/LateReturns/Index', [
+        'lateBorrows' => $lateReturns,
+    ]);
+}
 
     // Activity Logs
-    public function activityLogs()
+    public function activityLogs(Request $request)
     {
-        $logs = Activity::latest()->paginate(20);
+        $role = $request->query('role', 'anggota');
+        
+        $activities = Activity::with('user')
+            ->when($role && in_array($role, ['anggota', 'petugas', 'admin']), function($query) use ($role) {
+                return $query->whereHas('user', function($q) use ($role) {
+                    $q->where('role', $role);
+                });
+            })
+            ->latest()
+            ->paginate(20);
 
         return Inertia::render('Admin/ActivityLogs/Index', [
-            'logs' => $logs,
+            'activities' => $activities,
+            'currentRole' => $role,
         ]);
     }
 
@@ -557,24 +559,31 @@ class AdminController extends Controller
     /**
      * Admin: Daftar pembayaran denda yang pending
      */
-    public function pendingPayments()
-    {
-        $user = Auth::user();
-        
-        if (!in_array($user->role, ['admin', 'petugas'])) {
-            abort(403, 'Unauthorized');
-        }
-
-        $borrows = Borrow::where('payment_status', 'pending')
-            ->with(['user', 'book'])
-            ->orderBy('updated_at', 'desc')
-            ->paginate(20);
-
-        return Inertia::render('Admin/Payments/PendingPayments', [
-            'borrows' => $borrows,
-        ]);
+public function pendingPayments()
+{
+    $user = Auth::user();
+    
+    if (!in_array($user->role, ['admin', 'petugas'])) {
+        abort(403, 'Unauthorized');
     }
 
+    Borrow::whereIn('status', ['approved', 'borrowed'])
+        ->where('due_date', '<', now())
+        ->get()
+        ->each
+        ->calculateLateFee();
+
+    $borrows = Borrow::where('payment_status', 'pending')
+        ->whereIn('payment_method', ['qris', 'cash'])
+        ->where('late_fee', '>', 0)
+        ->with(['user', 'book'])
+        ->orderBy('updated_at', 'desc')
+        ->paginate(20);
+
+    return Inertia::render('Admin/Payments/PendingPayments', [
+        'borrows' => $borrows,
+    ]);
+}
     /**
      * Admin: Konfirmasi pembayaran tunai
      */
@@ -583,4 +592,98 @@ class AdminController extends Controller
         $borrowController = new \App\Http\Controllers\BorrowController();
         return $borrowController->confirmCashPayment($borrow);
     }
+
+    public function confirmQrisPayment(Borrow $borrow)
+    {
+        $borrowController = new \App\Http\Controllers\BorrowController();
+        return $borrowController->confirmQrisPayment($borrow);
+    }
+
+    public function addAdditionalFine(Request $request, Borrow $borrow)
+    {
+        return app(\App\Http\Controllers\Petugas\PetugasController::class)->addAdditionalFine($request, $borrow);
+    }
+
+    public function resolveLateReturn(Borrow $borrow)
+    {
+        return app(\App\Http\Controllers\Petugas\PetugasController::class)->resolveLateReturn($borrow);
+    }
+
+    public function showLateReturn(User $user)
+{
+    $lateBorrows = Borrow::where('user_id', $user->id)
+        ->whereIn('status', ['approved', 'borrowed'])
+        ->where('due_date', '<', now())
+        ->with('book')
+        ->get()
+        ->map(function($borrow) {
+            $borrow->calculateLateFee();
+            
+            return [
+                'id' => $borrow->id,
+                'book' => [
+                    'id' => $borrow->book->id,
+                    'title' => $borrow->book->title,
+                    'author' => $borrow->book->author,
+                ],
+                'due_date' => $borrow->due_date,
+                'late_days' => $borrow->late_days,
+                'late_fee' => (float) $borrow->late_fee,
+                'payment_method' => $borrow->payment_method,
+                'payment_status' => $borrow->payment_status,
+                'payment_due_date' => $borrow->payment_due_date,
+                'is_damaged' => $borrow->is_damaged,
+                'damage_status' => $borrow->damage_status,
+                'damage_type' => $borrow->damage_type,
+                'damage_description' => $borrow->damage_description,
+                'damage_images' => $borrow->damage_images ? array_map(function($path) {
+                    return asset('storage/' . $path);
+                }, json_decode($borrow->damage_images, true) ?? []) : [],
+                'additional_fine' => (float) ($borrow->additional_fine ?? 0),
+                'staff_comment' => $borrow->staff_comment,
+            ];
+        });
+    
+    // Update lateReturns query untuk admin index
+    $lateReturns = Borrow::whereIn('status', ['approved', 'borrowed'])
+        ->where('due_date', '<', now())
+        ->with('user', 'book')
+        ->latest()
+        ->paginate(10);
+    
+    return Inertia::render('Admin/LateReturns/Show', [
+        'user' => $user,
+        'lateBorrows' => $lateBorrows,
+    ]);
+}
+
+/**
+ * Kirim notifikasi keterlambatan ke user spesifik
+ */
+public function sendLateReminder(User $user)
+{
+    // TODO: Implement notification system (email, WhatsApp, etc.)
+    // Untuk saat ini, log activity saja
+    Activity::log(Auth::id(), 'send_reminder', "Mengirim notifikasi keterlambatan ke: {$user->name}");
+    
+    return back()->with('success', "Notifikasi keterlambatan dikirim ke {$user->name}.");
+}
+
+/**
+ * Kirim notifikasi massal ke semua anggota terlambat
+ */
+public function sendBulkLateReminder()
+{
+    $lateUsers = Borrow::whereIn('status', ['approved', 'borrowed'])
+        ->where('due_date', '<', now())
+        ->distinct('user_id')
+        ->pluck('user_id');
+    
+    foreach ($lateUsers as $userId) {
+        // TODO: Implement notification system
+        Activity::log(Auth::id(), 'bulk_reminder', "Notifikasi massal keterlambatan terkirim");
+    }
+    
+    return back()->with('success', "Notifikasi massal dikirim ke {$lateUsers->count()} anggota.");
+}
 }

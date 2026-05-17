@@ -54,6 +54,32 @@ function confirmCashPayment(borrow) {
     }
   });
 }
+
+function confirmQrisPayment(borrow) {
+  Swal.fire({
+    title: 'Konfirmasi Pembayaran QRIS',
+    html: `
+      <div class="text-left space-y-2">
+        <p><strong>Pengguna:</strong> ${borrow.user.name}</p>
+        <p><strong>Buku:</strong> ${borrow.book.title}</p>
+        <p><strong>Nominal:</strong> Rp ${formatNumber((borrow.late_fee || 0) + (borrow.additional_fine || 0))}</p>
+      </div>
+    `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#2563eb',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Konfirmasi QRIS',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      router.post(`/admin/payments/${borrow.id}/confirm-qris`, {}, {
+        onSuccess: () => Swal.fire('Berhasil!', 'Pembayaran QRIS berhasil dikonfirmasi.', 'success'),
+        onError: () => Swal.fire('Gagal!', 'Terjadi kesalahan saat mengkonfirmasi pembayaran.', 'error')
+      });
+    }
+  });
+}
 </script>
 
 <template>
@@ -82,7 +108,7 @@ function confirmCashPayment(borrow) {
           <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
             <p class="text-xs text-purple-600 uppercase font-semibold">Total Denda</p>
             <p class="text-2xl font-bold text-purple-900 mt-1">
-              Rp {{ formatNumber(borrows.data.reduce((sum, b) => sum + (b.late_fee || 0), 0)) }}
+              Rp {{ formatNumber(borrows.data.reduce((sum, b) => sum + (b.late_fee || 0) + (b.additional_fine || 0), 0)) }}
             </p>
           </div>
         </div>
@@ -115,7 +141,7 @@ function confirmCashPayment(borrow) {
                   <div class="text-xs text-gray-500">{{ borrow.book.author }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-sm font-bold text-red-600">Rp {{ formatNumber(borrow.late_fee) }}</span>
+                  <span class="text-sm font-bold text-red-600">Rp {{ formatNumber((borrow.late_fee || 0) + (borrow.additional_fine || 0)) }}</span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span 
@@ -137,12 +163,20 @@ function confirmCashPayment(borrow) {
                   {{ formatDate(borrow.updated_at) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <div v-if="borrow.payment_status === 'pending' && borrow.payment_method === 'cash'" class="flex gap-2">
+                  <div v-if="borrow.payment_status === 'pending'" class="flex gap-2">
                     <button
+                      v-if="borrow.payment_method === 'cash'"
                       @click="confirmCashPayment(borrow)"
                       class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium"
                     >
-                      Konfirmasi
+                      Konfirmasi Tunai
+                    </button>
+                    <button
+                      v-if="borrow.payment_method === 'qris'"
+                      @click="confirmQrisPayment(borrow)"
+                      class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium"
+                    >
+                      Konfirmasi QRIS
                     </button>
                   </div>
                   <span v-else class="text-gray-500 text-xs">-</span>

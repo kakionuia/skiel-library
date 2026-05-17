@@ -58,9 +58,33 @@
               <span class="text-sm font-medium text-slate-600">Tarif denda per hari</span>
               <span class="font-bold text-slate-900">Rp 5.000</span>
             </div>
-            <div class="flex justify-between items-center p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
-              <span class="text-sm font-bold text-orange-900">Total Denda Pembayaran</span>
-              <span class="text-2xl font-black text-orange-600">Rp {{ formatNumber(borrow.late_fee) }}</span>
+            <div class="flex justify-between items-center p-4 bg-orange-50 rounded-xl border border-orange-200">
+              <span class="text-sm font-medium text-orange-700">Denda Keterlambatan</span>
+              <span class="font-bold text-orange-600">Rp {{ formatNumber(borrow.late_fee) }}</span>
+            </div>
+
+            <!-- Additional Fine from Damage (if any) -->
+            <div v-if="borrow.is_damaged && borrow.additional_fine > 0" class="space-y-3 p-4 bg-red-50 rounded-xl border border-red-200">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                <div class="flex-1">
+                  <p class="text-xs font-bold text-red-900 uppercase tracking-wider">Denda Tambahan (Kerusakan Buku)</p>
+                  <p class="text-sm text-red-800 mt-1">{{ getDamageTypeLabel(borrow.damage_type) }}</p>
+                  <p class="text-xs text-red-700 mt-2">{{ borrow.staff_comment }}</p>
+                </div>
+              </div>
+              <div class="flex justify-between items-center pt-3 border-t border-red-200">
+                <span class="text-sm font-bold text-red-900">Nominal Denda Tambahan</span>
+                <span class="font-bold text-red-600">Rp {{ formatNumber(borrow.additional_fine) }}</span>
+              </div>
+            </div>
+
+            <!-- Total to Pay -->
+            <div class="flex justify-between items-center p-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl text-white">
+              <span class="text-sm font-bold uppercase tracking-wider">Total Denda Pembayaran</span>
+              <span class="text-2xl font-black">Rp {{ formatNumber(borrow.total_fine) }}</span>
             </div>
           </div>
         </div>
@@ -198,6 +222,17 @@ function formatNumber(number) {
   return new Intl.NumberFormat('id-ID').format(Math.round(number || 0));
 }
 
+function getDamageTypeLabel(type) {
+  const labels = {
+    lost: '🗑️ Hilang',
+    wet: '💧 Basah',
+    torn: '✂️ Sobek',
+    stained: '🔴 Ternoda',
+    other: '❓ Lainnya'
+  };
+  return labels[type] || type;
+}
+
 function processPayment() {
   if (!selectedMethod.value) {
     Swal.fire({
@@ -213,9 +248,9 @@ function processPayment() {
 
   let confirmText = '';
   if (selectedMethod.value === 'qris') {
-    confirmText = `Anda akan melanjutkan ke pembayaran QRIS sebesar Rp ${formatNumber(props.borrow.late_fee)}`;
+    confirmText = `Anda akan melanjutkan ke pembayaran QRIS sebesar Rp ${formatNumber(props.borrow.total_fine)}`;
   } else {
-    confirmText = `Anda akan membayar denda tunai sebesar Rp ${formatNumber(props.borrow.late_fee)} ke kasir perpustakaan`;
+    confirmText = `Anda akan membayar denda tunai sebesar Rp ${formatNumber(props.borrow.total_fine)} ke kasir perpustakaan`;
   }
 
   Swal.fire({
@@ -239,11 +274,9 @@ function processPayment() {
           } else {
             Swal.fire({
               title: 'Pembayaran Diajukan',
-              text: 'Pembayaran tunai Anda telah diajukan. Silakan bayar ke kasir perpustakaan dengan nominal Rp ' + formatNumber(props.borrow.late_fee),
+              text: 'Pembayaran tunai Anda telah diajukan. Silakan bayar ke kasir perpustakaan dengan nominal Rp ' + formatNumber(props.borrow.total_fine),
               icon: 'success',
               confirmButtonColor: '#ea580c'
-            }).then(() => {
-              router.visit('/my-loans');
             });
           }
         },

@@ -19,6 +19,7 @@
       </header>
 
       <div class="p-10 max-w-[1400px] mx-auto space-y-8">
+        <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="bg-white p-7 rounded-[2rem] border border-slate-200 shadow-sm">
             <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total Kasus</p>
@@ -44,6 +45,7 @@
           </div>
         </div>
 
+        <!-- Table -->
         <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full border-collapse">
@@ -53,6 +55,7 @@
                   <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Buku & Durasi</th>
                   <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Hari Terlambat</th>
                   <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Estimasi Denda</th>
+                  <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                   <th class="px-8 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Aksi</th>
                 </tr>
               </thead>
@@ -81,10 +84,37 @@
                   <td class="px-8 py-6">
                     <p class="text-sm font-bold text-slate-900">Rp {{ loan.fine.toLocaleString('id-ID') }}</p>
                   </td>
+                  <td class="px-8 py-6">
+                    <div class="flex flex-col gap-1">
+                      <span 
+                        class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                        :class="loan.is_damaged ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'"
+                      >
+                        {{ loan.is_damaged ? '⚠ Rusak' : '✓ Normal' }}
+                      </span>
+                      <span 
+                        v-if="loan.payment_status"
+                        class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                        :class="loan.payment_status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
+                      >
+                        {{ loan.payment_status === 'confirmed' ? 'Lunas' : 'Pending' }}
+                      </span>
+                    </div>
+                  </td>
                   <td class="px-8 py-6 text-right">
-                    <button class="px-3 py-1 text-[10px] font-bold rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 transition-all">
-                      Proses
-                    </button>
+                    <Link 
+                      :href="`/petugas/late-returns/${loan.user_id}`"
+                      class="px-4 py-2 text-[11px] font-bold rounded-xl bg-orange-50 text-orange-700 hover:bg-orange-100 transition-all inline-block"
+                    >
+                      Detail →
+                    </Link>
+                  </td>
+                </tr>
+                <tr v-if="overdueLoans.length === 0">
+                  <td colspan="6" class="px-8 py-12 text-center text-slate-500">
+                    <div class="text-4xl mb-3">📚</div>
+                    <p class="text-sm font-bold">Tidak ada keterlambatan</p>
+                    <p class="text-xs mt-1">Semua peminjaman dalam batas waktu normal</p>
                   </td>
                 </tr>
               </tbody>
@@ -97,6 +127,7 @@
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3';
 import PetugasSidebar from '@/Components/PetugasSidebar.vue';
 
 defineProps({
@@ -106,6 +137,7 @@ defineProps({
 });
 
 const formatDate = (date) => {
+  if (!date) return '-';
   return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 </script>

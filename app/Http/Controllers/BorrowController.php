@@ -54,8 +54,8 @@ class BorrowController extends Controller
 
         $book = Book::findOrFail($request->book_id);
 
-        // Cek stok
-        if ($book->available_quantity < $request->quantity) {
+        // Cek stok (gunakan calculated available quantity)
+        if ($book->calculated_available_quantity < $request->quantity) {
             return back()->withErrors(['error' => 'Stok buku tidak mencukupi.']);
         }
 
@@ -113,15 +113,12 @@ class BorrowController extends Controller
 
         $book = $borrow->book;
 
-        // Cek stok buku
-        if ($book->available_quantity < $borrow->quantity) {
+        // Cek stok buku (gunakan calculated available quantity)
+        if ($book->calculated_available_quantity < $borrow->quantity) {
             return back()->withErrors(['error' => 'Stok buku tidak mencukupi.']);
         }
 
-        // Kurangi stok buku
-        $book->decrement('available_quantity', $borrow->quantity);
-
-        // Update status peminjaman
+        // Update status peminjaman (no need to decrement available_quantity, it's calculated dynamically)
         $borrow->update([
             'status' => 'approved',
             'approved_by' => Auth::id(),
@@ -205,7 +202,7 @@ class BorrowController extends Controller
 
         // Hitung keterlambatan
         if ($returnDate->gt($borrow->due_date)) {
-            $lateDays = $returnDate->diffInDays($borrow->due_date);
+            $lateDays = (int) $borrow->due_date->startOfDay()->diffInDays($returnDate->startOfDay());
             $finePerDay = SystemParameter::getByKey('fine_per_day', 5000);
             $lateFee = $lateDays * $finePerDay;
         }
@@ -218,8 +215,7 @@ class BorrowController extends Controller
             'late_fee' => $lateFee,
         ]);
 
-        // Kembalikan stok buku
-        $borrow->book->increment('available_quantity', $borrow->quantity);
+        // No need to increment available_quantity - it's calculated dynamically based on active borrows
 
         // Log activity untuk user
         $logMessage = $lateDays > 0 
@@ -245,6 +241,17 @@ class BorrowController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($loan) {
+                if ($loan->isOverdue()) {
+                    $loan->calculateLateFee();
+                }
+
+                $damageImages = [];
+                if ($loan->damage_images) {
+                    $damageImages = array_map(function($path) {
+                        return asset('storage/' . $path);
+                    }, json_decode($loan->damage_images, true) ?? []);
+                }
+
                 return [
                     'id' => $loan->id,
                     'book_id' => $loan->book_id,
@@ -262,6 +269,16 @@ class BorrowController extends Controller
                     'rejected_at' => $loan->rejected_at,
                     'rejection_reason' => $loan->rejection_reason,
                     'created_at' => $loan->created_at,
+                    // Damage report details
+                    'is_damaged' => $loan->is_damaged,
+                    'damage_type' => $loan->damage_type,
+                    'damage_description' => $loan->damage_description,
+                    'damage_status' => $loan->damage_status, // pending, responded, resolved
+                    'damage_images' => $damageImages,
+                    'additional_fine' => $loan->additional_fine ?? 0,
+                    'staff_comment' => $loan->staff_comment,
+                    'payment_method' => $loan->payment_method,
+                    'payment_status' => $loan->payment_status,
                     'book' => [
                         'id' => $loan->book->id,
                         'title' => $loan->book->title,
@@ -280,47 +297,71 @@ class BorrowController extends Controller
     /**
      * Melihat bukti peminjaman (detail)
      */
-    public function show(Borrow $borrow)
-    {
-        $user = Auth::user();
+    // Di BorrowController.php, method show()
+public function show(Borrow $borrow)
+{
+    $user = Auth::user();
 
-        // User biasa hanya bisa lihat peminjamannya sendiri
-        if (!$this->isLibrarian($user) && $borrow->user_id !== $user->id) {
-            abort(403, 'Unauthorized');
-        }
-
-        $borrow->load(['user', 'book', 'approvedBy']);
-
-        $borrowData = [
-            'id' => $borrow->id,
-            'book_id' => $borrow->book_id,
-            'user_id' => $borrow->user_id,
-            'quantity' => $borrow->quantity,
-            'status' => $borrow->status,
-            'status_text' => ucfirst($borrow->status),
-            'borrow_date' => $borrow->borrow_date,
-            'due_date' => $borrow->due_date,
-            'return_date' => $borrow->return_date,
-            'late_days' => $borrow->late_days ?? 0,
-            'late_fee' => $borrow->late_fee ?? 0,
-            'notes' => $borrow->notes,
-            'approved_at' => $borrow->approved_at,
-            'rejected_at' => $borrow->rejected_at,
-            'rejection_reason' => $borrow->rejection_reason,
-            'created_at' => $borrow->created_at,
-            'book' => [
-                'id' => $borrow->book->id,
-                'title' => $borrow->book->title,
-                'author' => $borrow->book->author,
-                'publisher' => $borrow->book->publisher,
-                'cover_url' => $borrow->book->cover_image ? asset('storage/' . $borrow->book->cover_image) : null,
-            ]
-        ];
-
-        return Inertia::render('User/BorrowDetail', [
-            'borrow' => $borrowData,
-        ]);
+    // User biasa hanya bisa lihat peminjamannya sendiri
+    if (!$this->isLibrarian($user) && $borrow->user_id !== $user->id) {
+        abort(403, 'Unauthorized');
     }
+
+    $borrow->load(['user', 'book', 'approvedBy']);
+
+    // Hitung denda real-time
+    $lateDays = 0;
+    $lateFee = 0;
+    if ($borrow->isOverdue()) {
+        $borrow->calculateLateFee();
+        $lateDays = $borrow->late_days;
+        $lateFee = $borrow->late_fee;
+    } elseif ($borrow->return_date) {
+        $lateDays = $borrow->late_days ?? 0;
+        $lateFee = $borrow->late_fee ?? 0;
+    }
+
+    $borrowData = [
+        'id' => $borrow->id,
+        'book_id' => $borrow->book_id,
+        'user_id' => $borrow->user_id,
+        'quantity' => $borrow->quantity,
+        'status' => $borrow->status,
+        'status_text' => ucfirst($borrow->status),
+        'borrow_date' => $borrow->borrow_date,
+        'due_date' => $borrow->due_date,
+        'return_date' => $borrow->return_date,
+        'late_days' => $lateDays,
+        'late_fee' => $lateFee,
+        'payment_method' => $borrow->payment_method,
+        'payment_status' => $borrow->payment_status,
+        'is_damaged' => $borrow->is_damaged,
+        'damage_status' => $borrow->damage_status,
+        'damage_type' => $borrow->damage_type,
+        'damage_description' => $borrow->damage_description,
+        'additional_fine' => $borrow->additional_fine ?? 0,
+        'staff_comment' => $borrow->staff_comment,
+        'notes' => $borrow->notes,
+        'approved_at' => $borrow->approved_at,
+        'rejected_at' => $borrow->rejected_at,
+        'rejection_reason' => $borrow->rejection_reason,
+        'created_at' => $borrow->created_at,
+        'member' => [
+            'name' => $borrow->user->name,
+        ],
+        'book' => [
+            'id' => $borrow->book->id,
+            'title' => $borrow->book->title,
+            'author' => $borrow->book->author,
+            'publisher' => $borrow->book->publisher,
+            'cover_url' => $borrow->book->cover_image ? asset('storage/' . $borrow->book->cover_image) : null,
+        ]
+    ];
+
+    return Inertia::render('User/BorrowDetail', [
+        'borrow' => $borrowData,
+    ]);
+}
 
     /**
      * Petugas/Admin: Melihat semua peminjaman
@@ -519,7 +560,28 @@ class BorrowController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        if ($borrow->late_fee <= 0) {
+        // Calculate late fee if overdue
+        if ($borrow->isOverdue()) {
+            $borrow->calculateLateFee();
+        }
+
+        if ($borrow->is_damaged === null) {
+            return redirect()->route('fine.report-damage', ['borrow' => $borrow->id])
+                ->withErrors(['error' => 'Laporkan kondisi buku terlebih dahulu sebelum memilih metode pembayaran.']);
+        }
+
+        // If book was damaged and reported, only allow payment after staff response
+        if ($borrow->is_damaged && $borrow->damage_status === 'pending') {
+            return back()->withErrors(['error' => 'Laporan kerusakan Anda masih dalam proses verifikasi. Silakan tunggu respons dari petugas.']);
+        }
+
+        if ($borrow->payment_status === 'pending') {
+            return redirect()->route('fine.waiting', ['borrow' => $borrow->id]);
+        }
+
+        $totalFine = $borrow->late_fee + ($borrow->additional_fine ?? 0);
+        
+        if ($totalFine <= 0) {
             return back()->withErrors(['error' => 'Tidak ada denda untuk dibayar.']);
         }
 
@@ -529,6 +591,12 @@ class BorrowController extends Controller
                 'book_id' => $borrow->book_id,
                 'late_days' => $borrow->late_days,
                 'late_fee' => $borrow->late_fee,
+                'additional_fine' => $borrow->additional_fine ?? 0,
+                'total_fine' => $totalFine,
+                'is_damaged' => $borrow->is_damaged,
+                'damage_status' => $borrow->damage_status,
+                'damage_type' => $borrow->damage_type,
+                'staff_comment' => $borrow->staff_comment,
                 'book' => [
                     'id' => $borrow->book->id,
                     'title' => $borrow->book->title,
@@ -558,14 +626,26 @@ class BorrowController extends Controller
             'payment_method' => 'required|in:qris,cash',
         ]);
 
+        if ($borrow->isOverdue()) {
+            $borrow->calculateLateFee();
+        }
+
+        if ($borrow->is_damaged && $borrow->damage_status === 'pending') {
+            return back()->withErrors(['error' => 'Laporan kerusakan masih menunggu tanggapan petugas.']);
+        }
+
+        $totalFine = $borrow->late_fee + ($borrow->additional_fine ?? 0);
+        $paymentDueDate = now()->addHours(2);
+
         if ($request->payment_method === 'qris') {
             // Update borrow with QRIS payment details
             $borrow->update([
                 'payment_method' => 'qris',
                 'payment_status' => 'pending',
+                'payment_due_date' => $paymentDueDate,
             ]);
             
-            Activity::log($borrow->user_id, 'fine_payment_qris', "Mengajukan pembayaran denda via QRIS sebesar Rp " . number_format($borrow->late_fee, 0, ',', '.'));
+            Activity::log($borrow->user_id, 'fine_payment_qris', "Mengajukan pembayaran denda via QRIS sebesar Rp " . number_format($totalFine, 0, ',', '.'));
             
             return redirect()->route('fine.qris', ['borrow' => $borrow->id]);
         } else if ($request->payment_method === 'cash') {
@@ -573,11 +653,13 @@ class BorrowController extends Controller
             $borrow->update([
                 'payment_method' => 'cash',
                 'payment_status' => 'pending',
+                'payment_due_date' => $paymentDueDate,
             ]);
 
-            Activity::log($borrow->user_id, 'fine_payment_cash', "Mengajukan pembayaran denda tunai sebesar Rp " . number_format($borrow->late_fee, 0, ',', '.'));
+            Activity::log($borrow->user_id, 'fine_payment_cash', "Mengajukan pembayaran denda tunai sebesar Rp " . number_format($totalFine, 0, ',', '.'));
 
-            return back()->with('success', 'Pembayaran denda tunai berhasil diajukan. Harap bayar ke petugas perpustakaan.');
+            return redirect()->route('fine.waiting', ['borrow' => $borrow->id])
+                ->with('success', 'Pembayaran denda tunai berhasil diajukan. Harap bayar ke petugas perpustakaan.');
         }
 
         return back()->withErrors(['error' => 'Metode pembayaran tidak valid.']);
@@ -629,9 +711,41 @@ class BorrowController extends Controller
             'payment_date' => now(),
         ]);
 
-        Activity::log($borrow->user_id, 'fine_payment_confirmed', 'Pembayaran denda tunai dikonfirmasi oleh petugas');
+        // If there was damage reported, mark it as ready to be marked resolved
+        if ($borrow->is_damaged && $borrow->damage_status === 'responded') {
+            Activity::log($borrow->user_id, 'fine_payment_confirmed', 'Pembayaran denda tunai dikonfirmasi oleh petugas - Kerusakan siap ditandai selesai');
+        } else {
+            Activity::log($borrow->user_id, 'fine_payment_confirmed', 'Pembayaran denda tunai dikonfirmasi oleh petugas');
+        }
 
         return back()->with('success', 'Pembayaran denda tunai berhasil dikonfirmasi.');
+    }
+
+    public function confirmQrisPayment(Borrow $borrow)
+    {
+        $user = Auth::user();
+
+        if (!$this->isLibrarian($user)) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($borrow->payment_method !== 'qris' || $borrow->payment_status !== 'pending') {
+            abort(403, 'Pembayaran ini tidak valid untuk dikonfirmasi.');
+        }
+
+        $borrow->update([
+            'payment_status' => 'confirmed',
+            'payment_date' => now(),
+        ]);
+
+        // If there was damage reported, mark it as ready to be marked resolved by staff
+        if ($borrow->is_damaged && $borrow->damage_status === 'responded') {
+            Activity::log($borrow->user_id, 'fine_payment_confirmed', 'Pembayaran denda QRIS dikonfirmasi - Kerusakan siap ditandai selesai');
+        } else {
+            Activity::log($borrow->user_id, 'fine_payment_confirmed', 'Pembayaran denda QRIS dikonfirmasi');
+        }
+
+        return back()->with('success', 'Pembayaran QRIS berhasil dikonfirmasi.');
     }
 
     /**
@@ -680,13 +794,32 @@ class BorrowController extends Controller
             return back()->withErrors(['error' => 'Tidak ada pembayaran QRIS yang tertunda.']);
         }
 
+        if ($borrow->payment_due_date && now()->gt($borrow->payment_due_date)) {
+            $borrow->update([
+                'payment_method' => 'none',
+                'payment_status' => 'unpaid',
+                'payment_due_date' => null,
+            ]);
+
+            return redirect()->route('fine.pay', ['borrow' => $borrow->id])
+                ->withErrors(['error' => 'Batas waktu pembayaran habis. Silakan pilih metode pembayaran lagi.']);
+        }
+
         $borrow->load(['user', 'book']);
+        $totalFine = $borrow->late_fee + ($borrow->additional_fine ?? 0);
 
         return Inertia::render('User/Fine/QrisPayment', [
             'borrow' => [
                 'id' => $borrow->id,
                 'late_fee' => $borrow->late_fee,
+                'additional_fine' => $borrow->additional_fine ?? 0,
+                'total_fine' => $totalFine,
                 'late_days' => $borrow->late_days,
+                'payment_due_date' => $borrow->payment_due_date,
+                'is_damaged' => $borrow->is_damaged,
+                'damage_status' => $borrow->damage_status,
+                'damage_type' => $borrow->damage_type,
+                'staff_comment' => $borrow->staff_comment,
                 'book' => [
                     'id' => $borrow->book->id,
                     'title' => $borrow->book->title,
@@ -696,6 +829,153 @@ class BorrowController extends Controller
             'qrisCode' => 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=SKIEL-LIBRARY-FINE-' . $borrow->id . '-' . time(),
         ]);
     }
+
+public function showDamageReport(Borrow $borrow)
+{
+    $user = Auth::user();
+    
+    if ($borrow->user_id !== $user->id) {
+        abort(403, 'Unauthorized');
+    }
+    if ($borrow->isOverdue()) {
+        $borrow->calculateLateFee();
+    }
+
+    return Inertia::render('User/Fine/ReportDamage', [
+        'borrow' => [
+            'id' => $borrow->id,
+            'late_days' => $borrow->late_days,
+            'late_fee' => $borrow->late_fee,
+            'book' => [
+                'id' => $borrow->book->id,
+                'title' => $borrow->book->title,
+                'author' => $borrow->book->author,
+            ]
+        ]
+    ]);
+}
+
+/**
+ * User: Submit laporan kerusakan
+ */
+// Di BorrowController.php
+
+/**
+ * User: Submit laporan kerusakan
+ */
+public function reportDamage(Request $request, Borrow $borrow)
+{
+    $user = Auth::user();
+    
+    if ($borrow->user_id !== $user->id) {
+        abort(403, 'Unauthorized');
+    }
+
+    if ($borrow->isOverdue()) {
+        $borrow->calculateLateFee();
+    }
+
+    // Accept string '0'/'1' from FormData, convert to boolean
+    $isDamaged = in_array($request->is_damaged, ['true', '1', true], true);
+    
+    // Validate based on whether book is damaged or not
+    $rules = [
+        'images' => 'required|array|min:1|max:3',
+        'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+    ];
+    
+    // Only require damage details if damaged
+    if ($isDamaged) {
+        $rules['damage_type'] = 'required|in:lost,wet,torn,stained,other';
+        $rules['damage_description'] = 'required|string|min:10|max:1000';
+    }
+    
+    $messages = [
+        'images.required' => 'Foto kondisi buku wajib diupload.',
+        'images.min' => 'Minimal upload 1 foto.',
+        'images.*.image' => 'File harus berupa gambar.',
+        'images.*.mimes' => 'Format gambar harus jpeg, png, jpg, atau webp.',
+        'images.*.max' => 'Ukuran foto maksimal 2MB.',
+        'damage_type.required' => 'Pilih jenis kerusakan.',
+        'damage_description.required' => 'Deskripsi kerusakan wajib diisi.',
+        'damage_description.min' => 'Deskripsi minimal 10 karakter.',
+    ];
+    
+    $validated = $request->validate($rules, $messages);
+
+    // Store images
+    $imagePaths = [];
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('damage-reports', 'public');
+            $imagePaths[] = $path;
+        }
+    }
+
+    // Update borrow record
+    $borrow->update([
+        'is_damaged' => $isDamaged,
+        'damage_type' => $isDamaged ? $request->damage_type : null,
+        'damage_description' => $isDamaged ? $request->damage_description : null,
+        'damage_images' => !empty($imagePaths) ? json_encode($imagePaths) : null,
+        'damage_status' => $isDamaged ? 'pending' : 'resolved',
+        'payment_method' => 'none',
+        'payment_status' => 'unpaid',
+        'payment_due_date' => null,
+    ]);
+
+    // Log activity
+    Activity::log($user->id, 'damage_report', "Melaporkan kondisi buku: {$borrow->book->title}");
+
+    // Return JSON response for fetch API
+    return response()->json([
+        'success' => true,
+        'message' => $isDamaged 
+            ? 'Laporan kerusakan dikirim. Petugas akan review.' 
+            : 'Laporan kondisi baik dikirim.'
+    ]);
+}
+
+/**
+ * User: Halaman menunggu pembayaran
+ */
+public function waitingPayment(Borrow $borrow)
+{
+    $user = Auth::user();
+    
+    if ($borrow->user_id !== $user->id) {
+        abort(403, 'Unauthorized');
+    }
+    
+    if ($borrow->payment_status !== 'pending') {
+        return redirect()->route('my-loans');
+    }
+
+    if ($borrow->payment_due_date && now()->gt($borrow->payment_due_date)) {
+        $borrow->update([
+            'payment_method' => 'none',
+            'payment_status' => 'unpaid',
+            'payment_due_date' => null,
+        ]);
+
+        return redirect()->route('fine.pay', ['borrow' => $borrow->id])
+            ->withErrors(['error' => 'Batas waktu pembayaran habis. Silakan pilih metode pembayaran lagi.']);
+    }
+    
+    return Inertia::render('User/Fine/WaitingPayment', [
+        'borrow' => [
+            'id' => $borrow->id,
+                'late_fee' => $borrow->late_fee,
+                'additional_fine' => $borrow->additional_fine ?? 0,
+                'total_fine' => $borrow->late_fee + ($borrow->additional_fine ?? 0),
+                'payment_method' => $borrow->payment_method,
+                'payment_due_date' => $borrow->payment_due_date,
+                'book' => [
+                'title' => $borrow->book->title,
+            ]
+        ]
+    ]);
+}
 
     
 }

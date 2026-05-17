@@ -440,6 +440,14 @@ const props = defineProps({
   bestSellerBooks: {
     type: Array,
     default: () => []
+  },
+  bestReviews: {
+    type: Array,
+    default: () => []
+  },
+  recentReviews: {
+    type: Array,
+    default: () => []
   }
 });
 

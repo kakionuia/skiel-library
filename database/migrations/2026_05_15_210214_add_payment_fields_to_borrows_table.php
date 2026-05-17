@@ -13,12 +13,20 @@ return new class extends Migration
     {
         Schema::table('borrows', function (Blueprint $table) {
             // Payment tracking columns
-            $table->enum('payment_method', ['qris', 'cash', 'none'])->default('none')->after('late_fee');
-            $table->enum('payment_status', ['unpaid', 'pending', 'confirmed', 'paid'])->default('unpaid')->after('payment_method');
-            $table->datetime('payment_date')->nullable()->after('payment_status');
+            if (!Schema::hasColumn('borrows', 'payment_method')) {
+                $table->enum('payment_method', ['qris', 'cash', 'none'])->default('none')->after('late_fee');
+            }
+            if (!Schema::hasColumn('borrows', 'payment_status')) {
+                $table->enum('payment_status', ['unpaid', 'pending', 'confirmed', 'paid'])->default('unpaid')->after('payment_method');
+            }
+            if (!Schema::hasColumn('borrows', 'payment_date')) {
+                $table->datetime('payment_date')->nullable()->after('payment_status');
+            }
             
             // Extension tracking
-            $table->integer('extension_count')->default(0)->after('payment_date');
+            if (!Schema::hasColumn('borrows', 'extension_count')) {
+                $table->integer('extension_count')->default(0)->after('payment_date');
+            }
         });
     }
 

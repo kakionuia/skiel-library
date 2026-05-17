@@ -70,4 +70,17 @@ class Book extends Model
     {
         return $this->reviews()->avg('rating') ?? 0;
     }
+
+    /**
+     * Get the calculated available quantity based on active borrows
+     * available = total quantity - active borrows (approved + borrowed)
+     */
+    public function getCalculatedAvailableQuantityAttribute()
+    {
+        $activeBorrowsCount = $this->borrows()
+            ->whereIn('status', ['approved', 'borrowed'])
+            ->sum('quantity') ?? 0;
+        
+        return max(0, $this->quantity - $activeBorrowsCount);
+    }
 }

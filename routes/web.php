@@ -10,6 +10,7 @@ use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\BookQueueController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\NotificationController;
 use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\Complaint;
@@ -106,6 +107,14 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/late-returns', [AdminController::class, 'lateReturns'])->name('late-returns');
     Route::get('/late-returns/{user}', [AdminController::class, 'showLateReturn'])->name('late-returns.show');
     
+    // Late Return Actions (Admin)
+    Route::post('/late-returns/{borrow}/additional-fine', [AdminController::class, 'addAdditionalFine'])->name('late-returns.additional-fine');
+    Route::post('/late-returns/{borrow}/resolve', [AdminController::class, 'resolveLateReturn'])->name('late-returns.resolve');
+    
+    // Notifications
+    Route::post('/notifications/send-late-reminder/{user}', [AdminController::class, 'sendLateReminder'])->name('notifications.send-late');
+    Route::post('/notifications/send-bulk-late-reminder', [AdminController::class, 'sendBulkLateReminder'])->name('notifications.bulk-late');
+    
     // Reviews
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
     Route::delete('/reviews/{review}', [AdminController::class, 'destroyReview'])->name('reviews.destroy');
@@ -148,6 +157,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     // Payment Management
     Route::get('/payments/pending', [AdminController::class, 'pendingPayments'])->name('payments.pending');
     Route::post('/payments/{borrow}/confirm-cash', [AdminController::class, 'confirmCashPayment'])->name('payments.confirm-cash');
+    Route::post('/payments/{borrow}/confirm-qris', [AdminController::class, 'confirmQrisPayment'])->name('payments.confirm-qris');
     
     // Article Management
     Route::get('/articles', [ArticleController::class, 'admin'])->name('articles');
@@ -202,6 +212,21 @@ Route::middleware(['auth', 'verified', 'petugas'])->prefix('petugas')->name('pet
     
     // Late Returns
     Route::get('/late-returns', [PetugasController::class, 'lateReturns'])->name('late-returns');
+    Route::get('/late-returns/{user}', [PetugasController::class, 'showLateReturn'])->name('late-returns.show');
+    
+    // Late Return Actions (Petugas)
+    Route::post('/late-returns/{borrow}/additional-fine', [PetugasController::class, 'addAdditionalFine'])->name('late-returns.additional-fine');
+    Route::post('/late-returns/{borrow}/resolve', [PetugasController::class, 'resolveLateReturn'])->name('late-returns.resolve');
+    
+    // Payment Confirmation (Petugas)
+    Route::post('/payments/{borrow}/confirm-cash', [PetugasController::class, 'confirmCashPayment'])->name('payments.confirm-cash');
+    Route::post('/payments/{borrow}/confirm-qris', [PetugasController::class, 'confirmQrisPayment'])->name('payments.confirm-qris');
+    
+    // Damage Reports (Petugas)
+    Route::get('/damage-reports', [PetugasController::class, 'damageReports'])->name('damage-reports');
+    Route::get('/damage-reports/{borrow}', [PetugasController::class, 'showDamageReport'])->name('damage-reports.show');
+    Route::post('/damage-reports/{borrow}/respond', [PetugasController::class, 'respondToDamageReport'])->name('damage-reports.respond');
+    Route::post('/damage-reports/{borrow}/resolve', [PetugasController::class, 'markDamageResolved'])->name('damage-reports.resolve');
     
     // Reports
     Route::get('/reports', [PetugasController::class, 'reports'])->name('reports');
@@ -288,7 +313,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
                 'isbn' => $book->isbn,
                 'category' => $book->category ?: 'Umum',
                 'quantity' => (int) $book->quantity,
-                'available_quantity' => (int) $book->available_quantity,
+                'available_quantity' => (int) $book->calculated_available_quantity,
                 'description' => $book->description,
                 'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
                 'average_rating' => round((float) ($book->reviews_avg_rating ?? 0), 1),
@@ -308,6 +333,57 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             ->latest()
             ->limit(5)
             ->get();
+
+        // Get best reviews (comment longer than 500 characters)
+        $bestReviews = Review::with(['user', 'book', 'likes', 'comments.user', 'bookmarks'])
+            ->withCount(['likes', 'comments', 'bookmarks'])
+            ->whereRaw('CHAR_LENGTH(COALESCE(comment, "")) > 500')
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(function ($review) use ($user) {
+                $review->user_liked = $user ? $review->isLikedBy($user->id) : false;
+                $review->user_bookmarked = $user ? $review->isBookmarkedBy($user->id) : false;
+                return [
+                    'id' => $review->id,
+                    'user' => $review->user->name,
+                    'user_avatar' => $review->user->profile_photo_url,
+                    'book_title' => $review->book->title,
+                    'book_cover' => $review->book->cover_image ? asset('storage/' . $review->book->cover_image) : null,
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                    'likes_count' => $review->likes_count,
+                    'comments_count' => $review->comments_count,
+                    'bookmarks_count' => $review->bookmarks_count,
+                    'user_liked' => $user ? $review->isLikedBy($user->id) : false,
+                    'user_bookmarked' => $user ? $review->isBookmarkedBy($user->id) : false,
+                ];
+            });
+
+        // Get recent reviews (3 most recent)
+        $recentReviews = Review::with(['user', 'book', 'likes', 'comments.user', 'bookmarks'])
+            ->withCount(['likes', 'comments', 'bookmarks'])
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(function ($review) use ($user) {
+                $review->user_liked = $user ? $review->isLikedBy($user->id) : false;
+                $review->user_bookmarked = $user ? $review->isBookmarkedBy($user->id) : false;
+                return [
+                    'id' => $review->id,
+                    'user' => $review->user->name,
+                    'user_avatar' => $review->user->profile_photo_url,
+                    'book_title' => $review->book->title,
+                    'book_cover' => $review->book->cover_image ? asset('storage/' . $review->book->cover_image) : null,
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                    'likes_count' => $review->likes_count,
+                    'comments_count' => $review->comments_count,
+                    'bookmarks_count' => $review->bookmarks_count,
+                    'user_liked' => $user ? $review->isLikedBy($user->id) : false,
+                    'user_bookmarked' => $user ? $review->isBookmarkedBy($user->id) : false,
+                ];
+            });
 
         $userReviews = Review::with('book:id,title')
             ->where('user_id', $user->id)
@@ -353,6 +429,8 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             'availableBooks' => $availableBooks,
             'popularBooks' => $popularBooks,
             'latestReviews' => $latestReviews,
+            'bestReviews' => $bestReviews,
+            'recentReviews' => $recentReviews,
             'userReviews' => $userReviews,
             'userComplaints' => $userComplaints,
             'userSuggestions' => $userSuggestions,
@@ -383,7 +461,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             'isbn' => $book->isbn,
             'category' => $book->category ?: 'Umum',
             'quantity' => (int) $book->quantity,
-            'available_quantity' => (int) $book->available_quantity,
+            'available_quantity' => (int) $book->calculated_available_quantity,
             'description' => $book->description,
             'cover_image' => $book->cover_image ? asset('storage/' . $book->cover_image) : null,
             'average_rating' => round((float) ($book->reviews_avg_rating ?? 0), 1),
@@ -418,7 +496,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
                 'title' => $otherBook->title,
                 'author' => $otherBook->author,
                 'category' => $otherBook->category ?: 'Umum',
-                'available_quantity' => (int) $otherBook->available_quantity,
+                'available_quantity' => (int) $otherBook->calculated_available_quantity,
                 'cover_image' => $otherBook->cover_image ? asset('storage/' . $otherBook->cover_image) : null,
             ]);
         
@@ -494,10 +572,16 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     Route::post('/borrow/{borrow}/extend', [BorrowController::class, 'extend'])->name('borrow.extend');
     Route::delete('/borrow/{borrow}', [BorrowController::class, 'cancel'])->name('borrow.cancel');
     
-    // Fine Payment
-    Route::get('/borrow/{borrow}/fine', [BorrowController::class, 'payFine'])->name('fine.pay');
+    // Fine Payment Routes
+    Route::get('/fines/{borrow}/report-damage', [BorrowController::class, 'showDamageReport'])->name('fine.report-damage');
+    Route::post('/borrow/{borrow}/report-damage', [BorrowController::class, 'reportDamage'])->name('borrow.report-damage');
+    Route::get('/fines/{borrow}/pay', [BorrowController::class, 'payFine'])->name('fine.pay');
     Route::post('/borrow/{borrow}/fine/process', [BorrowController::class, 'processPayment'])->name('fine.process');
     Route::get('/borrow/{borrow}/fine/qris', [BorrowController::class, 'showQrisPayment'])->name('fine.qris');
+    Route::get('/fines/{borrow}/waiting-payment', [BorrowController::class, 'waitingPayment'])->name('fine.waiting');
+    
+    // QRIS Payment Confirmation
+    Route::post('/borrow/{borrow}/confirm-qris-payment', [BorrowController::class, 'confirmQrisPayment'])->name('fine.confirm-qris');
 
     // Book Queue
     Route::post('/queue/add', [BookQueueController::class, 'store'])->name('queue.store');
@@ -591,6 +675,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'destroyProfilePhoto'])->name('profile.photo.destroy');
 });
+
 /*
 |--------------------------------------------------------------------------
 | DEBUG ROUTES

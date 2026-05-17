@@ -296,6 +296,39 @@
               <p class="text-[10px] text-red-400 uppercase tracking-wider font-black mb-1">Alasan Penolakan</p>
               <p class="text-sm text-red-600">{{ selectedLoan.rejection_reason }}</p>
             </div>
+
+            <!-- Damage Information -->
+            <div v-if="selectedLoan.is_damaged" class="bg-red-50 rounded-2xl p-4 border border-red-200">
+              <p class="text-[10px] text-red-400 uppercase tracking-wider font-black mb-3">Laporan Kerusakan</p>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-red-700">Jenis Kerusakan:</span>
+                  <span class="font-bold text-red-900">{{ getDamageTypeLabel(selectedLoan.damage_type) }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-red-700">Status:</span>
+                  <span class="font-bold text-red-900">{{ getDamageStatusLabel(selectedLoan.damage_status) }}</span>
+                </div>
+                <div v-if="selectedLoan.additional_fine" class="flex justify-between">
+                  <span class="text-red-700">Denda Tambahan:</span>
+                  <span class="font-bold text-red-900">Rp {{ formatNumber(selectedLoan.additional_fine) }}</span>
+                </div>
+                <div v-if="selectedLoan.staff_comment" class="pt-2 border-t border-red-200">
+                  <p class="text-red-700 text-xs mb-1">Komentar Petugas:</p>
+                  <p class="text-red-800 text-xs italic">{{ selectedLoan.staff_comment }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mark Damage Resolved Button -->
+            <div v-if="selectedLoan.is_damaged && selectedLoan.damage_status === 'responded' && selectedLoan.payment_status === 'confirmed'" class="flex gap-3">
+              <button 
+                @click="markDamageResolved(selectedLoan)" 
+                class="flex-1 px-6 py-4 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl transition-all shadow-xl shadow-emerald-200"
+              >
+                ✓ Tandai Masalah Selesai
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -540,6 +573,53 @@ const returnBook = async (loan) => {
       }
     });
   }
+};
+
+const markDamageResolved = async (loan) => {
+  const result = await confirmDialog({
+    title: 'Tandai Masalah Kerusakan Selesai?',
+    html: `<p class="text-sm">Kerusakan buku <strong>${loan.book_title}</strong> dari <strong>${loan.member_name}</strong> sudah dibayar dan akan ditandai selesai.</p>`,
+    confirmButtonText: 'Ya, Tandai Selesai',
+  });
+  
+  if (result) {
+    router.post(`/petugas/damage-reports/${loan.id}/resolve`, {}, {
+      onSuccess: () => {
+        successAlert({
+          title: 'Berhasil!',
+          text: 'Status kerusakan berhasil diperbarui menjadi selesai.',
+        });
+        showDetailModal.value = false;
+      },
+      onError: (errors) => {
+        Swal.fire({
+          title: 'Gagal!',
+          text: errors.error || 'Gagal memperbarui status.',
+          icon: 'error',
+        });
+      }
+    });
+  }
+};
+
+const getDamageTypeLabel = (type) => {
+  const labels = {
+    lost: '🗑️ Hilang',
+    wet: '💧 Basah',
+    torn: '✂️ Sobek',
+    stained: '🔴 Ternoda',
+    other: '❓ Lainnya'
+  };
+  return labels[type] || type;
+};
+
+const getDamageStatusLabel = (status) => {
+  const labels = {
+    pending: '⏳ Menunggu Verifikasi',
+    responded: '📋 Sudah Direspons',
+    resolved: '✅ Selesai'
+  };
+  return labels[status] || status;
 };
 
 const openDetailModal = (loan) => {

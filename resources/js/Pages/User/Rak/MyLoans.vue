@@ -433,19 +433,34 @@ function cancelLoan(loan) {
   });
 }
 
+// function payFine(fine) {
+//   Swal.fire({
+//     title: 'Proses Invoice?',
+//     html: `<p class="text-xs text-slate-500">Melanjutkan pembayaran denda nominal: <strong>Rp ${formatNumber(fine.late_fee)}</strong></p>`,
+//     icon: 'question',
+//     showCancelButton: true,
+//     confirmButtonColor: '#ea580c',
+//     cancelButtonColor: '#64748b',
+//     confirmButtonText: 'Proceed Gateway',
+//     cancelButtonText: 'Hold'
+//   }).then((result) => {
+//     if (result.isConfirmed) router.visit(`/fines/${fine.id}/pay`);
+//   });
+// }
+
+
 function payFine(fine) {
-  Swal.fire({
-    title: 'Proses Invoice?',
-    html: `<p class="text-xs text-slate-500">Melanjutkan pembayaran denda nominal: <strong>Rp ${formatNumber(fine.late_fee)}</strong></p>`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#ea580c',
-    cancelButtonColor: '#64748b',
-    confirmButtonText: 'Proceed Gateway',
-    cancelButtonText: 'Hold'
-  }).then((result) => {
-    if (result.isConfirmed) router.visit(`/fines/${fine.id}/pay`);
-  });
+  if (fine.is_damaged === null || fine.is_damaged === undefined) {
+    router.visit(`/fines/${fine.id}/report-damage`);
+    return;
+  }
+
+  if (fine.payment_status === 'pending') {
+    router.visit(`/fines/${fine.id}/waiting-payment`);
+    return;
+  }
+
+  router.visit(`/fines/${fine.id}/pay`);
 }
 
 function handleLogout() {
