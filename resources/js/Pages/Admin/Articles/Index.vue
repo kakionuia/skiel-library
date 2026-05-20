@@ -18,7 +18,7 @@
       </div>
     </template>
 
-    <div class="space-y-6 mb-6">
+    <div class="space-y-6 mb-6 ms-6">
       <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <form @submit.prevent="filterArticles" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
@@ -57,6 +57,7 @@
                 <option value="">Semua Kategori</option>
                 <option value="artikel">Artikel</option>
                 <option value="berita">Berita</option>
+                <option value="event">Event</option>
               </select>
             </div>
 
@@ -93,7 +94,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="inline-flex items-center px-2.5 py-1 text-xs font-bold tracking-wide uppercase bg-orange-50 text-orange-700 rounded-lg">
-                    {{ article.category === 'artikel' ? 'Artikel' : 'Berita' }}
+                    {{ getCategoryText(article.category) }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">{{ article.author?.name }}</td>
@@ -353,5 +354,14 @@ const getStatusClass = (status) => {
     'draft': 'bg-slate-50 text-slate-600 border border-slate-100'
   }
   return classes[status] || 'bg-slate-50 text-slate-600 border border-slate-100'
+}
+
+const getCategoryText = (category) => {
+  const categories = {
+    artikel: 'Artikel',
+    berita: 'Berita',
+    event: 'Event',
+  }
+  return categories[category] || category
 }
 </script>

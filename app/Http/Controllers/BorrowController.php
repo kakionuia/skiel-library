@@ -707,9 +707,15 @@ public function show(Borrow $borrow)
         }
 
         $borrow->update([
-            'payment_status' => 'confirmed',
-            'payment_date' => now(),
-        ]);
+    'payment_status' => 'confirmed',
+    'payment_date' => now(),
+
+    // tandai selesai
+    'status' => 'returned',
+
+    // simpan final denda
+    'late_fee' => $borrow->late_fee,
+]);
 
         // If there was damage reported, mark it as ready to be marked resolved
         if ($borrow->is_damaged && $borrow->damage_status === 'responded') {
@@ -719,6 +725,8 @@ public function show(Borrow $borrow)
         }
 
         return back()->with('success', 'Pembayaran denda tunai berhasil dikonfirmasi.');
+
+        
     }
 
     public function confirmQrisPayment(Borrow $borrow)
@@ -734,9 +742,15 @@ public function show(Borrow $borrow)
         }
 
         $borrow->update([
-            'payment_status' => 'confirmed',
-            'payment_date' => now(),
-        ]);
+    'payment_status' => 'confirmed',
+    'payment_date' => now(),
+
+    // tandai selesai
+    'status' => 'returned',
+
+    // simpan final denda
+    'late_fee' => $borrow->late_fee,
+]);
 
         // If there was damage reported, mark it as ready to be marked resolved by staff
         if ($borrow->is_damaged && $borrow->damage_status === 'responded') {
@@ -746,6 +760,7 @@ public function show(Borrow $borrow)
         }
 
         return back()->with('success', 'Pembayaran QRIS berhasil dikonfirmasi.');
+
     }
 
     /**
@@ -828,6 +843,7 @@ public function show(Borrow $borrow)
             ],
             'qrisCode' => 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=SKIEL-LIBRARY-FINE-' . $borrow->id . '-' . time(),
         ]);
+        
     }
 
 public function showDamageReport(Borrow $borrow)

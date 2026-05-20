@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-slate-50 font-sans text-slate-800">
+  <div class="min-h-screen bg-white font-sans text-slate-800">
     <!-- ========== HERO SECTION ========== -->
     <section
       ref="heroSection"
@@ -75,7 +75,7 @@
 
       <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
         <svg class="relative block h-12 w-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M1200 120L0 120L0 0C161.333 46.6667 361.333 70 600 70C838.667 70 1038.67 46.6667 1200 0V120Z" fill="#f8fafc" />
+          <path d="M1200 120L0 120L0 0C161.333 46.6667 361.333 70 600 70C838.667 70 1038.67 46.6667 1200 0V120Z" fill="#FFFFFF" />
         </svg>
       </div>
     </section>
@@ -83,19 +83,17 @@
     <!-- ========== STICKY NAVBAR ========== -->
     <nav
       ref="navbarRef"
-      class="transition-all duration-300 w-full z-50 bg-slate-50"
+      class="transition-all duration-300 w-full z-50 bg-white"
       :class="{ 'sticky top-0 shadow-md': navbarSticky }"
     >
       <div class="mx-auto max-w-7xl px-4 md:px-8 py-4 flex justify-between items-center gap-8 md:gap-5">
         <!-- Hamburger Button Mobile -->
-        <button @click="toggleSidebar" class="md:hidden text-orange-500 p-1 transition-transform active:scale-90">
+        <button @click="toggleSidebar" class=" text-orange-500 p-1 transition-transform active:scale-90">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <!-- Logo Desktop -->
-        <div class="hidden md:block text-orange-500 font-bold text-xl">SKIE-Library</div>
 
         <!-- Scan & Search - Hidden on mobile -->
         <div class="hidden md:flex gap-2 w-full">
@@ -178,85 +176,107 @@
     <!-- ========== SIDEBAR (Mobile) ========== -->
     <div 
       v-if="isSidebarOpen" 
-      class="fixed inset-0 z-50 md:hidden"
-      @click="closeSidebar"
+      class="fixed inset-0 z-50"
     >
-      <!-- Overlay -->
-      <div class="absolute inset-0 bg-black/50 transition-opacity"></div>
+      <!-- Overlay dengan Backdrop Blur yang Lembut -->
+      <div 
+        class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
+        @click="closeSidebar"
+      ></div>
       
       <!-- Sidebar Panel -->
       <div 
-        class="absolute left-0 top-0 h-full w-80 bg-white shadow-2xl transition-transform transform translate-x-0"
+        class="absolute left-0 top-0 h-full w-80 bg-white shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-out"
         @click.stop
       >
-        <!-- Sidebar Header -->
-        <div class="bg-gradient-to-br from-orange-600 to-orange-500 p-6 text-white">
-          <div class="flex items-center gap-4">
-            <img :src="userAvatar" class="h-16 w-16 rounded-full border-2 border-white object-cover" />
-            <div>
-              <h3 class="font-bold text-lg">{{ user.name }}</h3>
-              <p class="text-xs text-orange-100">{{ user.email || 'student@skie.sch.id' }}</p>
+        <!-- Upper Section -->
+        <div>
+          <!-- Sidebar Header: Lebih Clean & Elegan -->
+          <div class="relative overflow-hidden bg-gradient-to-br from-orange-600 to-orange-500 p-6 text-white">
+            <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl" />
+            <div class="relative z-10 flex items-center gap-4">
+              <img 
+                :src="userAvatar" 
+                class="h-14 w-14 rounded-full border-2 border-white/80 object-cover shadow-md" 
+                alt="User Avatar"
+              />
+              <div class="space-y-0.5">
+                <h3 class="font-bold text-base tracking-tight leading-tight line-clamp-1">{{ user.name }}</h3>
+                <p class="text-xs text-orange-100/90 font-medium tracking-wide truncate">
+                  {{ user.email || 'student@skie.sch.id' }}
+                </p>
+              </div>
             </div>
           </div>
+
+          <!-- Sidebar Navigation Menu -->
+          <nav class="p-4 space-y-1">
+            <Link 
+              href="/dashboard" 
+              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span class="font-semibold text-sm tracking-wide">Beranda</span>
+            </Link>
+
+            <Link 
+              href="/my-loans" 
+              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <span class="font-semibold text-sm tracking-wide">Rak Buku Saya</span>
+            </Link>
+
+            <Link 
+              href="/loans" 
+              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="font-semibold text-sm tracking-wide">Riwayat Peminjaman</span>
+            </Link>
+
+            <Link 
+              href="/services" 
+              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+              <span class="font-semibold text-sm tracking-wide">Layanan</span>
+            </Link>
+
+            <Link 
+              href="/help" 
+              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="font-semibold text-sm tracking-wide">Bantuan</span>
+            </Link>
+          </nav>
         </div>
 
-        <!-- Sidebar Menu -->
-        <div class="p-4 space-y-2">
-          <Link href="/dashboard" class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span class="font-medium">Beranda</span>
-          </Link>
-
-          <Link href="/my-loans" class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-            <span class="font-medium">Peminjaman Saya</span>
-          </Link>
-
-          <Link href="/loans" class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="font-medium">Riwayat Peminjaman</span>
-          </Link>
-
-          <Link href="/services" class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-            <span class="font-medium">Layanan</span>
-          </Link>
-
-          <Link href="/help" class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="font-medium">Bantuan</span>
-          </Link>
-        </div>
-
-<Link href="/my-loans" class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-  </svg>
-  <span class="font-medium">Rak Buku Saya</span>
-</Link>
-
-        <!-- Sidebar Footer -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200">
-          <button @click="logout" class="flex items-center gap-4 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Sidebar Footer: Tombol Keluar yang Bersih -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+          <button 
+            @click="logout" 
+            class="flex items-center gap-3.5 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 font-semibold text-sm tracking-wide"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span class="font-medium">Keluar</span>
+            Keluar Account
           </button>
         </div>
       </div>
     </div>
-
     <!-- ========== MAIN CONTENT ========== -->
     <main class="mx-auto max-w-7xl px-4 py-8 md:py-12">
       <section class="space-y-16">
@@ -311,82 +331,67 @@
     <BestSellerSection :books="bestSellerBooks" />
 
     <!-- ========== REVIEWS SECTION ========== -->
-    <ReviewsSection :best-reviews="bestReviews" :recent-reviews="recentReviews" />
+    <ReviewsSection :best-reviews="bestReviews" :recent-reviews="recentReviews" :trending-reviews="trendingReviews" />
 
     <!-- ========== RIWAYAT SECTION ========== -->
-    <!-- ========== RIWAYAT SECTION ========== -->
-<section class="p-4 md:p-8 bg-white">
-  <div class="flex justify-between items-center mb-8">
-    <div class="flex items-center gap-3">
-      <div class="p-2.5 rounded-xl bg-orange-50">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h2 class="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Riwayat Pinjam Buku</h2>
-    </div>
-    <Link href="/my-loans" class="bg-[#e67e00] hover:bg-orange-700 text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all active:scale-95 inline-block">
-      Peminjaman Saya
-    </Link>
-  </div>
-
-  <!-- Empty State jika tidak ada data -->
-  <div v-if="history.length === 0" class="text-center py-16">
-    <div class="text-5xl mb-4">📋</div>
-    <h3 class="text-lg font-bold text-gray-900">Belum ada riwayat peminjaman</h3>
-    <p class="text-gray-500 text-sm mt-1">Mulai pinjam buku dan riwayat akan muncul di sini.</p>
-    <Link href="/dashboard" class="mt-4 inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all">
-      Jelajahi Buku
-    </Link>
-  </div>
-
-  <!-- Card Riwayat -->
-  <div v-else class="flex gap-4 md:gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory">
-    <Link
-      v-for="book in history"
-      :key="book.id"
-      :href="book.borrowId ? `/borrow/${book.borrowId}` : '/my-loans'"
-      class="min-w-[320px] md:min-w-[450px] border border-gray-200 rounded-2xl md:rounded-[2rem] p-4 md:p-5 flex gap-4 md:gap-5 snap-start hover:border-orange-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 bg-white group"
-    >
-      <img :src="book.cover" :alt="book.title" class="w-24 h-32 md:w-32 md:h-44 object-cover rounded-xl shadow-sm ring-1 ring-gray-100" />
-      <div class="flex-1 flex flex-col justify-between">
-        <div>
-          <div class="flex justify-between items-start mb-3">
-            <h3 class="text-base md:text-xl font-bold text-gray-900 leading-tight">{{ book.title }}</h3>
-            <span :class="['font-semibold text-xs uppercase tracking-wider px-2 py-1 rounded-full', book.statusColor]">
-              {{ book.status }}
-            </span>
+<section class="p-6 md:p-8 bg-white border-t border-slate-100">
+        <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-orange-50 text-orange-500 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 class="text-lg md:text-xl font-bold text-slate-900 tracking-tight">Riwayat Pinjam Buku</h2>
           </div>
-          <div class="text-xs md:text-sm space-y-1 text-gray-600 font-medium">
-            <p class="flex items-center gap-2">
-              <span class="text-gray-400 w-12 md:w-16">Penulis</span>
-              <span class="text-gray-800">{{ book.author }}</span>
-            </p>
-            <p class="flex items-center gap-2">
-              <span class="text-gray-400 w-12 md:w-16">Penerbit</span>
-              <span class="text-gray-800">{{ book.publisher }}</span>
-            </p>
-            <p v-if="book.dueDate" class="flex items-center gap-2">
-              <span class="text-gray-400 w-12 md:w-16">Tenggat</span>
-              <span class="font-semibold text-red-600 text-xs md:text-sm">{{ book.dueDate }}</span>
-            </p>
-          </div>
+          <Link href="/my-loans" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl font-semibold text-xs md:text-sm transition-all active:scale-95">
+            Peminjaman Saya
+          </Link>
         </div>
-        <div class="mt-3 md:mt-4">
-          <span v-if="book.isReviewed" class="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 md:px-4 py-1 rounded-lg text-xs md:text-sm font-semibold border border-orange-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Reviewed
-          </span>
-          <span v-else class="inline-flex items-center gap-2 bg-white text-orange-700 px-3 md:px-4 py-1 rounded-lg text-xs md:text-sm font-semibold border border-orange-200 group-hover:bg-orange-50">
-            Lihat detail
-          </span>
+
+        <!-- Empty History State -->
+        <div v-if="history.length === 0" class="text-center py-12">
+          <div class="text-4xl mb-3">📋</div>
+          <h3 class="text-sm font-bold text-slate-900">Belum ada riwayat peminjaman</h3>
+          <p class="text-slate-400 text-xs mt-1">Mulai pinjam buku dan riwayat akan muncul di sini.</p>
         </div>
-      </div>
-    </Link>
-  </div>
+
+        <!-- History Content Cards -->
+        <div v-else class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+          <Link
+            v-for="book in history"
+            :key="book.id"
+            :href="book.borrowId ? `/borrow/${book.borrowId}` : '/my-loans'"
+            class="min-w-[290px] md:min-w-[380px] border border-slate-100 rounded-2xl p-4 flex gap-4 snap-start hover:border-orange-200 hover:shadow-lg transition-all bg-white group"
+          >
+            <img :src="book.cover" :alt="book.title" class="w-20 h-28 object-cover rounded-xl shadow-sm ring-1 ring-slate-100 flex-shrink-0" />
+            <div class="flex-1 flex flex-col justify-between min-w-0">
+              <div>
+                <div class="flex justify-between items-start gap-2 mb-2">
+                  <h3 class="text-sm font-bold text-slate-900 leading-tight truncate group-hover:text-orange-500 transition-colors">{{ book.title }}</h3>
+                  <span :class="['font-semibold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0', book.statusColor]">
+                    {{ book.status }}
+                  </span>
+                </div>
+                <div class="text-xs space-y-0.5 text-slate-500 font-medium">
+                  <p class="truncate"><span class="text-slate-400 inline-block w-14">Penulis</span> {{ book.author }}</p>
+                  <p class="truncate"><span class="text-slate-400 inline-block w-14">Penerbit</span> {{ book.publisher }}</p>
+                  <p v-if="book.dueDate" class="text-red-500 font-semibold"><span class="text-slate-400 font-medium inline-block w-14">Tenggat</span> {{ book.dueDate }}</p>
+                </div>
+              </div>
+              <div class="mt-2">
+                <span v-if="book.isReviewed" class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-green-200">
+                  Reviewed
+                </span>
+                <span v-else class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-slate-200 group-hover:bg-orange-50 group-hover:text-orange-600 group-hover:border-orange-200 transition-all">
+                  Lihat detail
+                </span>
+              </div>
+            </div>
+          </Link>
+        </div>
 </section>
+
     <!-- Toast Notification -->
     <div v-if="toast.show" class="fixed bottom-4 right-4 z-50 animate-slide-up">
       <div :class="['px-6 py-3 rounded-xl shadow-lg text-white', toast.type === 'success' ? 'bg-green-500' : 'bg-red-500']">
@@ -420,7 +425,8 @@ const userAvatar = computed(() => {
 });
 
 // CONSTANTS
-const ALL_EXPECTED_CATEGORIES = ['Fiksi', 'Non Fiksi', 'Referensi', 'Cerita Anak'];
+const MAJOR_CATEGORIES = ['Elektro', 'RPL', 'Las', 'Mesin', 'Kimia'];
+const ALL_EXPECTED_CATEGORIES = ['Fiksi', 'Non Fiksi', 'Referensi', 'Cerita Anak', ...MAJOR_CATEGORIES];
 const ITEMS_PER_PAGE = 9;
 
 // PROPS
@@ -448,6 +454,10 @@ const props = defineProps({
   recentReviews: {
     type: Array,
     default: () => []
+  },
+  trendingReviews: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -461,82 +471,7 @@ const quickActions = [
 
 // BEST SELLER DATA
 const bestSellerBooks = computed(() => {
-  if (props.bestSellerBooks && props.bestSellerBooks.length > 0) {
-    return props.bestSellerBooks;
-  }
-  
-  return [
-    { 
-      title: 'One Piece', 
-      cover: 'https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=2076&auto=format&fit=crop',
-      author: 'Eiichiro Oda',
-      rating: 4.9,
-      totalBorrowed: 1523
-    },
-    { 
-      title: 'Ronggeng Dukuh Paruk', 
-      cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1974&auto=format&fit=crop',
-      author: 'Ahmad Tohari',
-      rating: 4.7,
-      totalBorrowed: 1256
-    },
-    { 
-      title: 'Witch Fantasy', 
-      cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1996&auto=format&fit=crop',
-      author: 'Sarah J. Maas',
-      rating: 4.5,
-      totalBorrowed: 1102
-    },
-    { 
-      title: 'Hujan', 
-      cover: 'https://images.unsplash.com/photo-1476275466078-4007374efbbe?q=80&w=2029&auto=format&fit=crop',
-      author: 'Tere Liye',
-      rating: 4.8,
-      totalBorrowed: 987
-    },
-    { 
-      title: 'Laskar Pelangi', 
-      cover: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2028&auto=format&fit=crop',
-      author: 'Andrea Hirata',
-      rating: 4.9,
-      totalBorrowed: 1456
-    },
-    { 
-      title: 'Bumi Manusia', 
-      cover: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2073&auto=format&fit=crop',
-      author: 'Pramoedya Ananta Toer',
-      rating: 4.8,
-      totalBorrowed: 1345
-    },
-    { 
-      title: 'Harry Potter', 
-      cover: 'https://images.unsplash.com/photo-1601645192563-3b20dd4cef46?q=80&w=2070&auto=format&fit=crop',
-      author: 'J.K. Rowling',
-      rating: 4.9,
-      totalBorrowed: 1678
-    },
-    { 
-      title: 'Sang Pemimpi', 
-      cover: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?q=80&w=2070&auto=format&fit=crop',
-      author: 'Andrea Hirata',
-      rating: 4.7,
-      totalBorrowed: 1123
-    },
-    { 
-      title: 'Filosofi Teras', 
-      cover: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=2070&auto=format&fit=crop',
-      author: 'Henry Manampiring',
-      rating: 4.6,
-      totalBorrowed: 1034
-    },
-    { 
-      title: 'Atomic Habits', 
-      cover: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=2072&auto=format&fit=crop',
-      author: 'James Clear',
-      rating: 4.8,
-      totalBorrowed: 1890
-    },
-  ];
+  return props.bestSellerBooks || [];
 });
 
 // STATE
@@ -558,7 +493,17 @@ const allCategories = computed(() => {
     .map(book => book.category)
     .filter(Boolean)
     .map(cat => cat.trim());
-  return [...new Set([...bookCategories, ...ALL_EXPECTED_CATEGORIES])].sort();
+  const preferred = preferredMajorCategory.value;
+  return [...new Set([...bookCategories, ...ALL_EXPECTED_CATEGORIES])].sort((a, b) => {
+    if (a === preferred) return -1;
+    if (b === preferred) return 1;
+    return a.localeCompare(b);
+  });
+});
+
+const preferredMajorCategory = computed(() => {
+  const jurusan = user.value?.jurusan || props.user?.jurusan || '';
+  return MAJOR_CATEGORIES.find(category => jurusan.toLowerCase().includes(category.toLowerCase())) || '';
 });
 
 const filteredGroups = computed(() => {
@@ -595,7 +540,14 @@ const filteredGroups = computed(() => {
   }
 
   const groups = {};
-  ALL_EXPECTED_CATEGORIES.forEach(cat => { groups[cat] = []; });
+  const orderedCategories = [...ALL_EXPECTED_CATEGORIES].sort((a, b) => {
+    const preferred = preferredMajorCategory.value;
+    if (a === preferred) return -1;
+    if (b === preferred) return 1;
+    return ALL_EXPECTED_CATEGORIES.indexOf(a) - ALL_EXPECTED_CATEGORIES.indexOf(b);
+  });
+
+  orderedCategories.forEach(cat => { groups[cat] = []; });
 
   filteredBooks.forEach(book => {
     const category = book.category?.trim() || 'Lain-lain';

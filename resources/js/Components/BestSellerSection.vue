@@ -1,5 +1,5 @@
 <template>
-  <section class="relative py-20 bg-[#FDFCFB] overflow-hidden group/container">
+  <section v-if="books.length > 0" class="relative py-20 bg-[#FDFCFB] overflow-hidden group/container">
     <div class="absolute top-0 left-0 w-64 h-64 bg-[#E67E22]/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
     <div class="absolute bottom-0 right-0 w-96 h-96 bg-[#2C3E50]/5 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none" />
 
@@ -18,7 +18,7 @@
         :modules="modules"
         :slides-per-view="5"
         :centered-slides="true"
-        :loop="true"
+        :loop="books.length > 3"
         :speed="800"
         :space-between="30"
         :grab-cursor="true"
@@ -52,7 +52,7 @@
         class="best-seller-swiper !pb-24 !pt-10"
       >
         <SwiperSlide
-          v-for="(book, index) in loopedBooks"
+          v-for="(book, index) in displayBooks"
           :key="`${index}-${book.id}`"
         >
           <div class="book-card-wrapper relative group/card perspective-1000">
@@ -60,7 +60,10 @@
               #{{ (index % totalUniqueBooks) + 1 }}
             </div>
 
-            <div class="relative overflow-hidden rounded-2xl shadow-xl transition-all duration-500 group-hover/card:shadow-[0_20px_50px_rgba(230,126,34,0.3)]">
+            <Link
+              :href="book.detail_url || `/books/${book.source_id || book.id}`"
+              class="relative overflow-hidden rounded-2xl shadow-xl transition-all duration-500 group-hover/card:shadow-[0_20px_50px_rgba(230,126,34,0.3)] block"
+            >
               <img
                 :src="book.cover"
                 :alt="book.title"
@@ -69,12 +72,12 @@
 
               <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-all duration-500 flex flex-col justify-end p-6 text-white translate-y-2 group-hover/card:translate-y-0">
                 <h3 class="font-bold text-base leading-tight line-clamp-2">{{ book.title }}</h3>
-                <p class="text-xs text-gray-300 mt-2">Tersedia untuk dipinjam</p>
-                <button class="mt-4 py-2 px-4 bg-[#E67E22] hover:bg-[#d35400] text-white text-xs font-bold rounded-lg transition-colors shadow-md">
+                <p class="text-xs text-gray-300 mt-2">{{ book.totalBorrowed || 0 }} kali dipinjam</p>
+                <span class="mt-4 py-2 px-4 bg-[#E67E22] hover:bg-[#d35400] text-white text-xs font-bold rounded-lg transition-colors shadow-md inline-flex">
                   Detail Buku
-                </button>
+                </span>
               </div>
-            </div>
+            </Link>
           </div>
         </SwiperSlide>
       </Swiper>
@@ -94,6 +97,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay, Navigation } from 'swiper/modules';
 
@@ -111,12 +115,12 @@ const modules = [Autoplay, Navigation];
 
 const totalUniqueBooks = computed(() => props.books.length);
 
-// Logika looping agar slider berputar terus tanpa patah
-const loopedBooks = computed(() => {
+const displayBooks = computed(() => {
   if (!props.books || props.books.length === 0) return [];
   
-  return [...props.books, ...props.books, ...props.books].map((book, index) => ({
+  return props.books.map((book, index) => ({
     ...book,
+    source_id: book.id,
     id: `${book.id || index}-${index}`
   }));
 });

@@ -171,9 +171,8 @@ defineEmits(['openAuth']);
               </div>
             </a>
             
-            <a 
-              href="#" 
-              @click.prevent="navigateTo('home')"
+            <Link 
+              :href="route('articles.index', { category: 'event' })"
               class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +182,7 @@ defineEmits(['openAuth']);
                 <span class="font-semibold text-sm">Event</span>
                 <p class="text-xs text-gray-400">Event literasi seru</p>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

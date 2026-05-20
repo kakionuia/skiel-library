@@ -43,6 +43,11 @@ class Article extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(ArticleComment::class)->whereNull('parent_id')->latest();
+    }
+
     /**
      * Scope: Get published articles
      */
@@ -103,4 +108,3 @@ class Article extends Model
         return $colors[$this->status] ?? 'gray';
     }
 }
-

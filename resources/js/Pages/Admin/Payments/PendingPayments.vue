@@ -18,9 +18,9 @@ function formatNumber(number) {
 
 function getPaymentMethodBadge(method) {
   const badges = {
-    qris: { class: 'bg-blue-100 text-blue-800', text: '📱 QRIS' },
-    cash: { class: 'bg-green-100 text-green-800', text: '💵 Tunai' },
-    none: { class: 'bg-gray-100 text-gray-800', text: 'Tidak Ada' }
+    qris: { class: 'bg-slate-50 text-slate-900', text: 'QRIS' },
+    cash: { class: 'bg-slate-50 text-slate-900', text: 'Tunai' },
+    none: { class: 'bg-slate-50 text-slate-900', text: 'Tidak Ada' }
   };
   return badges[method] || badges['none'];
 }
@@ -84,30 +84,30 @@ function confirmQrisPayment(borrow) {
 
 <template>
   <AdminLayout>
-    <div class="bg-white rounded-lg shadow">
+    <div class="bg-white rounded-lg shadow ms-8">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h1 class="text-2xl font-bold text-gray-900">💳 Pembayaran Denda Tertunda</h1>
+        <h1 class="text-2xl font-bold text-gray-900">Pembayaran Denda Tertunda</h1>
         <p class="text-gray-600 text-sm mt-1">Daftar pembayaran denda yang menunggu konfirmasi atau tindakan</p>
       </div>
 
       <div class="px-6 py-4">
         <!-- Filter Stats -->
         <div class="grid grid-cols-3 gap-4 mb-6">
-          <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <p class="text-xs text-blue-600 uppercase font-semibold">QRIS (Menunggu)</p>
-            <p class="text-2xl font-bold text-blue-900 mt-1">
+          <div class="bg-white p-4 rounded-lg border border-slate-200">
+            <p class="text-xs text-slate-900 uppercase font-semibold">QRIS (Menunggu)</p>
+            <p class="text-2xl font-bold text-slate-900 mt-1">
               {{ borrows.data.filter(b => b.payment_method === 'qris' && b.payment_status === 'pending').length }}
             </p>
           </div>
-          <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-            <p class="text-xs text-green-600 uppercase font-semibold">Tunai (Menunggu)</p>
-            <p class="text-2xl font-bold text-green-900 mt-1">
+          <div class="bg-white p-4 rounded-lg border border-slate-200">
+            <p class="text-xs text-slate-900 uppercase font-semibold">Tunai (Menunggu)</p>
+            <p class="text-2xl font-bold text-slate-900 mt-1">
               {{ borrows.data.filter(b => b.payment_method === 'cash' && b.payment_status === 'pending').length }}
             </p>
           </div>
-          <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
-            <p class="text-xs text-purple-600 uppercase font-semibold">Total Denda</p>
-            <p class="text-2xl font-bold text-purple-900 mt-1">
+          <div class="bg-white p-4 rounded-lg border border-slate-200">
+            <p class="text-xs text-slate-900 uppercase font-semibold">Total Denda</p>
+            <p class="text-2xl font-bold text-slate-900 mt-1">
               Rp {{ formatNumber(borrows.data.reduce((sum, b) => sum + (b.late_fee || 0) + (b.additional_fine || 0), 0)) }}
             </p>
           </div>
@@ -153,10 +153,10 @@ function confirmQrisPayment(borrow) {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span v-if="borrow.payment_status === 'pending'" class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                    ⏳ Menunggu
+                    Menunggu
                   </span>
                   <span v-else-if="borrow.payment_status === 'confirmed'" class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                    ✓ Dikonfirmasi
+                    Dikonfirmasi
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -167,14 +167,14 @@ function confirmQrisPayment(borrow) {
                     <button
                       v-if="borrow.payment_method === 'cash'"
                       @click="confirmCashPayment(borrow)"
-                      class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium"
+                      class="px-3 py-1 bg-white hover:bg-slate-200 text-white rounded text-xs font-medium"
                     >
                       Konfirmasi Tunai
                     </button>
                     <button
                       v-if="borrow.payment_method === 'qris'"
                       @click="confirmQrisPayment(borrow)"
-                      class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium"
+                      class="px-3 py-1 bg-white hover:bg-slate-200 text-white rounded text-xs font-medium"
                     >
                       Konfirmasi QRIS
                     </button>

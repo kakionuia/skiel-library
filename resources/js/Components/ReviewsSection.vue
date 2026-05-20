@@ -6,15 +6,14 @@
         <h2 class="text-white text-2xl font-bold mb-4">Ulasan Terbaik</h2>
 
         <!-- Empty State Best Reviews -->
-        <div v-if="!bestReviews || bestReviews.length === 0" class="bg-white rounded-[2rem] p-8 shadow-xl min-h-[400px] flex flex-col items-center justify-center text-center">
-          <div class="text-5xl mb-4">⭐</div>
+        <div v-if="!bestReviews || bestReviews.length === 0" class="bg-white rounded-md p-8 shadow-xl min-h-[400px] flex flex-col items-center justify-center text-center">
           <h3 class="text-lg font-bold text-gray-800 mb-2">Belum Ada Ulasan Terbaik</h3>
           <p class="text-gray-500 text-sm max-w-xs">Tulis ulasan yang menarik dan berkualitas, nanti ulasanmu akan jadi yang terbaik di sini!</p>
         </div>
 
         <!-- Best Reviews Content -->
         <template v-else>
-          <div class="bg-white rounded-[2rem] p-8 shadow-xl relative min-h-[400px] flex flex-col justify-between">
+          <div class="bg-white rounded-md p-8 shadow-xl relative min-h-[400px] flex flex-col justify-between">
             <div
               v-for="(review, index) in bestReviews"
               :key="review.id"
@@ -49,14 +48,16 @@
                     "{{ review.comment }}"
                   </p>
                   <div class="flex gap-4 mt-6 text-gray-800">
-                    <button class="hover:text-red-500 transition-colors">
-                      <i class="far fa-heart text-xl" />
+                    <button @click.stop.prevent="toggleLike(review)" class="hover:text-red-500 transition-colors" :class="review.user_liked ? 'text-red-500' : ''">
+                      <i :class="review.user_liked ? 'fas fa-heart text-xl' : 'far fa-heart text-xl'" />
+                      <span class="sr-only">Sukai ulasan</span>
                     </button>
-                    <button class="hover:text-blue-500 transition-colors">
+                    <Link :href="review.review_url || `/books/${review.book_id}/reviews?review=${review.id}`" class="hover:text-blue-500 transition-colors">
                       <i class="far fa-comment text-xl" />
-                    </button>
-                    <button class="hover:text-orange-500 transition-colors ml-auto">
-                      <i class="far fa-bookmark text-xl" />
+                    </Link>
+                    <button @click.stop.prevent="toggleBookmark(review)" class="hover:text-orange-500 transition-colors ml-auto" :class="review.user_bookmarked ? 'text-orange-500' : ''">
+                      <i :class="review.user_bookmarked ? 'fas fa-bookmark text-xl' : 'far fa-bookmark text-xl'" />
+                      <span class="sr-only">Simpan ulasan</span>
                     </button>
                   </div>
                 </div>
@@ -90,18 +91,18 @@
         </div>
 
         <!-- Empty State Recent Reviews -->
-        <div v-if="!recentReviews || recentReviews.length === 0" class="bg-white rounded-3xl p-8 flex flex-col items-center justify-center text-center min-h-[200px]">
-          <div class="text-4xl mb-3">💬</div>
+        <div v-if="!recentReviews || recentReviews.length === 0" class="bg-white rounded-md p-8 flex flex-col items-center justify-center text-center min-h-[200px]">
           <h3 class="text-base font-bold text-gray-800 mb-1">Belum Ada Ulasan</h3>
           <p class="text-gray-500 text-sm">Jadilah yang pertama memberikan ulasan!</p>
         </div>
 
         <!-- Recent Reviews Content -->
         <div v-else class="space-y-4">
-          <div
+          <Link
             v-for="item in recentReviews"
             :key="item.id"
-            class="bg-white rounded-3xl p-4 flex gap-4 shadow-md hover:scale-[1.02] transition-transform"
+            :href="item.review_url || `/books/${item.book_id}/reviews?review=${item.id}`"
+            class="bg-white rounded-md p-4 flex gap-4 shadow-md hover:scale-[1.02] transition-transform"
           >
             <img 
               :src="item.user_avatar || `https://ui-avatars.com/api/?name=${item.user}&background=E67E22&color=white`" 
@@ -122,12 +123,16 @@
                 {{ item.comment }}
               </p>
               <div class="flex gap-3 mt-2 text-gray-700">
-                <i class="far fa-heart text-xs" />
+                <button @click.stop.prevent="toggleLike(item)" :class="item.user_liked ? 'text-red-500' : ''" class="hover:text-red-500">
+                  <i :class="item.user_liked ? 'fas fa-heart text-xs' : 'far fa-heart text-xs'" />
+                </button>
                 <i class="far fa-comment text-xs" />
-                <i class="far fa-bookmark text-xs ml-auto" />
+                <button @click.stop.prevent="toggleBookmark(item)" :class="item.user_bookmarked ? 'text-orange-500' : ''" class="ml-auto hover:text-orange-500">
+                  <i :class="item.user_bookmarked ? 'fas fa-bookmark text-xs' : 'far fa-bookmark text-xs'" />
+                </button>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </div>
@@ -135,10 +140,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 
-defineProps({
+const props = defineProps({
   bestReviews: {
     type: Array,
     default: () => []
@@ -146,10 +151,50 @@ defineProps({
   recentReviews: {
     type: Array,
     default: () => []
+  },
+  trendingReviews: {
+    type: Array,
+    default: () => []
   }
 });
 
 const activeIndex = ref(0);
+const page = usePage();
+const authUser = computed(() => page.props.auth?.user || null);
+
+function requireAuth() {
+  return Boolean(authUser.value);
+}
+
+function updateReview(reviewId, patch) {
+  [...props.bestReviews, ...props.recentReviews, ...props.trendingReviews].forEach((review) => {
+    if (review.id === reviewId) Object.assign(review, patch);
+  });
+}
+
+function toggleLike(review) {
+  if (!requireAuth()) return router.visit('/login');
+
+  const liked = !review.user_liked;
+  updateReview(review.id, {
+    user_liked: liked,
+    likes_count: Math.max(0, (review.likes_count || 0) + (liked ? 1 : -1))
+  });
+
+  router.post(route('reviews.like', review.id), {}, { preserveScroll: true });
+}
+
+function toggleBookmark(review) {
+  if (!requireAuth()) return router.visit('/login');
+
+  const bookmarked = !review.user_bookmarked;
+  updateReview(review.id, {
+    user_bookmarked: bookmarked,
+    bookmarks_count: Math.max(0, (review.bookmarks_count || 0) + (bookmarked ? 1 : -1))
+  });
+
+  router.post(route('reviews.bookmark', review.id), {}, { preserveScroll: true });
+}
 </script>
 
 <style scoped>

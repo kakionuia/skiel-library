@@ -55,7 +55,7 @@
                 <p class="text-sm text-slate-500">Aktivitas 6 bulan terakhir</p>
               </div>
               <select class="text-sm border-none bg-slate-50 rounded-lg focus:ring-2 focus:ring-orange-500">
-                <option>Tahun 2024</option>
+                <option>Tahun {{ new Date().getFullYear() }}</option>
               </select>
             </div>
             

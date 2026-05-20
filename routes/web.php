@@ -10,6 +10,7 @@ use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\BookQueueController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\LiteracyEventController;
 use App\Http\Controllers\NotificationController;
 use App\Models\Book;
 use App\Models\Borrow;
@@ -71,6 +72,14 @@ Route::get('/api/articles', function () {
 */
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/articles/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
+Route::get('/events/{literacyEvent:slug}', [LiteracyEventController::class, 'show'])->name('events.show');
+Route::middleware('auth')->group(function () {
+    Route::post('/articles/{article}/comments', [ArticleController::class, 'storeComment'])->name('articles.comments.store');
+    Route::delete('/article-comments/{comment}', [ArticleController::class, 'deleteComment'])->name('articles.comments.delete');
+});
+Route::middleware(['auth', 'verified', 'approved'])->group(function () {
+    Route::post('/events/{literacyEvent:slug}/participate', [LiteracyEventController::class, 'participate'])->name('events.participate');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -168,6 +177,15 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::delete('/articles/{article}', [ArticleController::class, 'adminDestroy'])->name('articles.destroy');
     Route::post('/articles/{article}/approve', [ArticleController::class, 'approve'])->name('articles.approve');
     Route::post('/articles/{article}/reject', [ArticleController::class, 'reject'])->name('articles.reject');
+
+    // Literacy Event Management
+    Route::get('/events', [LiteracyEventController::class, 'adminIndex'])->name('events.index');
+    Route::post('/events', [LiteracyEventController::class, 'adminStore'])->name('events.store');
+    Route::get('/events/{literacyEvent}', [LiteracyEventController::class, 'adminShow'])->name('events.show');
+    Route::put('/events/{literacyEvent}', [LiteracyEventController::class, 'adminUpdate'])->name('events.update');
+    Route::delete('/events/{literacyEvent}', [LiteracyEventController::class, 'adminDestroy'])->name('events.destroy');
+    Route::post('/events/{literacyEvent}/winner/{user}', [LiteracyEventController::class, 'chooseWinner'])->name('events.winner');
+    Route::get('/events/{literacyEvent}/submissions/{participant}', [LiteracyEventController::class, 'viewSubmission'])->name('events.submissions.show');
     
     // System Parameters
     Route::get('/settings/system-parameters', [AdminController::class, 'systemParameters'])->name('settings.system-parameters');
@@ -329,36 +347,65 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             ->limit(5)
             ->get(['id', 'title', 'author', 'category', 'available_quantity']);
 
+        $bestSellerBooks = Book::query()
+            ->where('status', 'approved')
+            ->withCount('borrows')
+            ->having('borrows_count', '>', 1)
+            ->orderByDesc('borrows_count')
+            ->orderBy('title')
+            ->limit(10)
+            ->get()
+            ->map(fn ($book) => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'author' => $book->author,
+                'cover' => $book->cover_image ? asset('storage/' . $book->cover_image) : 'https://placehold.co/320x480/E67E22/white?text=Book',
+                'totalBorrowed' => $book->borrows_count,
+                'detail_url' => route('books.show', $book->id),
+            ]);
+
         $latestReviews = Review::with(['user:id,name', 'book:id,title'])
             ->latest()
             ->limit(5)
             ->get();
 
-        // Get best reviews (comment longer than 500 characters)
+        $mapDashboardReview = function ($review) use ($user) {
+            return [
+                'id' => $review->id,
+                'book_id' => $review->book->id,
+                'review_url' => route('books.reviews', $review->book->id) . '?review=' . $review->id,
+                'user' => $review->user->name,
+                'user_avatar' => $review->user->profile_photo_url,
+                'book_title' => $review->book->title,
+                'book_cover' => $review->book->cover_image ? asset('storage/' . $review->book->cover_image) : null,
+                'rating' => $review->rating,
+                'comment' => $review->comment,
+                'likes_count' => $review->likes_count,
+                'comments_count' => $review->comments_count,
+                'bookmarks_count' => $review->bookmarks_count,
+                'user_liked' => $user ? $review->isLikedBy($user->id) : false,
+                'user_bookmarked' => $user ? $review->isBookmarkedBy($user->id) : false,
+            ];
+        };
+
+        // Get best reviews (comment at least 500 words)
         $bestReviews = Review::with(['user', 'book', 'likes', 'comments.user', 'bookmarks'])
             ->withCount(['likes', 'comments', 'bookmarks'])
-            ->whereRaw('CHAR_LENGTH(COALESCE(comment, "")) > 500')
-            ->orderBy('created_at', 'desc')
+            ->whereRaw('(LENGTH(TRIM(COALESCE(comment, ""))) - LENGTH(REPLACE(TRIM(COALESCE(comment, "")), " ", "")) + 1) >= 500')
+            ->orderByDesc('rating')
+            ->orderByRaw('(likes_count + comments_count) DESC')
             ->limit(3)
             ->get()
-            ->map(function ($review) use ($user) {
-                $review->user_liked = $user ? $review->isLikedBy($user->id) : false;
-                $review->user_bookmarked = $user ? $review->isBookmarkedBy($user->id) : false;
-                return [
-                    'id' => $review->id,
-                    'user' => $review->user->name,
-                    'user_avatar' => $review->user->profile_photo_url,
-                    'book_title' => $review->book->title,
-                    'book_cover' => $review->book->cover_image ? asset('storage/' . $review->book->cover_image) : null,
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                    'likes_count' => $review->likes_count,
-                    'comments_count' => $review->comments_count,
-                    'bookmarks_count' => $review->bookmarks_count,
-                    'user_liked' => $user ? $review->isLikedBy($user->id) : false,
-                    'user_bookmarked' => $user ? $review->isBookmarkedBy($user->id) : false,
-                ];
-            });
+            ->map($mapDashboardReview);
+
+        // Get trending reviews (most likes + comments)
+        $trendingReviews = Review::with(['user', 'book', 'likes', 'comments.user', 'bookmarks'])
+            ->withCount(['likes', 'comments', 'bookmarks'])
+            ->orderByRaw('(likes_count + comments_count) DESC')
+            ->orderByDesc('created_at')
+            ->limit(3)
+            ->get()
+            ->map($mapDashboardReview);
 
         // Get recent reviews (3 most recent)
         $recentReviews = Review::with(['user', 'book', 'likes', 'comments.user', 'bookmarks'])
@@ -366,24 +413,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get()
-            ->map(function ($review) use ($user) {
-                $review->user_liked = $user ? $review->isLikedBy($user->id) : false;
-                $review->user_bookmarked = $user ? $review->isBookmarkedBy($user->id) : false;
-                return [
-                    'id' => $review->id,
-                    'user' => $review->user->name,
-                    'user_avatar' => $review->user->profile_photo_url,
-                    'book_title' => $review->book->title,
-                    'book_cover' => $review->book->cover_image ? asset('storage/' . $review->book->cover_image) : null,
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                    'likes_count' => $review->likes_count,
-                    'comments_count' => $review->comments_count,
-                    'bookmarks_count' => $review->bookmarks_count,
-                    'user_liked' => $user ? $review->isLikedBy($user->id) : false,
-                    'user_bookmarked' => $user ? $review->isBookmarkedBy($user->id) : false,
-                ];
-            });
+            ->map($mapDashboardReview);
 
         $userReviews = Review::with('book:id,title')
             ->where('user_id', $user->id)
@@ -427,10 +457,12 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             'maxLoanDays' => 7,
             'finePerDay' => 1000,
             'availableBooks' => $availableBooks,
+            'bestSellerBooks' => $bestSellerBooks,
             'popularBooks' => $popularBooks,
             'latestReviews' => $latestReviews,
             'bestReviews' => $bestReviews,
             'recentReviews' => $recentReviews,
+            'trendingReviews' => $trendingReviews,
             'userReviews' => $userReviews,
             'userComplaints' => $userComplaints,
             'userSuggestions' => $userSuggestions,

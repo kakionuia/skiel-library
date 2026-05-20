@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleComment;
+use App\Models\LiteracyEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -57,7 +59,7 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'excerpt' => 'nullable|string|max:500',
-            'category' => 'required|in:artikel,berita',
+            'category' => 'required|in:artikel,berita,event',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'in:draft,pending,approved'
         ]);
@@ -105,7 +107,7 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'excerpt' => 'nullable|string|max:500',
-            'category' => 'required|in:artikel,berita',
+            'category' => 'required|in:artikel,berita,event',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'in:draft,pending,approved'
         ]);
@@ -198,7 +200,7 @@ class ArticleController extends Controller
                 return $query->where('title', 'LIKE', '%' . $request->search . '%')
                     ->orWhere('excerpt', 'LIKE', '%' . $request->search . '%');
             })
-            ->when($request->category && $request->category !== 'all', function($query) use ($request) {
+            ->when($request->category && !in_array($request->category, ['all', 'event']), function($query) use ($request) {
                 return $query->where('category', $request->category);
             })
             ->when($request->sort, function($query) use ($request) {
@@ -227,8 +229,37 @@ class ArticleController extends Controller
                 return $article;
             });
 
+        $events = LiteracyEvent::with('winner:id,name,profile_photo_path')
+            ->withCount('participants')
+            ->when($request->search, function ($query) use ($request) {
+                return $query->where('title', 'LIKE', '%' . $request->search . '%')
+                    ->orWhere('description', 'LIKE', '%' . $request->search . '%');
+            })
+            ->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END")
+            ->orderBy('starts_at', 'desc')
+            ->get()
+            ->map(fn ($event) => [
+                'id' => 'event-' . $event->id,
+                'event_id' => $event->id,
+                'title' => $event->title,
+                'slug' => $event->slug,
+                'excerpt' => $event->description,
+                'category' => 'event',
+                'event_category' => $event->category,
+                'featured_image' => $event->image_url,
+                'published_at' => $event->starts_at,
+                'starts_at' => $event->starts_at,
+                'ends_at' => $event->ends_at,
+                'status_label' => $event->status_label,
+                'participants_count' => $event->participants_count,
+                'winner' => $event->winner,
+                'is_event' => true,
+                'readTime' => null,
+            ]);
+
         return Inertia::render('Articles/Index', [
             'articles' => $articles,
+            'events' => $events,
             'filters' => $request->only(['search', 'category', 'sort', 'page'])
         ]);
     }
@@ -250,8 +281,31 @@ class ArticleController extends Controller
                 return $article;
             });
 
+        $latestEvents = LiteracyEvent::with('winner:id,name,profile_photo_path')
+            ->withCount('participants')
+            ->latest('starts_at')
+            ->limit(10)
+            ->get()
+            ->map(fn ($event) => [
+                'id' => 'event-' . $event->id,
+                'event_id' => $event->id,
+                'title' => $event->title,
+                'slug' => $event->slug,
+                'excerpt' => $event->description,
+                'category' => 'event',
+                'event_category' => $event->category,
+                'featured_image' => $event->image_url,
+                'published_at' => $event->starts_at,
+                'starts_at' => $event->starts_at,
+                'ends_at' => $event->ends_at,
+                'status_label' => $event->status_label,
+                'participants_count' => $event->participants_count,
+                'is_event' => true,
+            ]);
+
         return Inertia::render('Welcome', [
-            'latestArticles' => $latestArticles
+            'latestArticles' => $latestArticles,
+            'latestEvents' => $latestEvents,
         ]);
     }
 
@@ -274,18 +328,75 @@ class ArticleController extends Controller
             ->where('id', '!=', $article->id)
             ->orderBy('published_at', 'desc')
             ->limit(3)
-            ->get()
-            ->map(function ($item) {
-                if ($item->featured_image) {
-                    $item->featured_image = asset('storage/' . $item->featured_image);
-                }
-                return $item;
-            });
+            ->get();
+
+        if ($relatedArticles->count() < 3) {
+            $fallbackArticles = Article::published()
+                ->where('id', '!=', $article->id)
+                ->whereNotIn('id', $relatedArticles->pluck('id'))
+                ->orderBy('published_at', 'desc')
+                ->limit(3 - $relatedArticles->count())
+                ->get();
+
+            $relatedArticles = $relatedArticles->concat($fallbackArticles)->values();
+        }
+
+        $relatedArticles = $relatedArticles->map(function ($item) {
+            if ($item->featured_image) {
+                $item->featured_image = asset('storage/' . $item->featured_image);
+            }
+            return $item;
+        });
+
+        $article->load([
+            'author',
+            'comments.user:id,name,profile_photo_path',
+            'comments.replies.user:id,name,profile_photo_path',
+        ]);
+        $article->comments_count = $article->comments->sum(fn ($comment) => 1 + $comment->replies->count());
 
         return Inertia::render('ArticleDetail', [
-            'article' => $article->load('author'),
+            'article' => $article,
             'relatedArticles' => $relatedArticles
         ]);
+    }
+
+    public function storeComment(Request $request, Article $article)
+    {
+        if ($article->status !== 'approved') {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'comment' => 'required|string|min:3|max:1000',
+            'parent_id' => 'nullable|exists:article_comments,id',
+        ]);
+
+        $parentId = $validated['parent_id'] ?? null;
+        if ($parentId) {
+            $parent = ArticleComment::where('article_id', $article->id)->findOrFail($parentId);
+            $parentId = $parent->parent_id ?: $parent->id;
+        }
+
+        ArticleComment::create([
+            'article_id' => $article->id,
+            'user_id' => Auth::id(),
+            'parent_id' => $parentId,
+            'comment' => $validated['comment'],
+        ]);
+
+        return back()->with('success', 'Komentar artikel berhasil dikirim.');
+    }
+
+    public function deleteComment(ArticleComment $comment)
+    {
+        if ($comment->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $comment->delete();
+
+        return back()->with('success', 'Komentar artikel dihapus.');
     }
 
     /**
@@ -305,7 +416,7 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'excerpt' => 'nullable|string|max:500',
-            'category' => 'required|in:artikel,berita',
+            'category' => 'required|in:artikel,berita,event',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -369,7 +480,7 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'excerpt' => 'nullable|string|max:500',
-            'category' => 'required|in:artikel,berita',
+            'category' => 'required|in:artikel,berita,event',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 

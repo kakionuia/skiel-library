@@ -126,7 +126,7 @@ function editBook(bookId) {
 
 <template>
   <AuthenticatedLayout title="Kelola Buku">
-    <div class="min-h-screen bg-slate-50/50 py-6">
+    <div class="min-h-screen bg-slate-50/50 py-6 ms-8">
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex items-center justify-between">
           <div>

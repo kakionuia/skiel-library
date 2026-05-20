@@ -6,7 +6,7 @@
       <div class="flex flex-col gap-4">
         <div class="flex items-center gap-3">
           <!-- Ganti src dengan path logo sekolah Anda -->
-          <img src="/images/logo-smk.png" alt="Logo SKIE" class="w-16 h-16 object-contain">
+        <img :src="$page.props.logoUrl" alt="Logo" class="w-16 h-16">
           <div>
             <h2 class="text-3xl font-bold leading-none">SKIE-Library</h2>
             <p class="text-sm font-medium opacity-90">Administrasi perpus digital</p>

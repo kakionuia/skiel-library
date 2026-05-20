@@ -25,7 +25,7 @@
     >
       <div class="h-20 flex items-center px-6 border-b border-slate-100 justify-between shrink-0">
         <Link href="/dashboard" class="flex items-center gap-3 group overflow-hidden">
-          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-600 text-sm font-black text-white group-hover:bg-orange-700 transition-colors">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white group-hover:bg-orange-700 transition-colors">
             <img src="/image/logo-smk.png" alt="Logo" class="h-5 w-5" onerror="this.style.display='none'">
           </span>
           <div v-show="!isSidebarCollapsed || isSidebarOpen" class="transition-opacity duration-200 whitespace-nowrap">
@@ -48,17 +48,16 @@
           
           <Link 
             href="/dashboard" 
-            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-600 transition"
+            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-500 transition"
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Dashboard Overview"
           >
-            <span class="text-lg">📊</span>
-            <span v-show="!isSidebarCollapsed || isSidebarOpen">Dashboard Overview</span>
+            <span v-show="!isSidebarCollapsed || isSidebarOpen">Dashboard</span>
           </Link>
 
           <Link 
             href="/my-loans" 
-            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-700 border border-orange-100/50 transition"
+            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-500 border border-orange-100/50 transition"
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Rak Buku Saya"
           >
@@ -68,7 +67,7 @@
 
           <Link 
             href="/my-queue" 
-            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-600 transition"
+            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-500 transition"
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Antrian Buku"
           >
@@ -88,7 +87,7 @@
             @click="activeTab = tab.key"
             class="flex w-full items-center rounded-xl p-3 text-left transition duration-150 group"
             :class="[
-              activeTab === tab.key ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-500 hover:bg-orange-50 hover:text-orange-600',
+              activeTab === tab.key ? 'bg-orange-500 text-white shadow-xs' : 'text-slate-500 hover:bg-orange-50 hover:text-orange-600',
               isSidebarCollapsed ? 'justify-center' : 'justify-between'
             ]"
             :title="tab.label"
@@ -251,6 +250,11 @@ const activeTab = ref('active');
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 
+const finesList = computed(() => props.loans.filter(loan => {
+  const fee = parseFloat(loan.late_fee || 0);
+  return fee > 0 && loan.status !== 'returned';
+}));
+
 function handleResize() {
   if (window.innerWidth >= 1024) {
     isSidebarOpen.value = false;
@@ -284,14 +288,17 @@ function getTabIcon(key) {
 const activeLoans = computed(() => props.loans.filter(loan => loan.status === 'approved' || loan.status === 'borrowed'));
 const pendingLoans = computed(() => props.loans.filter(loan => loan.status === 'pending'));
 const historyLoans = computed(() => props.loans.filter(loan => ['returned', 'lost', 'rejected'].includes(loan.status)));
-const finesList = computed(() => props.loans.filter(loan => (loan.late_fee || 0) > 0 && loan.status !== 'returned'));
 
 const stats = computed(() => {
   const user = page.props.auth?.user || {};
   return {
     total_active: activeLoans.value.length,
     total_pending: pendingLoans.value.length,
-    total_fines: finesList.value.reduce((sum, loan) => sum + (loan.late_fee || 0), 0),
+    // PERBAIKAN: Memastikan late_fee dikonversi ke angka sebelum dijumlahkan
+    total_fines: finesList.value.reduce((sum, loan) => {
+      const fee = parseFloat(loan.late_fee);
+      return sum + (isNaN(fee) ? 0 : fee);
+    }, 0),
     user_name: user.name || 'Staff Admin',
     user_initials: user.name ? user.name.charAt(0).toUpperCase() : 'A',
     user_role: user.role || 'Pustakawan'
@@ -476,7 +483,7 @@ function handleLogout() {
   }).then((result) => {
     if (result.isConfirmed) router.post(route('logout'));
   });
-}
+};
 </script>
 
 <style scoped>

@@ -1,116 +1,109 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100/50 py-12 px-4 antialiased">
     <div class="max-w-2xl mx-auto">
       <!-- Header -->
       <div class="mb-8">
-        <Link href="/my-loans" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 mb-4">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <Link href="/my-loans" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-200 mb-4 group">
+          <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
           </svg>
           Kembali ke Rak Buku
         </Link>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight mb-2">📋 Laporan Kondisi Buku</h1>
-        <p class="text-slate-500">Laporkan kondisi buku sebelum melakukan pembayaran denda</p>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight sm:text-4xl">📋 Laporan Kondisi Buku</h1>
+        <p class="text-slate-500 mt-2 text-sm sm:text-base">Verifikasi kondisi fisik buku sebelum melanjutkan prosedur penutupan administrasi pinjaman.</p>
       </div>
 
       <!-- Main Card -->
-      <div class="bg-white rounded-3xl shadow-xl border border-slate-200/60 overflow-hidden mb-8">
-        <!-- Book Info -->
-        <div class="bg-gradient-to-r from-orange-50 to-orange-100/50 border-b border-orange-200/50 p-8">
-          <div class="flex gap-6">
-            <div class="w-24 h-32 rounded-xl overflow-hidden bg-slate-100 border-2 border-white shadow-lg shrink-0">
-              <div class="w-full h-full bg-gradient-to-br from-orange-200 to-orange-400 flex items-center justify-center text-3xl">
-                📚
-              </div>
+      <div class="bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-200/60 overflow-hidden mb-8">
+        
+        <!-- Book Info Section -->
+        <div class="bg-gradient-to-br from-orange-50/60 via-orange-50/30 to-transparent border-b border-slate-100 p-6 sm:p-8">
+          <div class="flex flex-col sm:flex-row gap-6">
+            <!-- Book Cover -->
+            <div class="w-24 h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-orange-400 to-orange-500 shadow-md shadow-orange-500/20 flex items-center justify-center text-4xl shrink-0 mx-auto sm:mx-0">
+              📚
             </div>
-            <div class="flex-1">
-              <h2 class="text-lg font-bold text-slate-900 mb-1">{{ borrow.book?.title }}</h2>
-              <p class="text-sm text-slate-600 mb-4">{{ borrow.book?.author }}</p>
-              <div class="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hari Terlambat</p>
-                  <p class="text-2xl font-black text-orange-600 mt-1">{{ borrow.late_days }}</p>
-                </div>
-                <div>
-                  <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Denda</p>
-                  <p class="text-2xl font-black text-red-600 mt-1">Rp {{ formatNumber(borrow.late_fee) }}</p>
-                </div>
-              </div>
+
+            <!-- Book Details -->
+            <div class="flex-1 text-center sm:text-left flex flex-col justify-center">
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700 w-max mx-auto sm:mx-0 mb-2">Buku yang Dipinjam</span>
+              <h2 class="text-xl font-bold text-slate-900 leading-snug mb-1">{{ borrow.book?.title || 'Judul Buku' }}</h2>
+              <p class="text-sm text-slate-500 font-medium">{{ borrow.book?.author || 'Penulis' }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-200/60">
+            <div class="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-100 text-center">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Masa Keterlambatan</p>
+              <p class="text-2xl font-black text-slate-800 mt-1">{{ borrow.late_days }} <span class="text-xs font-bold text-slate-400">hari</span></p>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-100 text-center">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Denda Keterlambatan</p>
+              <p class="text-2xl font-black text-orange-500 mt-1"><span class="text-xs font-bold text-orange-400">Rp</span> {{ formatNumber(borrow.late_fee) }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Damage Report Form -->
-        <div class="p-8">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-6">Form Laporan Kondisi Buku</h3>
+        <!-- Form Section -->
+        <div class="p-6 sm:p-8">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-5">Instrumen Evaluasi Fisik</h3>
           
           <form @submit.prevent="submitReport" class="space-y-6">
-            <!-- Apakah buku mengalami kerusakan? -->
-            <div class="space-y-4">
-              <label class="block text-sm font-bold text-slate-900">Apakah buku mengalami kerusakan?</label>
-              <div class="flex gap-4">
+            <!-- Question: Is Damaged? -->
+            <div class="space-y-3">
+              <label class="block text-sm font-bold text-slate-800">Bagaimana kondisi fisik buku saat ini?</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- Option: Fine / Normal -->
                 <label 
-                  class="flex-1 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200"
-                  :class="form.is_damaged === true 
-                    ? 'border-red-500 bg-red-50' 
-                    : 'border-slate-200 bg-white hover:border-red-200'"
+                  class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 text-left group relative overflow-hidden"
+                  :class="form.is_damaged === false 
+                    ? 'border-orange-500 bg-orange-50/30 ring-4 ring-orange-500/5' 
+                    : 'border-slate-200/80 bg-white hover:border-orange-200 hover:bg-orange-50/10'"
                 >
-                  <input 
-                    type="radio" 
-                    v-model="form.is_damaged" 
-                    :value="true" 
-                    class="sr-only"
-                  >
-                  <div class="flex items-center gap-3">
-                    <div 
-                      class="w-6 h-6 rounded-full border-2 flex items-center justify-center"
-                      :class="form.is_damaged === true ? 'border-red-500 bg-red-500' : 'border-slate-300'"
-                    >
-                      <svg v-if="form.is_damaged === true" class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="font-bold text-slate-900">Ya, Mengalami Kerusakan</p>
-                      <p class="text-xs text-slate-600 mt-0.5">Buku hilang, basah, sobek, atau ternoda</p>
-                    </div>
+                  <input type="radio" v-model="form.is_damaged" :value="false" class="sr-only">
+                  <div :class="[
+                    'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200',
+                    form.is_damaged === false ? 'border-orange-500 bg-orange-500' : 'border-slate-300'
+                  ]">
+                    <svg v-if="form.is_damaged === false" class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-800 text-sm sm:text-base">Utuh / Layak</p>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Buku kembali dalam keadaan normal, bersih, dan tidak cacat struktural.</p>
                   </div>
                 </label>
 
+                <!-- Option: Damaged -->
                 <label 
-                  class="flex-1 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200"
-                  :class="form.is_damaged === false 
-                    ? 'border-green-500 bg-green-50' 
-                    : 'border-slate-200 bg-white hover:border-green-200'"
+                  class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 text-left group relative overflow-hidden"
+                  :class="form.is_damaged === true 
+                    ? 'border-orange-500 bg-orange-50/30 ring-4 ring-orange-500/5' 
+                    : 'border-slate-200/80 bg-white hover:border-orange-200 hover:bg-orange-50/10'"
                 >
-                  <input 
-                    type="radio" 
-                    v-model="form.is_damaged" 
-                    :value="false" 
-                    class="sr-only"
-                  >
-                  <div class="flex items-center gap-3">
-                    <div 
-                      class="w-6 h-6 rounded-full border-2 flex items-center justify-center"
-                      :class="form.is_damaged === false ? 'border-green-500 bg-green-500' : 'border-slate-300'"
-                    >
-                      <svg v-if="form.is_damaged === false" class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="font-bold text-slate-900">Tidak, Kondisi Baik</p>
-                      <p class="text-xs text-slate-600 mt-0.5">Buku dalam kondisi normal</p>
-                    </div>
+                  <input type="radio" v-model="form.is_damaged" :value="true" class="sr-only">
+                  <div :class="[
+                    'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200',
+                    form.is_damaged === true ? 'border-orange-500 bg-orange-500' : 'border-slate-300'
+                  ]">
+                    <svg v-if="form.is_damaged === true" class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-800 text-sm sm:text-base">Rusak / Cacat</p>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Buku mengalami robek, terkena cairan, coretan permanen, atau hilang.</p>
                   </div>
                 </label>
               </div>
             </div>
 
-            <!-- Upload Foto (Required) -->
-            <div class="space-y-4">
-              <label class="block text-sm font-bold text-slate-900">
-                Foto Kondisi Buku <span class="text-red-500">*</span>
+            <!-- Upload Photo Section -->
+            <div class="space-y-3">
+              <label class="block text-sm font-bold text-slate-800">
+                Dokumentasi Bukti Fisik <span class="text-orange-500">*</span>
               </label>
               <div class="relative">
                 <input 
@@ -123,84 +116,110 @@
                 >
                 <div 
                   @click="$refs.fileInput.click()"
-                  class="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer hover:border-orange-400 transition-all duration-200"
-                  :class="previewImages.length > 0 ? 'border-orange-400 bg-orange-50/50' : ''"
+                  class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/10 transition-all duration-200"
+                  :class="previewImages.length > 0 ? 'border-orange-400 bg-slate-50/50' : 'bg-slate-50/30'"
                 >
-                  <div v-if="previewImages.length === 0">
-                    <svg class="w-12 h-12 mx-auto text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p class="text-sm font-medium text-slate-600">Klik untuk upload foto buku</p>
-                    <p class="text-xs text-slate-400 mt-1">Maksimal 3 foto (JPG, PNG, WebP)</p>
+                  <!-- Empty State -->
+                  <div v-if="previewImages.length === 0" class="py-4">
+                    <div class="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm w-max mx-auto mb-3 text-slate-400">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                      </svg>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-700">Unggah Foto Kondisi Aktual</p>
+                    <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Maksimal 3 berkas gambar dalam format JPG, PNG, atau WebP (Maks. 2MB/foto).</p>
                   </div>
-                  <div v-else class="grid grid-cols-3 gap-4">
-                    <div v-for="(preview, index) in previewImages" :key="index" class="relative group">
-                      <img :src="preview" class="w-full h-32 object-cover rounded-xl" />
-                      <button 
-                        @click.stop="removeImage(index)"
-                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                  
+                  <!-- Grid Preview Pictures -->
+                  <div v-else class="grid grid-cols-3 gap-3">
+                    <div v-for="(preview, index) in previewImages" :key="index" class="relative group aspect-square rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                      <img :src="preview" class="w-full h-full object-cover" />
+                      <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button 
+                          @click.stop="removeImage(index)"
+                          class="w-8 h-8 bg-red-500 text-white rounded-xl flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-150 hover:bg-red-600"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Add button inside grid if slot remaining -->
+                    <div v-if="previewImages.length < 3" class="border border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center bg-white text-slate-400 hover:text-orange-500 hover:border-orange-400 transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
                     </div>
                   </div>
                 </div>
               </div>
-              <p v-if="photoError" class="text-xs text-red-500">{{ photoError }}</p>
+              <p v-if="photoError" class="text-xs font-semibold text-red-500 flex items-center gap-1.5 mt-1">
+                ⚠️ {{ photoError }}
+              </p>
             </div>
 
-            <!-- Damage Details (if "Ya") -->
-            <div v-if="form.is_damaged === true" class="space-y-4 p-6 bg-red-50 rounded-2xl border border-red-200">
-              <h4 class="text-sm font-bold text-red-900 mb-4">Detail Kerusakan</h4>
+            <!-- Conditional Damage Specification (Smooth Transition View) -->
+            <div v-if="form.is_damaged === true" class="space-y-4 p-5 sm:p-6 bg-slate-50 border border-slate-200/60 rounded-2xl animate-fadeIn">
+              <div class="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span class="w-1.5 h-4 bg-orange-500 rounded-full"></span>
+                <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Spesifikasi Kerusakan</h4>
+              </div>
               
-              <!-- Damage Type -->
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-900">Jenis Kerusakan <span class="text-red-500">*</span></label>
-                <select 
-                  v-model="form.damage_type"
-                  class="w-full px-4 py-3 rounded-xl border-2 border-red-200 bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"
-                >
-                  <option value="">Pilih jenis kerusakan</option>
-                  <option value="lost">Hilang</option>
-                  <option value="wet">Basah</option>
-                  <option value="torn">Sobek</option>
-                  <option value="stained">Tertimpa Noda</option>
-                  <option value="other">Lainnya</option>
-                </select>
+              <!-- Damage Type Selection -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide">Kategori Kerusakan <span class="text-orange-500">*</span></label>
+                <div class="relative">
+                  <select 
+                    v-model="form.damage_type"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 outline-none transition-all appearance-none text-sm font-medium text-slate-800"
+                  >
+                    <option value="">Pilih jenis kerusakan</option>
+                    <option value="lost">📚 Buku Hilang / Tidak Dikembalikan</option>
+                    <option value="wet">💧 Terkena Air / Lembab / Jamur</option>
+                    <option value="torn">✂️ Lembaran Robek / Hilang Sebagian</option>
+                    <option value="stained">🔴 Coretan / Noda Kopi / Kotoran</option>
+                    <option value="other">❓ Kerusakan Struktural Lainnya</option>
+                  </select>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
-              <!-- Damage Description -->
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-900">Deskripsi Kerusakan <span class="text-red-500">*</span></label>
+              <!-- Damage Description Details -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide">Deskripsi Kronologi & Detail Fisik <span class="text-orange-500">*</span></label>
                 <textarea 
                   v-model="form.damage_description"
                   rows="4"
-                  placeholder="Ceritakan detail kerusakan buku..."
-                  class="w-full px-4 py-3 rounded-xl border-2 border-red-200 bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none resize-none transition-all"
+                  placeholder="Mohon jabarkan secara terperinci kondisi bagian buku yang rusak atau kronologi singkatnya..."
+                  class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 outline-none resize-none transition-all text-slate-800 placeholder-slate-400 leading-relaxed"
                 ></textarea>
               </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="flex gap-4 pt-4">
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t border-slate-100">
               <Link 
                 href="/my-loans"
-                class="flex-1 py-4 px-6 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-center hover:bg-slate-50 transition-all"
+                class="order-2 sm:order-1 flex-1 py-4 px-6 rounded-2xl border border-slate-200 text-slate-600 font-bold text-center bg-white hover:bg-slate-50 hover:text-slate-800 active:scale-[0.99] transition-all duration-150 shadow-sm"
               >
                 Batal
               </Link>
               <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="flex-1 py-4 px-6 rounded-2xl text-white font-bold text-center transition-all flex items-center justify-center gap-2"
-                :class="isSubmitting ? 'bg-orange-300 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'"
+                class="order-1 sm:order-2 flex-1 py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold text-center shadow-md shadow-orange-500/10 active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2"
               >
                 <svg v-if="isSubmitting" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {{ isSubmitting ? 'Mengirim...' : 'Kirim Laporan' }}
+                {{ isSubmitting ? 'Memproses Berkas...' : 'Kirim Laporan Resmi' }}
               </button>
             </div>
           </form>
@@ -239,13 +258,13 @@ function handleFileUpload(event) {
   photoError.value = '';
   
   if (files.length + form.value.images.length > 3) {
-    photoError.value = 'Maksimal 3 foto';
+    photoError.value = 'Batas maksimal unggahan adalah 3 berkas foto.';
     return;
   }
 
   for (let file of files) {
     if (file.size > 2048 * 1024) {
-      photoError.value = 'Ukuran foto maksimal 2MB';
+      photoError.value = 'Ukuran berkas terlalu besar. Maksimal resolusi per foto adalah 2MB.';
       return;
     }
     
@@ -264,26 +283,23 @@ function removeImage(index) {
   previewImages.value.splice(index, 1);
 }
 
-// Di ReportDamage.vue, ganti fungsi submitReport
-
 async function submitReport() {
-  // Validasi
   if (form.value.is_damaged === null) {
     Swal.fire({
       title: 'Peringatan',
-      text: 'Pilih kondisi buku terlebih dahulu.',
+      text: 'Silakan tentukan indikator kondisi kelayakan buku terlebih dahulu.',
       icon: 'warning',
-      confirmButtonColor: '#ea580c'
+      confirmButtonColor: '#f97316'
     });
     return;
   }
 
   if (previewImages.value.length === 0) {
     Swal.fire({
-      title: 'Peringatan',
-      text: 'Foto kondisi buku wajib diupload.',
+      title: 'Dokumentasi Wajib',
+      text: 'Mohon unggah minimal 1 foto kondisi fisik buku untuk validasi bukti.',
       icon: 'warning',
-      confirmButtonColor: '#ea580c'
+      confirmButtonColor: '#f97316'
     });
     return;
   }
@@ -291,19 +307,19 @@ async function submitReport() {
   if (form.value.is_damaged === true) {
     if (!form.value.damage_type) {
       Swal.fire({
-        title: 'Peringatan',
-        text: 'Pilih jenis kerusakan.',
+        title: 'Kategori Kosong',
+        text: 'Silakan pilih klasifikasi jenis kerusakan buku.',
         icon: 'warning',
-        confirmButtonColor: '#ea580c'
+        confirmButtonColor: '#f97316'
       });
       return;
     }
     if (!form.value.damage_description || form.value.damage_description.trim() === '') {
       Swal.fire({
-        title: 'Peringatan',
-        text: 'Deskripsi kerusakan wajib diisi.',
+        title: 'Deskripsi Wajib',
+        text: 'Mohon isi rincian penjelasan kerusakan buku Anda.',
         icon: 'warning',
-        confirmButtonColor: '#ea580c'
+        confirmButtonColor: '#f97316'
       });
       return;
     }
@@ -312,16 +328,13 @@ async function submitReport() {
   isSubmitting.value = true;
 
   const formData = new FormData();
-  // Kirim is_damaged sebagai string agar backend bisa konversi
   formData.append('is_damaged', form.value.is_damaged ? '1' : '0');
   
-  // Jika kerusakan, tambahkan detail
   if (form.value.is_damaged) {
     formData.append('damage_type', form.value.damage_type);
     formData.append('damage_description', form.value.damage_description);
   }
   
-  // Append semua images
   form.value.images.forEach((image, index) => {
     formData.append(`images[${index}]`, image);
   });
@@ -345,7 +358,7 @@ async function submitReport() {
         title: 'Validasi Gagal',
         html: Object.values(errorData.errors || {}).flat().join('<br>'),
         icon: 'error',
-        confirmButtonColor: '#ea580c'
+        confirmButtonColor: '#f97316'
       });
       return;
     }
@@ -354,12 +367,12 @@ async function submitReport() {
     isSubmitting.value = false;
     
     Swal.fire({
-      title: 'Berhasil!',
+      title: 'Laporan Diterima!',
       text: form.value.is_damaged 
-        ? 'Laporan kerusakan dikirim. Petugas akan review.' 
-        : 'Laporan kondisi baik dikirim. Lanjut ke pembayaran.',
+        ? 'Data kerusakan berhasil diajukan. Mohon tunggu proses telaah kalkulasi denda dari tim pustakawan.' 
+        : 'Verifikasi kondisi baik selesai. Sistem mengarahkan Anda ke halaman tagihan.',
       icon: 'success',
-      confirmButtonColor: '#ea580c',
+      confirmButtonColor: '#f97316',
       allowOutsideClick: false,
       allowEscapeKey: false
     }).then((result) => {
@@ -374,11 +387,21 @@ async function submitReport() {
     isSubmitting.value = false;
     console.error('Error:', error);
     Swal.fire({
-      title: 'Gagal',
-      text: 'Terjadi kesalahan. Coba lagi.',
+      title: 'Gangguan Sistem',
+      text: 'Gagal mengirim data akibat masalah koneksi jaringan. Silakan dicoba beberapa saat lagi.',
       icon: 'error',
-      confirmButtonColor: '#ea580c'
+      confirmButtonColor: '#f97316'
     });
   }
 }
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+</style>

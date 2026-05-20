@@ -1,128 +1,127 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100/50 py-12 px-4 antialiased">
     <div class="max-w-2xl mx-auto">
       <!-- Header -->
       <div class="mb-8">
-        <Link href="/my-loans" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 mb-4">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <Link href="/my-loans" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-200 mb-4 group">
+          <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
           </svg>
           Kembali ke Rak Buku
         </Link>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight mb-2">💳 Pembayaran Denda Keterlambatan</h1>
-        <p class="text-slate-500">Selesaikan pembayaran denda untuk pengembalian buku yang terlambat</p>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight sm:text-4xl">Pembayaran Denda</h1>
+        <p class="text-slate-500 mt-2 text-sm sm:text-base">Selesaikan administrasi keterlambatan atau kerusakan pengembalian buku Anda.</p>
       </div>
 
       <!-- Main Card -->
-      <div class="bg-white rounded-3xl shadow-xl border border-slate-200/60 overflow-hidden mb-8">
+      <div class="bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-200/60 overflow-hidden mb-8">
         
         <!-- Borrow Info Section -->
-        <div class="bg-gradient-to-r from-orange-50 to-orange-100/50 border-b border-orange-200/50 p-8">
-          <div class="flex gap-6">
-            <!-- Book Cover -->
-            <div class="w-24 h-32 rounded-xl overflow-hidden bg-slate-100 border-2 border-white shadow-lg shrink-0">
-              <!-- Placeholder for book cover -->
-              <div class="w-full h-full bg-gradient-to-br from-orange-200 to-orange-400 flex items-center justify-center text-3xl">
-                📚
-              </div>
+        <div class="bg-white border-b border-slate-100 p-6 sm:p-8">
+          <div class="flex flex-col sm:flex-row gap-6">
+            <!-- Book Cover Placeholder Icon -->
+            <div class="w-24 h-32 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 shadow-md shadow-orange-500/20 flex items-center justify-center text-white shrink-0 mx-auto sm:mx-0">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
             </div>
 
             <!-- Book Details -->
-            <div class="flex-1">
-              <h2 class="text-lg font-bold text-slate-900 mb-1">{{ borrow.book?.title }}</h2>
-              <p class="text-sm text-slate-600 mb-4">{{ borrow.book?.author }}</p>
-              
-              <div class="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hari Terlambat</p>
-                  <p class="text-2xl font-black text-orange-600 mt-1">{{ borrow.late_days }}</p>
-                </div>
-                <div>
-                  <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Denda</p>
-                  <p class="text-2xl font-black text-red-600 mt-1">Rp {{ formatNumber(borrow.late_fee) }}</p>
-                </div>
-              </div>
+            <div class="flex-1 text-center sm:text-left flex flex-col justify-center">
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 w-max mx-auto sm:mx-0 mb-2">Informasi Peminjaman</span>
+              <h2 class="text-xl font-bold text-slate-900 leading-snug mb-1">{{ borrow.book?.title || 'Judul Buku' }}</h2>
+              <p class="text-sm text-slate-500 font-medium">{{ borrow.book?.author || 'Penulis' }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-200/60">
+            <div class="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-100 text-center">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hari Terlambat</p>
+              <p class="text-3xl font-black text-orange-500 mt-1">{{ borrow.late_days }} <span class="text-sm font-normal text-slate-400">hari</span></p>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-100 text-center">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Denda Dasar</p>
+              <p class="text-3xl font-black text-slate-800 mt-1"><span class="text-sm font-bold text-slate-400">Rp</span> {{ formatNumber(borrow.late_fee) }}</p>
             </div>
           </div>
         </div>
 
         <!-- Denda Calculation -->
-        <div class="p-8 border-b border-slate-200/60 bg-slate-50/50">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Detail Perhitungan Denda</h3>
+        <div class="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Rincian Kalkulasi</h3>
           <div class="space-y-3">
-            <div class="flex justify-between items-center p-4 bg-white rounded-xl border border-slate-100">
-              <span class="text-sm font-medium text-slate-600">Jumlah hari terlambat</span>
-              <span class="font-bold text-slate-900">{{ borrow.late_days }} hari</span>
+            <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100">
+              <span class="text-sm font-medium text-slate-600">Durasi Keterlambatan</span>
+              <span class="font-semibold text-slate-800">{{ borrow.late_days }} hari</span>
             </div>
-            <div class="flex justify-between items-center p-4 bg-white rounded-xl border border-slate-100">
-              <span class="text-sm font-medium text-slate-600">Tarif denda per hari</span>
-              <span class="font-bold text-slate-900">Rp 5.000</span>
+            <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100">
+              <span class="text-sm font-medium text-slate-600">Tarif / Hari</span>
+              <span class="font-semibold text-slate-800">Rp 5.000</span>
             </div>
-            <div class="flex justify-between items-center p-4 bg-orange-50 rounded-xl border border-orange-200">
-              <span class="text-sm font-medium text-orange-700">Denda Keterlambatan</span>
+            <div class="flex justify-between items-center p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+              <span class="text-sm font-semibold text-orange-800">Subtotal Denda Waktu</span>
               <span class="font-bold text-orange-600">Rp {{ formatNumber(borrow.late_fee) }}</span>
             </div>
 
-            <!-- Additional Fine from Damage (if any) -->
-            <div v-if="borrow.is_damaged && borrow.additional_fine > 0" class="space-y-3 p-4 bg-red-50 rounded-xl border border-red-200">
+            <!-- Additional Fine from Damage (if any) - Refactored to Consistent Amber/Orange Theme -->
+            <div v-if="borrow.is_damaged && borrow.additional_fine > 0" class="space-y-3 p-4 bg-amber-50/60 rounded-2xl border border-amber-200/70">
               <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                </svg>
+                <div class="p-1.5 bg-amber-100 text-amber-700 rounded-lg shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
                 <div class="flex-1">
-                  <p class="text-xs font-bold text-red-900 uppercase tracking-wider">Denda Tambahan (Kerusakan Buku)</p>
-                  <p class="text-sm text-red-800 mt-1">{{ getDamageTypeLabel(borrow.damage_type) }}</p>
-                  <p class="text-xs text-red-700 mt-2">{{ borrow.staff_comment }}</p>
+                  <p class="text-xs font-bold text-amber-800 uppercase tracking-wider">Denda Kondisi Fisik</p>
+                  <p class="text-sm font-semibold text-amber-900 mt-0.5">{{ getDamageTypeLabel(borrow.damage_type) }}</p>
+                  <p class="text-xs text-amber-700/90 mt-1 italic">"{{ borrow.staff_comment || 'Tidak ada catatan staf' }}"</p>
                 </div>
               </div>
-              <div class="flex justify-between items-center pt-3 border-t border-red-200">
-                <span class="text-sm font-bold text-red-900">Nominal Denda Tambahan</span>
-                <span class="font-bold text-red-600">Rp {{ formatNumber(borrow.additional_fine) }}</span>
+              <div class="flex justify-between items-center pt-3 border-t border-amber-200">
+                <span class="text-sm font-medium text-amber-800">Biaya Kerusakan</span>
+                <span class="font-bold text-amber-700">Rp {{ formatNumber(borrow.additional_fine) }}</span>
               </div>
             </div>
 
             <!-- Total to Pay -->
-            <div class="flex justify-between items-center p-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl text-white">
-              <span class="text-sm font-bold uppercase tracking-wider">Total Denda Pembayaran</span>
+            <div class="flex justify-between items-center p-5 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl text-white shadow-md shadow-orange-500/10">
+              <span class="text-sm font-bold uppercase tracking-wider">Total Kewajiban</span>
               <span class="text-2xl font-black">Rp {{ formatNumber(borrow.total_fine) }}</span>
             </div>
           </div>
         </div>
 
         <!-- Payment Methods -->
-        <div class="p-8">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-6">Pilih Metode Pembayaran</h3>
+        <div class="p-6 sm:p-8">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Metode Pembayaran</h3>
           
-          <div class="space-y-4">
+          <div class="grid grid-cols-1 gap-4">
             <!-- QRIS Option -->
             <button
               @click="selectedMethod = 'qris'"
               :class="[
-                'w-full p-6 rounded-2xl border-2 transition-all duration-200 flex items-start gap-4 text-left group',
+                'w-full p-5 rounded-2xl border-2 transition-all duration-200 flex items-start gap-4 text-left group relative overflow-hidden',
                 selectedMethod === 'qris' 
-                  ? 'border-orange-500 bg-orange-50' 
-                  : 'border-slate-200 bg-white hover:border-orange-200 hover:bg-orange-50/30'
+                  ? 'border-orange-500 bg-orange-50/30 ring-4 ring-orange-500/5' 
+                  : 'border-slate-200/80 bg-white hover:border-orange-200 hover:bg-orange-50/10'
               ]"
             >
               <div :class="[
-                'w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all',
-                selectedMethod === 'qris'
-                  ? 'border-orange-500 bg-orange-500'
-                  : 'border-slate-300 group-hover:border-orange-300'
+                'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200',
+                selectedMethod === 'qris' ? 'border-orange-500 bg-orange-500' : 'border-slate-300'
               ]">
-                <svg v-if="selectedMethod === 'qris'" class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                <svg v-if="selectedMethod === 'qris'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               </div>
               <div class="flex-1">
-                <h4 class="font-bold text-slate-900 text-base mb-1">Pembayaran QRIS</h4>
-                <p class="text-sm text-slate-600">Bayar menggunakan QRIS dari aplikasi e-wallet atau mobile banking Anda</p>
-                <div class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                  </svg>
-                  Tersedia 24/7
+                <div class="flex items-center justify-between gap-2">
+                  <h4 class="font-bold text-slate-800 text-base">Instant QRIS</h4>
+                  <span class="inline-flex items-center gap-1 text-[10px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                    Otomatis
+                  </span>
                 </div>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Bayar real-time via aplikasi e-wallet (Gopay, OVO, Dana) atau Mobile Banking Anda.</p>
               </div>
             </button>
 
@@ -130,49 +129,45 @@
             <button
               @click="selectedMethod = 'cash'"
               :class="[
-                'w-full p-6 rounded-2xl border-2 transition-all duration-200 flex items-start gap-4 text-left group',
+                'w-full p-5 rounded-2xl border-2 transition-all duration-200 flex items-start gap-4 text-left group relative overflow-hidden',
                 selectedMethod === 'cash' 
-                  ? 'border-orange-500 bg-orange-50' 
-                  : 'border-slate-200 bg-white hover:border-orange-200 hover:bg-orange-50/30'
+                  ? 'border-orange-500 bg-orange-50/30 ring-4 ring-orange-500/5' 
+                  : 'border-slate-200/80 bg-white hover:border-orange-200 hover:bg-orange-50/10'
               ]"
             >
               <div :class="[
-                'w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all',
-                selectedMethod === 'cash'
-                  ? 'border-orange-500 bg-orange-500'
-                  : 'border-slate-300 group-hover:border-orange-300'
+                'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200',
+                selectedMethod === 'cash' ? 'border-orange-500 bg-orange-500' : 'border-slate-300'
               ]">
-                <svg v-if="selectedMethod === 'cash'" class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                <svg v-if="selectedMethod === 'cash'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               </div>
               <div class="flex-1">
-                <h4 class="font-bold text-slate-900 text-base mb-1">Pembayaran Tunai</h4>
-                <p class="text-sm text-slate-600">Bayar langsung ke kasir perpustakaan dalam bentuk uang tunai</p>
-                <div class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M5 9V7a1 1 0 011-1h8a1 1 0 011 1v2M5 9c0 1.657-4 3-4 3s4 1.343 4 3m6-6c0 1.657 4 3 4 3s-4 1.343-4 3m0 0v2a1 1 0 001 1h-2a1 1 0 001-1v-2" />
-                  </svg>
-                  Teller Perpustakaan
+                <div class="flex items-center justify-between gap-2">
+                  <h4 class="font-bold text-slate-800 text-base">Tunai di Lokasi</h4>
+                  <span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                    Layanan Kasir
+                  </span>
                 </div>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Lakukan penyelesaian transaksi langsung melalui staf kasir meja sirkulasi perpustakaan.</p>
               </div>
             </button>
           </div>
 
-          <!-- Additional Info -->
-          <div class="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+          <!-- Additional Info Notes -->
+          <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
             <div class="flex gap-3">
-              <svg class="w-5 h-5 text-slate-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
               </svg>
-              <div class="text-xs text-slate-600 leading-relaxed">
-                <p class="font-semibold text-slate-900 mb-1">Catatan Penting:</p>
-                <ul class="space-y-1 list-disc list-inside">
-                  <li v-if="selectedMethod === 'qris'">Scan QRIS dengan aplikasi pembayaran Anda</li>
-                  <li v-if="selectedMethod === 'qris'">Pembayaran akan diverifikasi secara otomatis</li>
-                  <li v-if="selectedMethod === 'cash'">Serahkan uang tunai kepada kasir perpustakaan</li>
-                  <li v-if="selectedMethod === 'cash'">Kasir akan konfirmasi pembayaran Anda</li>
-                  <li>Simpan bukti pembayaran untuk arsip Anda</li>
+              <div class="text-xs text-slate-500 leading-relaxed">
+                <p class="font-bold text-slate-700 mb-1">Panduan Prosedur:</p>
+                <ul class="space-y-1 list-disc list-inside text-slate-600">
+                  <li v-if="selectedMethod === 'qris'">Sistem akan menggenerasi kode QR dinamis setelah konfirmasi.</li>
+                  <li v-if="selectedMethod === 'qris'">Status denda langsung diperbarui lunas setelah transaksi sukses.</li>
+                  <li v-if="selectedMethod === 'cash'">Harap tunjukkan halaman pengajuan ini ke petugas perpustakaan.</li>
+                  <li>Pastikan Anda menyimpan resi digital/cetak sebagai validasi akhir arsip.</li>
                 </ul>
               </div>
             </div>
@@ -181,22 +176,23 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex gap-4">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <Link 
           href="/my-loans"
-          class="flex-1 py-4 px-6 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-center hover:bg-slate-50 transition-all"
+          class="order-2 sm:order-1 flex-1 py-4 px-6 rounded-2xl border border-slate-200 text-slate-600 font-bold text-center bg-white hover:bg-slate-50 hover:text-slate-800 active:scale-[0.99] transition-all duration-150 shadow-sm"
         >
           Batalkan
         </Link>
         <button
           @click="processPayment"
           :disabled="isProcessing"
-          class="flex-1 py-4 px-6 rounded-2xl bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-bold text-center transition-all flex items-center justify-center gap-2"
+          class="order-1 sm:order-2 flex-1 py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold text-center shadow-md shadow-orange-500/10 active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2"
         >
           <svg v-if="isProcessing" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {{ selectedMethod === 'qris' ? 'Lanjut ke QRIS' : 'Konfirmasi Pembayaran Tunai' }}
+          {{ selectedMethod === 'qris' ? 'Generate Kode QRIS' : 'Ajukan Pembayaran Tunai' }}
         </button>
       </div>
     </div>
@@ -224,11 +220,11 @@ function formatNumber(number) {
 
 function getDamageTypeLabel(type) {
   const labels = {
-    lost: '🗑️ Hilang',
-    wet: '💧 Basah',
-    torn: '✂️ Sobek',
-    stained: '🔴 Ternoda',
-    other: '❓ Lainnya'
+    lost: 'Buku Hilang',
+    wet: 'Kondisi Basah / Lembab',
+    torn: 'Halaman Robek',
+    stained: 'Terkena Noda Permanen',
+    other: 'Kerusakan Lainnya'
   };
   return labels[type] || type;
 }
@@ -239,7 +235,7 @@ function processPayment() {
       title: 'Peringatan',
       text: 'Silakan pilih metode pembayaran terlebih dahulu.',
       icon: 'warning',
-      confirmButtonColor: '#ea580c'
+      confirmButtonColor: '#f97316'
     });
     return;
   }
@@ -248,9 +244,9 @@ function processPayment() {
 
   let confirmText = '';
   if (selectedMethod.value === 'qris') {
-    confirmText = `Anda akan melanjutkan ke pembayaran QRIS sebesar Rp ${formatNumber(props.borrow.total_fine)}`;
+    confirmText = `Anda akan melanjutkan ke pembuatan invoice QRIS sebesar Rp ${formatNumber(props.borrow.total_fine)}`;
   } else {
-    confirmText = `Anda akan membayar denda tunai sebesar Rp ${formatNumber(props.borrow.total_fine)} ke kasir perpustakaan`;
+    confirmText = `Konfirmasi pembayaran tunai sebesar Rp ${formatNumber(props.borrow.total_fine)} langsung ke kasir perpustakaan`;
   }
 
   Swal.fire({
@@ -258,10 +254,10 @@ function processPayment() {
     text: confirmText,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#ea580c',
-    cancelButtonColor: '#6b7280',
-    confirmButtonText: selectedMethod.value === 'qris' ? 'Lanjut ke QRIS' : 'Konfirmasi',
-    cancelButtonText: 'Batal'
+    confirmButtonColor: '#f97316',
+    cancelButtonColor: '#94a3b8',
+    confirmButtonText: selectedMethod.value === 'qris' ? 'Lanjut Bayar' : 'Konfirmasi',
+    cancelButtonText: 'Kembali'
   }).then((result) => {
     if (result.isConfirmed) {
       router.post(`/borrow/${props.borrow.id}/fine/process`, {
@@ -270,19 +266,29 @@ function processPayment() {
         onSuccess: () => {
           isProcessing.value = false;
           if (selectedMethod.value === 'qris') {
-            Swal.fire('Berhasil', 'Silakan lakukan pembayaran melalui QRIS.', 'success');
+            Swal.fire({
+              title: 'Berhasil',
+              text: 'Silakan pindai QRIS yang tertera untuk menyelesaikan pembayaran.',
+              icon: 'success',
+              confirmButtonColor: '#f97316'
+            });
           } else {
             Swal.fire({
-              title: 'Pembayaran Diajukan',
-              text: 'Pembayaran tunai Anda telah diajukan. Silakan bayar ke kasir perpustakaan dengan nominal Rp ' + formatNumber(props.borrow.total_fine),
+              title: 'Permintaan Dikirim',
+              text: 'Silakan menuju meja kasir sirkulasi untuk menyerahkan pembayaran senilai Rp ' + formatNumber(props.borrow.total_fine),
               icon: 'success',
-              confirmButtonColor: '#ea580c'
+              confirmButtonColor: '#f97316'
             });
           }
         },
         onError: (error) => {
           isProcessing.value = false;
-          Swal.fire('Gagal', 'Terjadi kesalahan saat memproses pembayaran.', 'error');
+          Swal.fire({
+            title: 'Gagal',
+            text: 'Terjadi kendala internal saat memproses data denda Anda.',
+            icon: 'error',
+            confirmButtonColor: '#f97316'
+          });
         }
       });
     } else {

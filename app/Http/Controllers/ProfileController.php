@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -14,6 +15,8 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    private const POINT_PER_BOOK = 10;
+
     /**
      * Display the user's profile form.
      */
@@ -45,6 +48,16 @@ class ProfileController extends Controller
             ->where('due_date', '<', now())
             ->sum('late_fee') ?? 0;
 
+        $pointStatuses = ['approved', 'borrowed', 'returned'];
+        $totalPoints = ((int) $user->borrows()
+            ->whereIn('status', $pointStatuses)
+            ->sum(DB::raw('COALESCE(quantity, 1)'))) * self::POINT_PER_BOOK;
+
+        $monthlyPoints = ((int) $user->borrows()
+            ->whereIn('status', $pointStatuses)
+            ->whereBetween('borrow_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
+            ->sum(DB::raw('COALESCE(quantity, 1)'))) * self::POINT_PER_BOOK;
+
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
@@ -54,6 +67,10 @@ class ProfileController extends Controller
             'totalBorrows' => $totalBorrows,
             'overdueCount' => $overdueCount,
             'totalFines' => (int)$totalFines,
+            'totalPoints' => $totalPoints,
+            'monthlyPoints' => $monthlyPoints,
+            'pointPerBook' => self::POINT_PER_BOOK,
+            'pointMonthLabel' => now()->translatedFormat('F Y'),
         ]);
     }
 

@@ -21,7 +21,7 @@ const formattedTime = computed(() => {
 const isTimeUp = computed(() => timeLeft.value <= 0);
 
 const whatsappLink = computed(() => {
-  const phone = '6281234567890'; // Ganti dengan nomor WhatsApp perpustakaan
+  const phone = '6282113149076'; // Ganti dengan nomor WhatsApp perpustakaan
   const message = `Halo petugas, saya ingin konfirmasi pembayaran QRIS untuk buku "${props.borrow.book?.title}".\n\nID Peminjaman: #${props.borrow.id}\nNominal: Rp ${formatNumber(props.borrow.total_fine || props.borrow.late_fee)}`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 });
@@ -58,147 +58,162 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100/50 py-12 px-4 antialiased">
     <div class="max-w-2xl mx-auto">
       <!-- Header -->
       <div class="mb-8">
-        <button @click="goBack" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 mb-4">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <button @click="goBack" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 transition-colors duration-200 mb-4 group">
+          <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
           </svg>
           Kembali
         </button>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight mb-2">📱 Pembayaran QRIS</h1>
-        <p class="text-slate-500">Scan kode QR di bawah dengan aplikasi pembayaran Anda</p>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight sm:text-4xl">Pembayaran QRIS</h1>
+        <p class="text-slate-500 mt-2 text-sm sm:text-base">Selesaikan transaksi digital Anda dengan memindai kode QRIS di bawah ini.</p>
       </div>
 
-      <!-- Countdown Timer -->
-      <div class="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl p-6 mb-6 text-white shadow-lg">
-        <div class="text-center">
-          <p class="text-sm font-semibold opacity-90 mb-2">⏰ Sisa Waktu Pembayaran</p>
-          <div class="text-5xl font-black mb-3">{{ formattedTime }}</div>
-          <div class="flex justify-center gap-4 text-sm">
-            <div class="bg-white/20 rounded-lg px-4 py-2">
-              <span class="block text-2xl font-bold">{{ hours }}</span>
-              <span class="text-xs opacity-75">Jam</span>
+      <!-- Countdown Timer (Premium Dark Dashboard Concept) -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 mb-6 text-white shadow-xl shadow-slate-900/10 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div class="text-center sm:text-left">
+            <p class="text-xs font-bold uppercase tracking-widest text-orange-500 mb-1">Batas Waktu Transaksi</p>
+            <h3 class="text-sm text-slate-900">Segera bayar sebelum invoice kedaluwarsa</h3>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <!-- Hours -->
+            <div class="bg-orange-500 backdrop-blur-sm border border-orange-500 rounded-2xl p-3 min-w-[64px] text-center">
+              <span class="block text-2xl font-black text-white leading-tight">{{ String(hours).padStart(2, '0') }}</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-100">Jam</span>
             </div>
-            <div class="bg-white/20 rounded-lg px-4 py-2">
-              <span class="block text-2xl font-bold">{{ minutes }}</span>
-              <span class="text-xs opacity-75">Menit</span>
+            <span class="text-xl font-bold text-slate-600 animate-pulse">:</span>
+            <!-- Minutes -->
+            <div class="bg-orange-500 backdrop-blur-sm border border-orange-500 rounded-2xl p-3 min-w-[64px] text-center">
+              <span class="block text-2xl font-black text-white leading-tight">{{ String(minutes).padStart(2, '0') }}</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-100">Menit</span>
             </div>
-            <div class="bg-white/20 rounded-lg px-4 py-2">
-              <span class="block text-2xl font-bold">{{ seconds }}</span>
-              <span class="text-xs opacity-75">Detik</span>
+            <span class="text-xl font-bold text-slate-600 animate-pulse">:</span>
+            <!-- Seconds -->
+            <div class="bg-orange-500 backdrop-blur-sm border border-orange-500 rounded-2xl p-3 min-w-[64px] text-center">
+              <span class="block text-2xl font-black text-white leading-tight">{{ String(seconds).padStart(2, '0') }}</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-100">Detik</span>
             </div>
           </div>
-          <p v-if="isTimeUp" class="mt-3 text-sm font-bold text-yellow-200">
-            Waktu habis! Silakan hubungi petugas untuk perpanjangan.
-          </p>
+        </div>
+        
+        <!-- Time Up Alert -->
+        <div v-if="isTimeUp" class="mt-4 pt-4 border-t border-slate-800 text-center text-sm font-bold text-red-400">
+          ⚠️ Sesi pembayaran telah berakhir. Silakan minta kode QR baru kepada petugas.
         </div>
       </div>
 
       <!-- Main Card -->
-      <div class="bg-white rounded-3xl shadow-xl border border-slate-200/60 overflow-hidden mb-8">
+      <div class="bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-200/60 overflow-hidden mb-8">
         
         <!-- QRIS Code Section -->
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border-b border-blue-200/50 p-8 flex flex-col items-center">
-          <div class="mb-4 bg-white p-4 rounded-2xl shadow-inner">
+        <div class="bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-100 p-8 flex flex-col items-center">
+          <!-- QR Wrapper -->
+          <div class="mb-6 bg-white p-5 rounded-3xl shadow-md border border-slate-100/80 transition-transform duration-300 hover:scale-[1.02]">
             <img 
               :src="qrisCode" 
-              alt="QRIS Code" 
-              class="w-56 h-56 object-contain"
+              alt="QRIS Code Perpustakaan" 
+              class="w-52 h-52 sm:w-60 sm:h-60 object-contain mx-auto"
             />
           </div>
           
-          <div class="text-center">
-            <h3 class="text-lg font-bold text-slate-900 mb-1">Scan Kode QR</h3>
-            <p class="text-sm text-slate-600 mb-4">Gunakan aplikasi pembayaran untuk scan kode di atas</p>
+          <div class="text-center max-w-sm">
+            <h3 class="text-lg font-bold text-slate-900 tracking-tight">Pindai QRIS Dinamis</h3>
+            <p class="text-sm text-slate-500 mt-1">Kompatibel dengan seluruh aplikasi e-wallet dan perbankan Indonesia.</p>
             
-            <!-- Amount -->
-            <div class="bg-white rounded-2xl px-6 py-4 inline-block mb-4 shadow-sm border border-slate-100">
-              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nominal Pembayaran</p>
-              <p class="text-3xl font-black text-orange-600 mt-1">Rp {{ formatNumber(borrow.total_fine) }}</p>
+            <!-- Amount Card -->
+            <div class="bg-orange-50/60 border border-orange-100/80 rounded-2xl px-8 py-4 inline-block mt-5 shadow-sm">
+              <p class="text-[11px] font-bold text-orange-800 uppercase tracking-widest">Total Tagihan Denda</p>
+              <p class="text-3xl font-black text-orange-500 mt-1">Rp {{ formatNumber(borrow.total_fine) }}</p>
             </div>
 
-            <!-- Supported Apps -->
-            <div class="mt-4 flex justify-center gap-2 flex-wrap">
-              <div class="text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-full">📱 GoPay</div>
-              <div class="text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-full">📱 OVO</div>
-              <div class="text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-full">📱 Dana</div>
-              <div class="text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-full">📱 ShopeePay</div>
+            <!-- Supported Apps Branding (Minimalist Modern) -->
+            <div class="mt-6 flex justify-center items-center gap-3 flex-wrap opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300">
+              <span class="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200/60 px-3 py-1.5 rounded-xl">GOPAY</span>
+              <span class="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200/60 px-3 py-1.5 rounded-xl">OVO</span>
+              <span class="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200/60 px-3 py-1.5 rounded-xl">DANA</span>
+              <span class="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200/60 px-3 py-1.5 rounded-xl">SHOPEEPAY</span>
+              <span class="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200/60 px-3 py-1.5 rounded-xl">LINKAJA</span>
             </div>
           </div>
         </div>
 
-        <!-- WhatsApp Contact -->
-        <div class="p-8 bg-green-50 border-t border-green-100">
-          <div class="text-center">
-            <p class="text-sm font-bold text-green-800 mb-3">Butuh bantuan? Hubungi petugas via WhatsApp</p>
-            <a 
-              :href="whatsappLink"
-              target="_blank"
-              class="inline-flex items-center gap-3 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-green-500/20"
-            >
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              Hubungi Petugas via WhatsApp
-            </a>
+        <!-- Meta Bill & Instruction Details -->
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detail Verifikasi</h3>
+            <div class="space-y-2.5">
+              <div class="flex justify-between items-center p-4 bg-slate-50/60 border border-slate-100 rounded-2xl text-sm">
+                <span class="font-medium text-slate-500">Judul Buku Peminjaman</span>
+                <span class="font-bold text-slate-800 text-right max-w-[240px] truncate">{{ borrow.book?.title || 'Judul Buku' }}</span>
+              </div>
+              <div class="flex justify-between items-center p-4 bg-slate-50/60 border border-slate-100 rounded-2xl text-sm">
+                <span class="font-medium text-slate-500">Total Akumulasi Keterlambatan</span>
+                <span class="font-bold text-slate-800">{{ borrow.late_days }} hari</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions Steps -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Langkah Penyelesaian</h3>
+            <div class="bg-slate-50 border border-slate-200/50 rounded-2xl p-5">
+              <ul class="space-y-3.5 text-sm text-slate-600">
+                <li class="flex gap-3">
+                  <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <span>Buka e-wallet atau aplikasi mobile banking pilihan Anda.</span>
+                </li>
+                <li class="flex gap-3">
+                  <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <span>Pilih opsi pembayaran **Scan** atau **Pindai QR**.</span>
+                </li>
+                <li class="flex gap-3">
+                  <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <span>Arahkan pemindai kamera tepat pada barcode QRIS di atas.</span>
+                </li>
+                <li class="flex gap-3">
+                  <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                  <span>Periksa kembali nama merchant perpustakaan dan nominal tagihan denda Anda, lalu masukkan PIN pembayaran.</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <!-- Book & Details Section -->
-        <div class="p-8">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Detail Pembayaran</h3>
-          
-          <div class="space-y-3 mb-6">
-            <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl">
-              <span class="text-sm font-medium text-slate-600">Buku</span>
-              <span class="text-sm font-bold text-slate-900">{{ borrow.book?.title }}</span>
-            </div>
-            <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl">
-              <span class="text-sm font-medium text-slate-600">Hari Terlambat</span>
-              <span class="text-sm font-bold text-slate-900">{{ borrow.late_days }} hari</span>
-            </div>
-            <div class="flex justify-between items-center p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
-              <span class="text-sm font-bold text-orange-900">Total Denda</span>
-              <span class="text-xl font-black text-orange-600">Rp {{ formatNumber(borrow.total_fine) }}</span>
-            </div>
+        <!-- WhatsApp Soft Help Section -->
+        <div class="px-6 py-5 sm:px-8 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="text-center sm:text-left">
+            <h4 class="text-sm font-bold text-slate-900">Kendala pada pemindaian barcode?</h4>
+            <p class="text-xs text-slate-800 mt-0.5">Kirim bukti atau hubungi langsung meja administrasi perpustakaan.</p>
           </div>
-
-          <!-- Instructions -->
-          <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
-            <h4 class="font-bold text-blue-900 mb-3 flex items-center gap-2">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-              </svg>
-              Langkah Pembayaran:
-            </h4>
-            <ol class="space-y-2 text-sm text-blue-800 ml-6 list-decimal">
-              <li>Buka aplikasi pembayaran favorit Anda</li>
-              <li>Pilih menu "Scan QRIS" atau "Bayar"</li>
-              <li>Arahkan kamera ke kode QR di atas</li>
-              <li>Verifikasi nominal dan lakukan pembayaran</li>
-              <li>Hubungi petugas jika pembayaran sudah dilakukan</li>
-              <li>Tunggu petugas mengkonfirmasi pembayaran Anda</li>
-            </ol>
-          </div>
+          <a 
+            :href="whatsappLink"
+            target="_blank"
+            class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all duration-150 shadow-md shadow-emerald-600/10 active:scale-[0.98]"
+          >
+            Hubungi via WhatsApp
+          </a>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex gap-4">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <button
           @click="goBack"
-          class="flex-1 py-4 px-6 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-center hover:bg-slate-50 transition-all"
+          class="order-2 sm:order-1 flex-1 py-4 px-6 rounded-2xl border border-slate-200 text-slate-600 font-bold text-center bg-white hover:bg-slate-50 hover:text-slate-800 active:scale-[0.99] transition-all duration-150 shadow-sm"
         >
-          Batal
+          Kembali
         </button>
         <button
           @click="router.visit('/my-loans')"
-          class="flex-1 py-4 px-6 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-center transition-all"
+          class="order-1 sm:order-2 flex-1 py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-center shadow-md shadow-orange-500/10 active:scale-[0.99] transition-all duration-150"
         >
-          Kembali ke Rak Buku
+          Selesai & Ke Rak Buku
         </button>
       </div>
     </div>

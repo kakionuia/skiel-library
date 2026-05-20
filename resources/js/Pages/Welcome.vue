@@ -409,7 +409,7 @@
   <div class="flex justify-between items-center mb-8">
     <h2 class="text-2xl font-bold text-gray-800">Artikel dan Event Kami</h2>
     <Link 
-      :href="route('articles.index')" 
+      :href="route('articles.index', activeTab === 'event' ? { category: 'event' } : {})" 
       class="bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md"
     >
       Lihat Semua <span class="text-xl">→</span>
@@ -419,14 +419,14 @@
   <div class="flex gap-4 mb-8">
     <button
       @click="activeTab = 'artikel'"
-      :class="activeTab === 'artikel' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
+      :class="activeTab === 'artikel' ? 'border-orange-500 bg-orange-500 text-white font-bold shadow-sm' : 'border-gray-200 border text-gray-400'"
       class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
     >
       Artikel
     </button>
     <button
       @click="activeTab = 'event'"
-      :class="activeTab === 'event' ? 'border-orange-500 text-orange-500 font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
+      :class="activeTab === 'event' ? 'border-orange-500 bg-orange-500 text-white font-bold shadow-sm' : 'border-gray-200 text-gray-400'"
       class="px-10 py-2 rounded-full border-2 transition-all duration-300 transform active:scale-95"
     >
       Event
@@ -442,14 +442,14 @@
       <div
         v-for="(item, index) in filteredItems"
         :key="index"
-        class="min-w-[320px] md:min-w-[360px] w-[320px] md:w-[360px] bg-white rounded-2xl shadow-xl border border-gray-100 p-6 snap-start flex-shrink-0 hover:shadow-2xl transition-shadow flex flex-col group cursor-pointer"
+        class="min-w-[280px] md:min-w-[320px] w-[300px] md:w-[340px] bg-white shadow-xl border border-gray-50 p-6 snap-start flex-shrink-0 hover:shadow-2xl transition-shadow flex flex-col group cursor-pointer"
       >
         <Link
-          :href="route('articles.show', item.slug)"
+          :href="contentHref(item)"
           class="flex flex-col h-full"
         >
           <!-- Image Container -->
-          <div class="relative mb-5 overflow-hidden rounded-xl border-2 border-orange-200 flex-shrink-0" style="height: 200px;">
+          <div class="relative mb-5 overflow-hidden flex-shrink-0" style="height: 200px;">
             <img 
               :src="getArticleImage(item.featured_image)" 
               class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
@@ -460,7 +460,7 @@
           
           <!-- Category Badge -->
           <span class="bg-orange-500 text-white text-[10px] px-4 py-1.5 rounded-full uppercase font-black tracking-wider w-fit flex-shrink-0">
-            {{ item.category }}
+            {{ categoryLabel(item) }}
           </span>
           
           <!-- Title -->
@@ -544,6 +544,10 @@ const props = defineProps({
   latestArticles: {
     type: Array,
     default: () => []
+  },
+  latestEvents: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -610,12 +614,20 @@ const getArticleImage = (path) => {
 };
 
 const filteredItems = computed(() => {
-  const items = props.latestArticles || [];
   if (activeTab.value === 'artikel') {
-    return items.filter(a => a.category === 'artikel' || a.category === 'berita').slice(0, 10);
+    return (props.latestArticles || []).filter(a => a.category === 'artikel' || a.category === 'berita').slice(0, 10);
   }
-  return items.filter(a => a.category === 'event').slice(0, 10);
+  return (props.latestEvents || []).slice(0, 10);
 });
+
+const contentHref = (item) => {
+  return item.is_event ? route('events.show', item.slug) : route('articles.show', item.slug);
+};
+
+const categoryLabel = (item) => {
+  if (item.is_event) return item.event_category === 'karya' ? 'Event Karya' : 'Event Poin';
+  return item.category;
+};
 
 const handleScroll = () => {
   if (!slider.value) return;

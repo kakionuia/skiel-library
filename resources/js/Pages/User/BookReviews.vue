@@ -1,287 +1,259 @@
 <template>
-  <div class="min-h-screen bg-slate-50">
-    <!-- Header -->
-    <div class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <Link href="/dashboard" class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-slate-100 transition">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-              </svg>
-            </Link>
-            <div>
-              <h1 class="text-xl font-black text-slate-900">{{ book.title }}</h1>
-              <p class="text-xs text-slate-500 font-medium">{{ book.author }} • {{ totalReviews }} Ulasan</p>
-            </div>
-          </div>
-          <div class="hidden sm:flex items-center gap-3">
-            <Link :href="route('books.show', book.id)" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition font-semibold text-sm">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-              Detail Buku
-            </Link>
+  <div class="min-h-screen bg-white text-slate-900 font-sans antialiased">
+    <div class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+      <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4 min-w-0">
+          <Link href="/dashboard" class="p-2 -ml-2 rounded-full hover:bg-slate-200 transition text-slate-900">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+          </Link>
+          <div class="min-w-0">
+            <h1 class="text-base font-bold text-slate-900 truncate">{{ book.title }}</h1>
+            <p class="text-xs text-slate-500 truncate">{{ book.author }} · {{ totalReviews }} Ulasan</p>
           </div>
         </div>
+        <Link :href="route('books.show', book.id)" class="text-xs font-bold text-orange-500 hover:underline transition shrink-0">
+          Detail Buku
+        </Link>
       </div>
     </div>
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <!-- No Reviews State -->
-      <div v-if="reviews.data.length === 0" class="py-24 text-center">
-        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-slate-100 mb-4">
-          <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2h-3l-4 4z"/>
-          </svg>
-        </div>
-        <h2 class="text-lg font-bold text-slate-900 mb-2">Belum Ada Ulasan</h2>
-        <p class="text-slate-500 mb-6">Jadilah yang pertama memberi ulasan untuk buku ini</p>
-        <Link href="/dashboard" class="inline-flex items-center gap-2 px-6 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-semibold">
+    <main class="max-w-2xl mx-auto border-x border-slate-200 min-h-[calc(100vh-61px)] bg-white">
+      <div v-if="reviews.data.length === 0" class="py-20 text-center px-4">
+        <h2 class="text-xl font-bold text-slate-900 mb-2">Belum ada ulasan</h2>
+        <p class="text-slate-500 mb-6 text-sm max-w-xs mx-auto">Jadilah yang pertama memberi ulasan untuk buku ini dan bagikan pengalaman membaca Anda.</p>
+        <Link href="/dashboard" class="inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white rounded-full font-bold text-sm hover:opacity-90 transition">
           Kembali ke Dashboard
         </Link>
       </div>
 
-      <!-- Reviews Grid (Instagram-like) -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-else class="divide-y divide-slate-200">
         <div
           v-for="review in reviews.data"
           :key="review.id"
-          class="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all duration-300 flex flex-col"
-        >
-          <!-- Review Header -->
-          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div class="flex items-center gap-3 min-w-0">
-              <img 
-                :src="`https://ui-avatars.com/api/?name=${review.user.name}&background=ea580c&color=white`"
-                :alt="review.user.name"
-                class="w-10 h-10 rounded-full object-cover"
-              />
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-bold text-slate-900 truncate">{{ review.user.name }}</p>
-                <p class="text-xs text-slate-400 font-medium">{{ formatDate(review.created_at) }}</p>
+          :id="`review-${review.id}`"
+          class="p-4 flex gap-3 hover:bg-slate-50/50 transition-colors duration-200"
+        ><img 
+            :src="review.user.avatar_url || review.user.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.user.name)}&background=f97316&color=white&size=128`"
+            :alt="review.user.name"
+            class="w-10 h-10 rounded-full object-cover shrink-0 border border-slate-200"
+          />
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-baseline gap-1.5 min-w-0 flex-wrap">
+                <span class="text-sm font-bold text-slate-900 truncate">{{ review.user.name }}</span>
+                <span class="text-xs text-slate-500 shrink-0">·</span>
+                <span class="text-xs text-slate-500 shrink-0">{{ formatDate(review.created_at) }}</span>
+              </div>
+              <div class="flex items-center gap-0.5 text-xs font-bold text-slate-900 shrink-0">
+                <span>★</span>
+                <span>{{ review.rating }}</span>
               </div>
             </div>
-            <div class="flex items-center gap-0.5">
-              <span v-for="star in 5" :key="star" class="text-lg" :class="star <= review.rating ? 'text-amber-400' : 'text-slate-200'">★</span>
-            </div>
-          </div>
 
-          <!-- Review Content -->
-          <div class="px-5 py-4 flex-1">
-            <p class="text-sm text-slate-700 leading-relaxed line-clamp-4">{{ review.comment || 'Tidak ada komentar.' }}</p>
-            <div v-if="review.image_path" class="mt-3 rounded-lg overflow-hidden bg-slate-100">
-              <img :src="review.image_path" :alt="review.user.name" class="w-full h-32 object-cover" />
-            </div>
-          </div>
+            <p class="text-sm text-slate-900 leading-normal mt-1 whitespace-pre-wrap font-normal">
+              {{ review.comment || 'Tidak ada komentar.' }}
+            </p>
 
-          <!-- Review Stats -->
-          <div class="px-5 py-3 border-t border-slate-100 bg-slate-50 grid grid-cols-3 gap-2 text-xs text-center">
-            <div class="py-2 rounded-lg hover:bg-slate-200 transition cursor-pointer">
-              <p class="font-bold text-slate-900">{{ review.likes_count }}</p>
-              <p class="text-slate-500">Suka</p>
+            <div v-if="review.image_path" class="mt-3 rounded-xl overflow-hidden border border-slate-200 max-h-80 bg-white">
+              <img :src="review.image_path" :alt="review.user.name" class="w-full h-full object-cover" />
             </div>
-            <div class="py-2 rounded-lg hover:bg-slate-200 transition cursor-pointer">
-              <p class="font-bold text-slate-900">{{ review.comments_count }}</p>
-              <p class="text-slate-500">Komentar</p>
-            </div>
-            <div class="py-2 rounded-lg hover:bg-slate-200 transition cursor-pointer">
-              <p class="font-bold text-slate-900">{{ review.bookmarks_count }}</p>
-              <p class="text-slate-500">Simpan</p>
-            </div>
-          </div>
 
-          <!-- Review Actions -->
-          <div class="px-5 py-4 border-t border-slate-100 flex items-center gap-2">
-            <button
-              @click="toggleLike(review)"
-              :disabled="!authUser"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition font-semibold text-sm"
-              :class="review.user_liked 
-                ? 'bg-red-50 text-red-600 hover:bg-red-100' 
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-            >
-              <svg class="w-4 h-4" :fill="review.user_liked ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-              </svg>
-              {{ review.user_liked ? 'Disukai' : 'Sukai' }}
-            </button>
-            <button
-              @click="openCommentModal(review)"
-              :disabled="!authUser"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition font-semibold text-sm"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-              </svg>
-              Komentar
-            </button>
-            <button
-              @click="toggleBookmark(review)"
-              :disabled="!authUser"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition font-semibold text-sm"
-              :class="review.user_bookmarked 
-                ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-            >
-              <svg class="w-4 h-4" :fill="review.user_bookmarked ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h6a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-              </svg>
-              {{ review.user_bookmarked ? 'Tersimpan' : 'Simpan' }}
-            </button>
-          </div>
+            <div class="flex items-center justify-between max-w-md mt-3 -ml-2 text-slate-500">
+              <button 
+                @click="openCommentModal(review)"
+                class="flex items-center gap-2 p-2 rounded-full hover:bg-orange-50 hover:text-orange-500 transition group text-left"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span class="text-xs font-medium group-hover:text-orange-500">{{ review.comments_count }}</span>
+              </button>
 
-          <!-- Comments Preview -->
-          <div v-if="review.comments_count > 0" class="px-5 py-3 border-t border-slate-100 bg-slate-50">
-            <p class="text-xs font-semibold text-slate-600 mb-2">Komentar Terbaru:</p>
-            <div v-for="(comment, idx) in review.comments.slice(0, 2)" :key="idx" class="mb-2 pb-2 border-b border-slate-200 last:border-0 last:pb-0 last:mb-0">
-              <p class="text-xs font-medium text-slate-900">{{ comment.user.name }}</p>
-              <p class="text-xs text-slate-600 line-clamp-2">{{ comment.comment }}</p>
+              <button 
+                @click="toggleLike(review)"
+                :disabled="!authUser"
+                class="flex items-center gap-2 p-2 rounded-full hover:bg-red-50 hover:text-red-600 transition group text-left"
+                :class="{ 'text-red-600': review.user_liked }"
+              >
+                <svg class="w-4 h-4" :fill="review.user_liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                <span class="text-xs font-medium">{{ review.likes_count }}</span>
+              </button>
+
+              <button 
+                @click="toggleBookmark(review)"
+                :disabled="!authUser"
+                class="flex items-center gap-2 p-2 rounded-full hover:bg-blue-50 hover:text-blue-600 transition group text-left"
+                :class="{ 'text-blue-600': review.user_bookmarked }"
+              >
+                <svg class="w-4 h-4" :fill="review.user_bookmarked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h6a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
+                <span class="text-xs font-medium">{{ review.bookmarks_count }}</span>
+              </button>
             </div>
-            <button
-              @click="openCommentModal(review)"
-              v-if="review.comments_count > 2"
-              class="text-xs text-orange-600 font-semibold hover:underline"
-            >
-              Lihat {{ review.comments_count - 2 }} komentar lainnya
-            </button>
+
+            <div v-if="review.comments_count > 0" class="mt-3 space-y-3 pl-2 border-l-2 border-slate-200">
+              <div v-for="(comment, idx) in review.comments.slice(0, 2)" :key="idx" class="text-xs flex gap-2 items-start pt-1">
+                <img 
+  :src="selectedReview?.user.avatar_url || selectedReview?.user.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedReview?.user.name || '')}&background=f97316&color=white&size=128`"
+  class="w-10 h-10 rounded-full object-cover shrink-0 z-10 bg-white"
+/>
+                <div class="flex-1 min-w-0">
+                  <span class="font-bold text-slate-900 mr-1.5 hover:underline cursor-pointer">{{ comment.user.name }}</span>
+                  <span class="text-slate-900 font-normal leading-normal">{{ comment.comment }}</span>
+                </div>
+              </div>
+              
+              <button
+                @click="openCommentModal(review)"
+                v-if="review.comments_count > 2"
+                class="block text-[11px] text-orange-500 font-bold hover:underline transition pt-1 pl-7"
+              >
+                Lihat semua {{ review.comments_count }} komentar
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="reviews.last_page > 1" class="flex items-center justify-center gap-2 mt-12">
+      <div v-if="reviews.last_page > 1" class="flex items-center justify-between p-4 border-t border-slate-200">
         <Link
           v-if="reviews.current_page > 1"
           :href="`?page=${reviews.current_page - 1}`"
-          class="px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-semibold"
+          class="px-4 py-2 rounded-full border border-slate-200 text-slate-900 hover:bg-slate-50 transition font-bold text-xs"
         >
           Sebelumnya
         </Link>
-        <div class="flex items-center gap-1">
-          <button
-            v-for="page in reviews.last_page"
-            :key="page"
-            @click="$inertia.visit(`?page=${page}`)"
-            :class="page === reviews.current_page 
-              ? 'bg-orange-600 text-white' 
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
-            class="w-10 h-10 rounded-lg transition font-semibold"
-          >
-            {{ page }}
-          </button>
-        </div>
+        <span class="text-xs text-slate-500 font-medium mx-auto">Halaman {{ reviews.current_page }} dari {{ reviews.last_page }}</span>
         <Link
           v-if="reviews.current_page < reviews.last_page"
           :href="`?page=${reviews.current_page + 1}`"
-          class="px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-semibold"
+          class="px-4 py-2 rounded-full border border-slate-200 text-slate-900 hover:bg-slate-50 transition font-bold text-xs"
         >
           Selanjutnya
         </Link>
       </div>
     </main>
 
-    <!-- Comment Modal -->
-    <div v-if="showCommentModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center">
-      <div class="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-xl font-black text-slate-900">Komentar Ulasan</h2>
-            <p class="text-sm text-slate-500 mt-1">dari {{ selectedReview?.user.name }}</p>
-          </div>
-          <button
-            @click="showCommentModal = false"
-            class="p-2 rounded-lg hover:bg-slate-100 transition"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    <div v-if="showCommentModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-start sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-full sm:max-w-xl bg-white h-full sm:h-auto sm:max-h-[90vh] border border-slate-200 flex flex-col overflow-hidden shadow-2xl mt-0 sm:mt-8">
+        
+        <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between shrink-0">
+          <span class="text-sm font-bold text-slate-900">Balas Ulasan</span>
+          <button @click="showCommentModal = false" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-900 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>
 
-        <!-- Original Review -->
-        <div class="mb-6 pb-6 border-b border-slate-200">
-          <div class="flex items-start gap-3 mb-4">
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          
+          <div class="flex gap-3 relative">
+            <div class="absolute top-10 bottom-[-16px] left-5 w-0.5 bg-slate-200"></div>
+            
             <img 
-              :src="`https://ui-avatars.com/api/?name=${selectedReview?.user.name}&background=ea580c&color=white`"
-              :alt="selectedReview?.user.name"
-              class="w-12 h-12 rounded-full"
-            />
-            <div class="flex-1">
-              <p class="font-bold text-slate-900">{{ selectedReview?.user.name }}</p>
-              <div class="flex items-center gap-1 mt-1">
-                <span v-for="star in 5" :key="star" class="text-base" :class="star <= (selectedReview?.rating || 0) ? 'text-amber-400' : 'text-slate-200'">★</span>
+  :src="selectedReview?.user.avatar_url || selectedReview?.user.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedReview?.user.name || '')}&background=f97316&color=white&size=128`"
+  class="w-10 h-10 rounded-full object-cover shrink-0 z-10 bg-white"
+/>
+            <div class="flex-1 min-w-0 pb-2">
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-sm font-bold text-slate-900">{{ selectedReview?.user.name }}</span>
+                <span class="text-xs text-slate-500">{{ formatDate(selectedReview?.created_at) }}</span>
               </div>
-              <p class="text-sm text-slate-700 mt-2">{{ selectedReview?.comment }}</p>
+              <p class="text-sm text-slate-900 mt-1 leading-normal font-normal">{{ selectedReview?.comment }}</p>
+              <p class="text-xs text-slate-500 mt-2">
+                Membalas ke <span class="text-orange-500">@{{ selectedReview?.user.name.toLowerCase().replace(/\s+/g, '') }}</span>
+              </p>
             </div>
           </div>
-        </div>
 
-        <!-- Comments List -->
-        <div class="mb-6 space-y-4 max-h-96 overflow-y-auto">
-          <div v-if="!selectedReview?.comments || selectedReview.comments.length === 0" class="text-center py-8">
-            <p class="text-slate-500 text-sm">Belum ada komentar. Jadilah yang pertama!</p>
-          </div>
-          <div v-for="comment in selectedReview?.comments" :key="comment.id" class="flex items-start gap-3 pb-4 border-b border-slate-100 last:border-0">
+          <div v-if="authUser" class="flex gap-3 pt-2">
             <img 
-              :src="`https://ui-avatars.com/api/?name=${comment.user.name}&background=ea580c&color=white`"
-              :alt="comment.user.name"
-              class="w-9 h-9 rounded-full"
-            />
+  :src="authUser.avatar_url || authUser.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.name)}&background=f97316&color=white&size=128`"
+  class="w-10 h-10 rounded-full object-cover shrink-0 z-10"
+/>
             <div class="flex-1 min-w-0">
-              <p class="font-bold text-sm text-slate-900">{{ comment.user.name }}</p>
-              <p class="text-xs text-slate-400 mb-1">{{ formatDate(comment.created_at) }}</p>
-              <p class="text-sm text-slate-700">{{ comment.comment }}</p>
-              <img v-if="comment.image_path" :src="comment.image_path" :alt="comment.user.name" class="mt-2 rounded-lg max-w-48 h-auto" />
-              <div v-if="comment.user_id === authUser?.id" class="mt-2 flex items-center gap-2">
-                <button
-                  @click="deleteComment(comment.id)"
-                  class="text-xs text-red-600 hover:text-red-700 font-semibold"
-                >
-                  Hapus
-                </button>
+              <form @submit.prevent="submitComment">
+                <textarea
+                  v-model="commentForm.comment"
+                  placeholder="Tulis balasan Anda..."
+                  class="w-full px-0 py-1.5 border-0 bg-transparent text-slate-900 focus:ring-0 placeholder:text-slate-400 text-sm resize-none font-normal outline-none min-h-[60px]"
+                  rows="3"
+                ></textarea>
+                
+                <div v-if="commentForm.image" class="mt-2 mb-3 relative inline-block">
+                  <span class="text-[11px] text-slate-700 bg-slate-100 border border-slate-200 pl-2 pr-8 py-1 rounded-md max-w-xs truncate block">
+                    File: {{ commentForm.image.name }}
+                  </span>
+                  <button type="button" @click="commentForm.image = null" class="absolute right-1.5 top-1 text-slate-400 hover:text-slate-900 font-bold text-xs">
+                    ✕
+                  </button>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100 mt-1">
+                  <label class="cursor-pointer text-slate-500 hover:text-orange-500 transition p-1.5 rounded-full hover:bg-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <input type="file" @change="handleImageUpload" accept="image/*" class="hidden" />
+                  </label>
+
+                  <button
+                    type="submit"
+                    :disabled="!commentForm.comment.trim() || commentForm.uploading"
+                    class="px-4 py-1.5 bg-orange-500 text-white rounded-full font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed transition shrink-0"
+                  >
+                    {{ commentForm.uploading ? 'Mengirim...' : 'Balas' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div v-if="selectedReview?.comments?.length > 0" class="border-t border-slate-100 pt-4">
+            <h3 class="text-xs font-bold text-slate-400 mb-4 tracking-wider uppercase">Balasan Lainnya</h3>
+            
+            <div class="space-y-4">
+              <div v-for="comment in selectedReview?.comments" :key="comment.id" class="flex gap-3 items-start">
+                <img 
+                  :src="comment.user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user.name)}&background=f97316&color=white`"
+                  class="w-8 h-8 rounded-full object-cover shrink-0"
+                />
+                <div class="flex-1 min-w-0 border-b border-slate-50 pb-3">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-baseline gap-1.5">
+                      <span class="text-xs font-bold text-slate-900">{{ comment.user.name }}</span>
+                      <span class="text-[10px] text-slate-400 font-medium">{{ formatDate(comment.created_at) }}</span>
+                    </div>
+                    <button
+                      v-if="comment.user_id === authUser?.id"
+                      @click="deleteComment(comment.id)"
+                      class="text-[11px] text-slate-400 hover:text-red-500 font-medium transition"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                  <p class="text-xs text-slate-900 mt-0.5 leading-normal font-normal whitespace-pre-wrap">{{ comment.comment }}</p>
+                  <img v-if="comment.image_path" :src="comment.image_path" class="mt-2 rounded-md max-w-xs h-auto border border-slate-200" />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Add Comment Form -->
-        <form @submit.prevent="submitComment" class="border-t border-slate-200 pt-4" v-if="authUser">
-          <div class="space-y-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-2">Komentar Anda</label>
-              <textarea
-                v-model="commentForm.comment"
-                placeholder="Tulis komentar..."
-                class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition text-sm resize-none"
-                rows="3"
-              ></textarea>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-2">Tambah Foto (Opsional)</label>
-              <input
-                type="file"
-                @change="handleImageUpload"
-                accept="image/*"
-                class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-orange-500 outline-none text-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              :disabled="!commentForm.comment.trim() || commentForm.uploading"
-              class="w-full px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {{ commentForm.uploading ? 'Mengirim...' : 'Kirim Komentar' }}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 
@@ -302,17 +274,30 @@ const commentForm = ref({
   uploading: false,
 });
 
+onMounted(() => {
+  const params = new URLSearchParams(window.location.search);
+  const reviewId = params.get('review');
+  if (!reviewId) return;
+
+  requestAnimationFrame(() => {
+    document.getElementById(`review-${reviewId}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  });
+});
+
 function formatDate(date) {
   const d = new Date(date);
   const now = new Date();
   const diff = now - d;
   
   if (diff < 60000) return 'Baru saja';
-  if (diff < 3600000) return Math.floor(diff / 60000) + ' menit lalu';
-  if (diff < 86400000) return Math.floor(diff / 3600000) + ' jam lalu';
-  if (diff < 604800000) return Math.floor(diff / 86400000) + ' hari lalu';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'j';
+  if (diff < 604800000) return Math.floor(diff / 86400000) + 'h';
   
-  return d.toLocaleDateString('id-ID');
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 }
 
 function toggleLike(review) {
@@ -321,12 +306,11 @@ function toggleLike(review) {
       title: 'Masuk Dulu',
       text: 'Silakan masuk untuk menyukai ulasan',
       icon: 'info',
-      confirmButtonColor: '#ea580c'
+      confirmButtonColor: '#0f172a'
     });
     return;
   }
-  
-  router.post(route('reviews.like', review.id));
+  router.post(route('reviews.like', review.id), {}, { preserveScroll: true });
 }
 
 function toggleBookmark(review) {
@@ -335,12 +319,11 @@ function toggleBookmark(review) {
       title: 'Masuk Dulu',
       text: 'Silakan masuk untuk menyimpan ulasan',
       icon: 'info',
-      confirmButtonColor: '#ea580c'
+      confirmButtonColor: '#0f172a'
     });
     return;
   }
-  
-  router.post(route('reviews.bookmark', review.id));
+  router.post(route('reviews.bookmark', review.id), {}, { preserveScroll: true });
 }
 
 function openCommentModal(review) {
@@ -349,7 +332,7 @@ function openCommentModal(review) {
       title: 'Masuk Dulu',
       text: 'Silakan masuk untuk mengomentari ulasan',
       icon: 'info',
-      confirmButtonColor: '#ea580c'
+      confirmButtonColor: '#0f172a'
     });
     return;
   }
@@ -364,15 +347,7 @@ function handleImageUpload(e) {
 }
 
 function submitComment() {
-  if (!commentForm.value.comment.trim()) {
-    Swal.fire({
-      title: 'Komentar Kosong',
-      text: 'Harap tulis komentar sebelum mengirim',
-      icon: 'warning',
-      confirmButtonColor: '#ea580c'
-    });
-    return;
-  }
+  if (!commentForm.value.comment.trim()) return;
 
   commentForm.value.uploading = true;
   const formData = new FormData();
@@ -385,48 +360,48 @@ function submitComment() {
     method: 'POST',
     headers: {
       'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+      'Accept': 'application/json',
     },
     body: formData,
   })
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      showCommentModal.value = false;
-      Swal.fire({
-        title: 'Berhasil!',
-        text: 'Komentar Anda telah dikirim',
-        icon: 'success',
-        confirmButtonColor: '#ea580c'
-      });
-      location.reload();
+      const newComment = data.comment;
+      
+      const targetReview = props.reviews.data.find(item => item.id === selectedReview.value.id);
+      if (targetReview) {
+        targetReview.comments = [newComment, ...(targetReview.comments || [])];
+        targetReview.comments_count = data.comments_count;
+        selectedReview.value = targetReview;
+      }
+
+      commentForm.value = { comment: '', image: null, uploading: false };
     }
   })
+  .catch(err => console.error(err))
   .finally(() => {
     commentForm.value.uploading = false;
   });
 }
 
 function deleteComment(commentId) {
-  Swal.fire({
-    title: 'Hapus Komentar?',
-    text: 'Tindakan ini tidak dapat dibatalkan',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#ef4444',
-    cancelButtonColor: '#6b7280',
-    confirmButtonText: 'Ya, Hapus',
-    cancelButtonText: 'Batal'
-  }).then(result => {
-    if (result.isConfirmed) {
-      fetch(route('reviews.comment.delete', commentId), {
-        method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-        },
-      })
-      .then(() => location.reload())
-      .catch(err => console.error(err));
+  fetch(route('reviews.comment.delete', commentId), {
+    method: 'DELETE',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+      'Accept': 'application/json',
+    },
+  })
+  .then(res => res.json())
+  .then(data => {
+    const targetReview = props.reviews.data.find(item => item.id === selectedReview.value.id);
+    if (targetReview) {
+      targetReview.comments = (targetReview.comments || []).filter(comment => comment.id !== commentId);
+      targetReview.comments_count = data.comments_count;
+      selectedReview.value = targetReview;
     }
-  });
+  })
+  .catch(err => console.error(err));
 }
 </script>

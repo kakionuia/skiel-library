@@ -25,7 +25,9 @@
     >
       <div class="h-20 flex items-center px-6 border-b border-slate-100 justify-between shrink-0">
         <Link href="/dashboard" class="flex items-center gap-3 group overflow-hidden">
-          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-600 text-sm font-black text-white group-hover:bg-orange-700 transition-colors"><img src="/image/logo-smk.png" alt="" srcset="" class="h-5 w-5"></span>
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white group-hover:bg-orange-600 transition-colors">
+            <img src="/image/logo-smk.png" alt="" class="h-5 w-5">
+          </span>
           <div v-show="!isSidebarCollapsed || isSidebarOpen" class="transition-opacity duration-200 whitespace-nowrap">
             <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">SKIE LIBRARY</p>
             <span class="text-sm font-extrabold tracking-tight text-slate-900">Sirkulasi</span>
@@ -50,13 +52,12 @@
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Katalog Buku"
           >
-            <span class="text-lg">📚</span>
-            <span v-show="!isSidebarCollapsed || isSidebarOpen">Katalog Buku</span>
+            <span v-show="!isSidebarCollapsed || isSidebarOpen">Dashboard</span>
           </Link>
 
           <Link 
             href="/my-loans" 
-            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-600 transition"
+            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-500 transition"
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Rak Buku Saya"
           >
@@ -66,7 +67,7 @@
 
           <Link 
             href="/my-queue" 
-            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-700 border border-orange-100/50 transition"
+            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-500 border border-orange-100/50 transition"
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Antrian Buku"
           >
@@ -86,7 +87,7 @@
             @click="activeTab = tab.key"
             class="flex w-full items-center rounded-xl p-3 text-left transition duration-150 group"
             :class="[
-              activeTab === tab.key ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-500 hover:bg-orange-50 hover:text-orange-600',
+              activeTab === tab.key ? 'bg-orange-500 text-white shadow-sm' : 'text-slate-500 hover:bg-orange-50 hover:text-orange-600',
               isSidebarCollapsed ? 'justify-center' : 'justify-between'
             ]"
             :title="tab.label"
@@ -109,13 +110,13 @@
 
       <div class="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
         <div class="flex items-center justify-between" :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }">
-          <Link href="/profile" class="flex items-center gap-3 overflow-hidden group">
-            <div class="h-9 w-9 rounded-full bg-orange-50 shrink-0 border border-orange-200 flex items-center justify-center font-bold text-orange-600">
-              {{ stats.user_initials }}
+         <Link href="/profile" class="flex items-center gap-3 overflow-hidden group">
+            <div class="h-9 w-9 rounded-full bg-orange-50 shrink-0 border border-orange-200 flex items-center justify-center font-bold text-orange-600 text-xs uppercase">
+              {{ userInitials }}
             </div>
             <div v-show="!isSidebarCollapsed || isSidebarOpen" class="text-left whitespace-nowrap">
-              <p class="text-xs font-bold text-slate-900 truncate">{{ stats.user_name || 'User' }}</p>
-              <p class="text-[10px] text-slate-400 font-semibold truncate">{{ stats.user_role || 'Anggota' }}</p>
+              <p class="text-xs font-bold text-slate-900 truncate max-w-[120px] group-hover:text-orange-600 transition-colors">{{ user.name }}</p>
+              <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider truncate max-w-[120px] mt-0.5">{{ user.role || 'Siswa' }}</p>
             </div>
           </Link>
           
@@ -167,12 +168,12 @@
             </div>
           </div>
           <Link 
-  :href="route('profile.edit')" 
-  class="h-8 w-8 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center lg:hidden font-bold text-orange-600 text-xs hover:bg-orange-100 hover:border-orange-300 transition-colors"
-  title="Edit Profil"
->
-  {{ stats.user_initials }}
-</Link>
+            :href="route('profile.edit')" 
+            class="h-8 w-8 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center lg:hidden font-bold text-orange-600 text-xs hover:bg-orange-100 hover:border-orange-300 transition-colors uppercase"
+            title="Edit Profil"
+          >
+            {{ userInitials }}
+          </Link>
         </div>
       </header>
 
@@ -183,8 +184,8 @@
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Daftar Antrian Buku</h1>
             <p class="text-xs font-medium text-slate-500 mt-1">Pantau dan kelola antrian buku reservasi yang Anda ajukan.</p>
           </div>
-          <Link href="/dashboard" class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-orange-50 border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-700 hover:text-orange-600 transition shadow-3xs shrink-0">
-            Jelajahi Katalog
+          <Link href="/dashboard" class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-orange-50 border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-700 hover:text-orange-600 transition shadow-xs shrink-0">
+            Kembali ke Dashboard
           </Link>
         </div>
 
@@ -208,8 +209,9 @@
 
         <div class="space-y-6">
           
+          <!-- Tab Menunggu -->
           <div v-if="activeTab === 'waiting'" class="space-y-4">
-            <div v-if="queuedBooks.filter(q => !q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl border border-slate-200/60 p-6">
+            <div v-if="queuedBooks.filter(q => !q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl shadow-sm p-6">
               <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-2xl text-orange-500 mb-4">⏳</div>
               <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Tidak ada antrian berjalan</h3>
               <p class="mt-1.5 text-xs font-medium text-slate-400 max-w-sm mx-auto leading-relaxed">Saat ini Anda tidak memiliki antrian buku aktif.</p>
@@ -219,11 +221,11 @@
               <div 
                 v-for="queue in queuedBooks.filter(q => !q.notified_at)" 
                 :key="queue.id" 
-                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-orange-200/80 transition-all duration-300 overflow-hidden"
+                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden"
               >
-                <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-amber-500 transition-all duration-300 group-hover:w-[6px]"></div>
+                <div class="absolute left-0 top-0 bottom-0 w-[4px] transition-all duration-300 group-hover:w-[6px]"></div>
 
-                <div class="w-20 aspect-[3/4.2] shrink-0 overflow-hidden rounded-xl border border-slate-100 p-1 bg-slate-50 shadow-2xs mx-auto md:mx-0">
+                <div class="w-20 aspect-[3/4.2] shrink-0 overflow-hidden rounded-xl border border-slate-100 p-1 bg-slate-50 shadow-xs mx-auto md:mx-0">
                   <img 
                     :src="queue.book?.cover_image || 'https://placehold.co/120x180/f1f5f9/94a3b8?text=No+Cover'" 
                     alt="Book cover"
@@ -264,8 +266,9 @@
             </div>
           </div>
 
+          <!-- Tab Tersedia -->
           <div v-if="activeTab === 'notified'" class="space-y-4">
-            <div v-if="queuedBooks.filter(q => q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl border border-slate-200/60 p-6">
+            <div v-if="queuedBooks.filter(q => q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl shadow-sm p-6">
               <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-2xl text-orange-500 mb-4">🎉</div>
               <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Belum ada buku tersedia</h3>
               <p class="mt-1.5 text-xs font-medium text-slate-400 max-w-sm mx-auto leading-relaxed">Kami akan memberi tahu Anda di sini jika ada buku yang siap diambil.</p>
@@ -275,11 +278,11 @@
               <div 
                 v-for="queue in queuedBooks.filter(q => q.notified_at)" 
                 :key="queue.id" 
-                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-orange-200/80 transition-all duration-300 overflow-hidden"
+                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white rounded-2xl shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden"
               >
                 <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-emerald-500 transition-all duration-300 group-hover:w-[6px]"></div>
 
-                <div class="w-20 aspect-[3/4.2] shrink-0 overflow-hidden rounded-xl border border-slate-100 p-1 bg-slate-50 shadow-2xs mx-auto md:mx-0">
+                <div class="w-20 aspect-[3/4.2] shrink-0 overflow-hidden rounded-xl border border-slate-100 p-1 bg-slate-50 shadow-xs mx-auto md:mx-0">
                   <img 
                     :src="queue.book?.cover_image || 'https://placehold.co/120x180/f1f5f9/94a3b8?text=No+Cover'" 
                     alt="Book cover"
@@ -309,7 +312,7 @@
                 <div class="flex flex-col sm:flex-row md:flex-col justify-end items-center gap-3 w-full md:w-auto self-stretch md:self-auto pt-4 md:pt-0 border-t border-slate-100 md:border-t-0 md:pl-6 md:border-l md:border-slate-100">
                   <Link 
                     :href="`/books/${queue.book?.id}`"
-                    class="w-full text-center px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 shadow-sm active:scale-98"
+                    class="w-full text-center px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 shadow-xs active:scale-98"
                   >
                     Pinjam Sekarang
                   </Link>
@@ -332,7 +335,7 @@
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { dangerConfirm, successAlert } from '@/Utils/sweetAlert';
 import { ref, computed } from 'vue';
@@ -340,6 +343,18 @@ import { ref, computed } from 'vue';
 const props = defineProps({
   queuedBooks: { type: Array, default: () => [] },
   stats: { type: Object, default: () => ({}) },
+});
+
+// Ambil shared data user dari Inertia global props
+const page = usePage();
+const user = computed(() => page.props.auth?.user || { name: 'Guest', role: 'Siswa' });
+
+// Bikin inisial otomatis dari nama user jika user_initials tidak dioper dari backend
+const userInitials = computed(() => {
+  if (user.value.initials) return user.value.initials;
+  return user.value.name
+    ? user.value.name.split(' ').map(n => n[0]).slice(0, 2).join('')
+    : 'U';
 });
 
 const activeTab = ref('waiting');

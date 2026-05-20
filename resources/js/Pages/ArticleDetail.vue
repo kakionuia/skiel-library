@@ -1,155 +1,217 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-    <!-- Navbar -->
+  <div class="min-h-screen bg-white font-sans antialiased">
     <Navbar @open-auth="showAuthModal = true" />
 
-    <!-- Hero Article Header -->
-    <div class="bg-gradient-to-r from-orange-600 to-orange-400 text-white py-28 md:py-32">
-      <div class="max-w-4xl mx-auto px-4 md:px-8">
-        <!-- Category Badge -->
-        <div class="inline-flex items-center gap-2 mb-6">
-          <span class="px-4 py-1.5 bg-white/20 backdrop-blur-sm text-sm font-semibold rounded-full">
-            {{ categoryLabel }}
-          </span>
-          <span class="text-white/70 text-sm">{{ formatDate(article.published_at) }}</span>
-        </div>
-
-        <!-- Title -->
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6 max-w-3xl">
-          {{ article.title }}
-        </h1>
-
-        <!-- Meta Info -->
-        <div class="flex flex-wrap items-center gap-6 text-white/90">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg">
-              {{ article.author?.name?.charAt(0) || 'A' }}
-            </div>
-            <div>
-              <p class="font-semibold">{{ article.author?.name || 'Admin' }}</p>
-              <p class="text-white/70 text-sm">Penulis Artikel</p>
-            </div>
+    <main class="max-w-6xl mx-auto px-4 py-24 md:py-32 ">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-2 space-y-6">
+          
+          <div>
+            <span class="inline-block bg-orange-400 text-white text-xs font-bold px-4 py-1.5 rounded-full tracking-wide">
+              {{ categoryLabel }}
+            </span>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Featured Image -->
-<div v-if="article.featured_image" class="relative w-full max-h-[500px] overflow-hidden bg-slate-100">
-  <img 
-    :src="getImageUrl(article.featured_image)" 
-    :alt="article.title"
-    class="w-full h-full max-h-[500px] object-cover"
-    @error="handleImageError"
-  />
-</div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-slate-950 leading-tight">
+            {{ article.title }}
+          </h1>
 
-    <!-- Article Content -->
-    <article class="max-w-3xl mx-auto px-4 md:px-8 py-16 md:py-24">
-      <!-- Excerpt/Introduction -->
-      <div class="mb-12 pb-8 border-b-2 border-slate-200">
-        <p class="text-xl text-slate-700 leading-relaxed font-medium">
-          {{ article.excerpt }}
-        </p>
-      </div>
-
-      <!-- Main Content -->
-      <div class="prose prose-lg max-w-none mb-16">
-        <div v-html="article.content" class="text-slate-700 leading-relaxed space-y-6"></div>
-      </div>
-
-      <!-- Article Stats -->
-      <div class="grid grid-cols-3 md:grid-cols-3 gap-4 my-16 p-8 bg-slate-100 rounded-2xl">
-        <div class="text-center">
-          <p class="text-3xl font-bold text-orange-600">{{ wordCount }}</p>
-          <p class="text-slate-600 text-sm mt-2">Kata</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-orange-600">{{ readTime }}</p>
-          <p class="text-slate-600 text-sm mt-2">Menit Baca</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-orange-600">{{ article.views || 0 }}</p>
-          <p class="text-slate-600 text-sm mt-2">Dibaca</p>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <hr class="my-16 border-slate-200" />
-
-      <!-- Author Info -->
-      <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-8 md:p-12 mb-16">
-        <div class="flex flex-col md:flex-row items-center gap-6">
-          <div class="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
-            {{ article.author?.name?.charAt(0) || 'A' }}
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <span class="font-semibold text-slate-800">{{ article.author?.name || 'Admin' }}</span>
+            <span class="text-gray-300">•</span>
+            <span>{{ formatDate(article.published_at) }}</span>
           </div>
-          <div class="flex-1 text-center md:text-left">
-            <h3 class="text-2xl font-bold text-slate-900 mb-2">{{ article.author?.name || 'Admin' }}</h3>
-            <p class="text-slate-600 mb-4">
-              Tim penulis perpustakaan SMKN 1 Gunungputri yang berdedikasi untuk berbagi pengetahuan dan wawasan literasi kepada semua siswa.
-            </p>
-            <div class="flex justify-center md:justify-start gap-4">
-              <a href="#" class="text-orange-600 hover:text-orange-700 font-semibold text-sm">Lihat Profil</a>
-              <span class="text-slate-300">•</span>
-              <a href="#" class="text-orange-600 hover:text-orange-700 font-semibold text-sm">Artikel Lainnya</a>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Related Articles -->
-      <div class="mb-16">
-        <h2 class="text-3xl font-bold text-slate-900 mb-8">Artikel Terkait</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div 
-            v-for="related in relatedArticles" 
-            :key="related.id"
-            class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100"
-          >
-            <div class="aspect-video bg-gradient-to-br from-orange-200 to-orange-300 flex items-center justify-center">
+          <div v-if="article.featured_image" class="w-full">
+            <div class="overflow-hidden bg-slate-100 rounded-sm">
               <img 
-                v-if="related.featured_image" 
-                :src="related.featured_image" 
-                :alt="related.title"
-                class="w-full h-full object-cover"
+                :src="getImageUrl(article.featured_image)" 
+                :alt="article.title"
+                class="w-full h-auto object-cover max-h-[450px]"
+                @error="handleImageError"
               />
-              <span v-else class="text-white text-2xl">📚</span>
             </div>
-            <div class="p-6">
-              <p class="text-orange-600 text-sm font-semibold mb-2">{{ related.category }}</p>
-              <h3 class="text-lg font-bold text-slate-900 mb-2 line-clamp-2">{{ related.title }}</h3>
-              <p class="text-slate-600 text-sm mb-4 line-clamp-2">{{ related.excerpt }}</p>
-              <Link 
-                :href="route('articles.show', related.slug)"
-                class="text-orange-600 hover:text-orange-700 font-semibold text-sm inline-flex items-center gap-2 group"
-              >
-                Baca Selengkapnya
-                <span class="group-hover:translate-x-1 transition-transform">→</span>
-              </Link>
+            <p class="text-center text-xs text-gray-500 mt-2 italic">
+              Puing-puing reruntuhan bangunan {{ categoryLabel }}
+            </p>
+          </div>
+
+          <article class="prose max-w-none pt-4">
+            <div v-html="article.content" class="text-slate-800 text-sm leading-relaxed space-y-5"></div>
+          </article>
+
+          <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+            <span class="text-xs font-bold text-slate-900">Bagikan:</span>
+            <button class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white hover:opacity-90 transition">
+              <span class="text-xs font-mono">w</span>
+            </button>
+            <button class="w-6 h-6 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90 transition">
+              <span class="text-xs font-mono">x</span>
+            </button>
+          </div>
+
+          <section class="pt-8 border-t-2 border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-bold text-slate-900">Komentar</h3>
+              <span class="text-xs text-gray-500 font-medium">{{ totalComments }} Komentar</span>
+            </div>
+            
+            <form v-if="authUser" @submit.prevent="submitComment" class="mb-8">
+              <div class="flex gap-2">
+                <input
+                  v-model="commentForm.comment"
+                  type="text"
+                  placeholder="Ketikkan sesuatu untuk artikel"
+                  class="flex-1 bg-slate-50 border border-gray-200 rounded-md px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-orange-500 placeholder-gray-400"
+                />
+                <button
+                  type="submit"
+                  :disabled="commentForm.processing || commentForm.comment.trim().length < 3"
+                  class="bg-orange-500 text-white p-3 rounded-md hover:bg-orange-600 transition flex items-center justify-center shrink-0 disabled:opacity-50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+
+            <div v-else class="mb-8 rounded-md border border-gray-200 bg-slate-50 p-4 text-center">
+              <p class="text-xs font-semibold text-slate-700">Masuk untuk ikut berdiskusi di artikel ini.</p>
+              <button @click="showAuthModal = true" class="mt-2 rounded-md bg-orange-500 px-4 py-2 text-xs font-bold text-white hover:bg-orange-600 transition">
+                Masuk
+              </button>
+            </div>
+
+            <div v-if="comments.length === 0" class="text-center py-6 border border-dashed rounded-md text-sm text-gray-400">
+              Belum ada komentar.
+            </div>
+
+            <div v-else class="space-y-4">
+              <div v-for="comment in comments" :key="comment.id" class="space-y-3">
+                
+                <div class="border border-gray-200 rounded-md p-4 bg-white flex gap-3">
+                  <div class="w-10 h-10 rounded-full bg-orange-500 shrink-0 text-white font-bold flex items-center justify-center text-xs">
+                    {{ comment.user?.name?.charAt(0).toUpperCase() || 'U' }}
+                  </div>
+                  <div class="flex-1 space-y-1">
+                    <div class="flex items-baseline justify-between">
+                      <div>
+                        <h5 class="text-xs font-bold text-slate-900">{{ comment.user?.name || 'User' }}</h5>
+                        <p class="text-[10px] text-gray-400" v-if="comment.user?.major">
+                          {{ comment.user.major }}
+                        </p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-gray-400">{{ formatRelativeDate(comment.created_at) }}</span>
+                        <button
+                          v-if="authUser && comment.user_id === authUser.id"
+                          @click="deleteComment(comment.id)"
+                          class="text-[10px] font-semibold text-rose-600 hover:underline"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                    <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-line">{{ comment.comment }}</p>
+                    
+                    <div class="flex justify-end pt-1">
+                      <button @click="startReply(comment)" class="text-[11px] text-gray-500 hover:underline flex items-center gap-1">
+                        <span>Balas komentar</span>
+                        <span class="text-[9px]">➔</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="replyingTo?.id === comment.id" class="ml-12 bg-slate-50 border border-gray-200 rounded-md p-3">
+                  <p class="text-[10px] font-semibold text-gray-500 mb-2">Membalas {{ comment.user?.name || 'User' }}</p>
+                  <div class="flex gap-2">
+                    <input
+                      v-model="replyForm.comment"
+                      type="text"
+                      placeholder="Tulis balasan..."
+                      class="flex-1 bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-orange-500"
+                    />
+                    <div class="flex gap-1 shrink-0">
+                      <button 
+                        type="button" 
+                        @click="cancelReply" 
+                        class="px-2.5 py-2 border border-gray-200 rounded-md text-xs text-gray-500 bg-white hover:bg-gray-100 transition"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        @click="submitReply(comment)"
+                        :disabled="replyForm.processing || replyForm.comment.trim().length < 3"
+                        class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 text-xs font-bold transition disabled:opacity-50"
+                      >
+                        Kirim
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="comment.replies && comment.replies.length" class="ml-12 space-y-3 border-l-2 border-gray-100 pl-3">
+                  <div v-for="reply in comment.replies" :key="reply.id" class="border border-gray-200 rounded-md p-3 bg-slate-50 flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-amber-500 shrink-0 text-white font-bold flex items-center justify-center text-[10px]">
+                      {{ reply.user?.name?.charAt(0).toUpperCase() || 'U' }}
+                    </div>
+                    <div class="flex-1 space-y-1">
+                      <div class="flex items-baseline justify-between">
+                        <h5 class="text-xs font-bold text-slate-900">{{ reply.user?.name || 'User' }}</h5>
+                        <div class="flex items-center gap-2">
+                          <span class="text-[10px] text-gray-400">{{ formatRelativeDate(reply.created_at) }}</span>
+                          <button
+                            v-if="authUser && reply.user_id === authUser.id"
+                            @click="deleteComment(reply.id)"
+                            class="text-[10px] font-semibold text-rose-600 hover:underline"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                      <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-line">{{ reply.comment }}</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="lg:col-span-1">
+          <div class="border border-gray-100 rounded-lg p-6 shadow-sm sticky top-6 bg-white">
+            <h3 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-gray-100">
+              Artikel terbaru
+            </h3>
+            
+            <div v-if="relatedArticles.length === 0" class="text-sm text-gray-400 py-2">
+              Tidak ada artikel terbaru.
+            </div>
+
+            <div v-else class="space-y-6">
+              <div v-for="related in relatedArticles.slice(0, 5)" :key="related.id" class="space-y-1">
+                <span class="text-[10px] font-bold text-orange-500 uppercase tracking-wider block">
+                  {{ relatedCategoryLabel(related.category) }}
+                </span>
+                <Link 
+                  :href="route('articles.show', related.slug)"
+                  class="text-xs font-bold text-slate-900 hover:text-orange-500 transition line-clamp-2 leading-snug block"
+                >
+                  {{ related.title }}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </article>
 
-    <!-- CTA Section -->
-    <section class="bg-gradient-to-r from-orange-600 to-orange-400 text-white py-16 md:py-24">
-      <div class="max-w-3xl mx-auto px-4 md:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold mb-4">Tertarik dengan Koleksi Kami?</h2>
-        <p class="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-          Kunjungi perpustakaan digital kami dan jelajahi ribuan judul buku berkualitas
-        </p>
-        <Link 
-          href="/"
-          class="inline-flex items-center gap-3 bg-white text-orange-600 px-8 py-4 rounded-full font-bold hover:bg-slate-100 transition-colors"
-        >
-          Kembali ke Beranda
-          <span>→</span>
-        </Link>
       </div>
-    </section>
+    </main>
 
-    <!-- Footer -->
     <FooterSection />
 
     <AuthModal :show="showAuthModal" @close="showAuthModal = false" />
@@ -158,7 +220,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Navbar from '@/Components/Navbar.vue';
 import FooterSection from '@/Components/FooterSection.vue';
 import AuthModal from '@/Components/AuthModal.vue';
@@ -176,122 +238,142 @@ const props = defineProps({
 
 const showAuthModal = ref(false);
 const imageError = ref(false);
+const page = usePage();
 
-// FUNGSI UNTUK MENDAPATKAN URL GAMBAR YANG BENAR
+// Auth States
+const authUser = computed(() => page.props.auth?.user || null);
+
+// Comments States & Logika Hitung Jumlah Komentar
+const comments = computed(() => props.article.comments || []);
+const totalComments = computed(() => {
+  return comments.value.reduce((total, comment) => total + 1 + (comment.replies?.length || 0), 0);
+});
+
+const commentForm = ref({
+  comment: '',
+  processing: false
+});
+
+// Reply States
+const replyingTo = ref(null);
+const replyForm = ref({
+  comment: '',
+  processing: false
+});
+
 const getImageUrl = (path) => {
-  if (!path) return '/images/placeholder.jpg'; // Gambar default jika tidak ada
-  
-  // Jika sudah full URL, gunakan langsung
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-  
-  // Jika path sudah mengandung 'storage/', gunakan dengan /
-  if (path.startsWith('storage/')) {
-    return `/${path}`;
-  }
-  
-  // Jika path dimulai dengan /, gunakan langsung
-  if (path.startsWith('/')) {
-    return path;
-  }
-  
-  // Default: tambahkan /storage/ di depan
+  if (!path) return '/images/placeholder.jpg';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (path.startsWith('storage/')) return `/${path}`;
+  if (path.startsWith('/')) return path;
   return `/storage/${path}`;
 };
 
 const handleImageError = (e) => {
   imageError.value = true;
-  // Optional: Set gambar default jika error
-  e.target.src = '/images/placeholder.jpg';
 };
 
-// Format date helper
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('id-ID', {
-    year: 'numeric',
+    day: 'numeric',
     month: 'long',
-    day: 'numeric'
+    year: 'numeric'
   }).format(date);
 };
 
-// Computed properties
 const categoryLabel = computed(() => {
-  const category = props.article?.category || 'Artikel';
+  const category = props.article?.category || 'Sekolah';
   return category.charAt(0).toUpperCase() + category.slice(1);
 });
 
-const wordCount = computed(() => {
-  if (!props.article?.content) return 0;
-  const text = props.article.content.replace(/<[^>]*>/g, '');
-  return text.split(/\s+/).filter(word => word.length > 0).length;
-});
+const relatedCategoryLabel = (category) => {
+  const labels = {
+    artikel: 'Artikel',
+    berita: 'Berita',
+    event: 'Event',
+    prestasi: 'Prestasi'
+  };
+  return labels[category] || category || 'Prestasi';
+};
 
-const readTime = computed(() => {
-  const avgWordsPerMinute = 200;
-  return Math.ceil(wordCount.value / avgWordsPerMinute) || 1;
-});
+function formatRelativeDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const diff = Date.now() - date.getTime();
+  if (diff < 60000) return 'Baru saja';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} menit lalu`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} jam lalu`;
+  return formatDate(dateString);
+}
+
+// Submit Komentar Induk/Utama
+function submitComment() {
+  if (!commentForm.value.comment.trim() || commentForm.value.comment.trim().length < 3) return;
+
+  commentForm.value.processing = true;
+  router.post(route('articles.comments.store', props.article.id), {
+    comment: commentForm.value.comment.trim()
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      commentForm.value.comment = '';
+    },
+    onFinish: () => {
+      commentForm.value.processing = false;
+    }
+  });
+}
+
+// Fungsi Aktivasi Balas Komentar
+function startReply(comment) {
+  replyingTo.value = comment;
+  replyForm.value.comment = '';
+}
+
+function cancelReply() {
+  replyingTo.value = null;
+  replyForm.value.comment = '';
+}
+
+// Submit Komentar Balasan (Mengirim dengan parent_id)
+function submitReply(comment) {
+  if (!replyForm.value.comment.trim() || replyForm.value.comment.trim().length < 3) return;
+
+  replyForm.value.processing = true;
+  router.post(route('articles.comments.store', props.article.id), {
+    comment: replyForm.value.comment.trim(),
+    parent_id: comment.id // Menandakan bahwa ini adalah balasan dari komentar tersebut
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      cancelReply();
+    },
+    onFinish: () => {
+      replyForm.value.processing = false;
+    }
+  });
+}
+
+// Hapus Komentar / Balasan
+function deleteComment(commentId) {
+  if (confirm('Apakah Anda yakin ingin menghapus komentar ini?')) {
+    router.delete(route('articles.comments.delete', commentId), {
+      preserveScroll: true
+    });
+  }
+}
 </script>
 
 <style scoped>
-.prose {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.8;
-  color: #475569;
-}
-
-.prose :deep(h2) {
-  @apply text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-6 first:mt-0;
-}
-
-.prose :deep(h3) {
-  @apply text-xl md:text-2xl font-bold text-slate-900 mt-10 mb-4;
-}
-
 .prose :deep(p) {
-  @apply mb-6 leading-relaxed;
+  @apply mb-4 text-slate-700 text-sm leading-relaxed text-justify;
 }
-
-.prose :deep(ul),
-.prose :deep(ol) {
-  @apply ml-6 mb-6;
+.prose :deep(h2) {
+  @apply text-lg font-bold text-slate-900 mt-6 mb-2;
 }
-
-.prose :deep(li) {
-  @apply mb-2;
-}
-
-.prose :deep(blockquote) {
-  @apply border-l-4 border-orange-500 pl-6 py-2 my-6 italic text-slate-600 bg-slate-50 py-4 px-6 rounded;
-}
-
-.prose :deep(strong) {
-  @apply font-bold text-slate-900;
-}
-
-.prose :deep(em) {
-  @apply italic text-slate-700;
-}
-
-.prose :deep(a) {
-  @apply text-orange-600 hover:text-orange-700 underline;
-}
-
-.prose :deep(img) {
-  @apply rounded-lg shadow-lg my-8 max-w-full h-auto;
-}
-
-.prose :deep(code) {
-  @apply bg-slate-100 px-2 py-1 rounded text-sm font-mono text-slate-900;
-}
-
-.prose :deep(pre) {
-  @apply bg-slate-900 text-white p-6 rounded-lg overflow-x-auto my-6;
-}
-
-.prose :deep(pre code) {
-  @apply bg-transparent px-0 py-0 text-slate-100;
+.prose :deep(h3) {
+  @apply text-base font-bold text-slate-900 mt-4 mb-2;
 }
 </style>

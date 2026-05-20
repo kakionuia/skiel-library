@@ -60,7 +60,7 @@
                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold" :class="getPaymentStatusClass(borrow.payment_status)">
                   {{ getPaymentStatusLabel(borrow.payment_status) }}
                 </span>
-                <p v-if="borrow.payment_method" class="text-xs text-gray-500">{{ borrow.payment_method === 'qris' ? 'QRIS' : 'Tunai' }}</p>
+                <p v-if="borrow.payment_method && borrow.payment_method !== 'none'" class="text-xs text-gray-500">{{ borrow.payment_method === 'qris' ? 'QRIS' : 'Tunai' }}</p>
               </div>
             </div>
 

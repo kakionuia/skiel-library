@@ -97,7 +97,7 @@ function rejectExtension(extension) {
 
 <template>
   <AdminLayout>
-    <div class="bg-white rounded-lg shadow">
+    <div class="bg-white rounded-lg shadow ms-8">
       <div class="px-6 py-4 border-b border-gray-200">
         <h1 class="text-2xl font-bold text-gray-900">Permintaan Perpanjangan Peminjaman</h1>
         <p class="text-gray-600 text-sm mt-1">Kelola permintaan perpanjangan dari pengguna</p>

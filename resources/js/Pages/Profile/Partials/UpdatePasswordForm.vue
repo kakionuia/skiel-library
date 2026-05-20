@@ -94,7 +94,7 @@ const updatePassword = () => {
             <div class="flex items-center gap-4 pt-2">
                 <PrimaryButton 
                     :disabled="form.processing"
-                    class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:from-orange-700 active:to-amber-700 text-white font-bold px-7 py-3 rounded-xl border-0 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-200 disabled:opacity-50"
+                    class="bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-amber-600 active:from-orange-700 active:to-amber-700 text-white font-bold px-7 py-3 rounded-xl border-0 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-200 disabled:opacity-50"
                 >
                     Perbarui Password
                 </PrimaryButton>

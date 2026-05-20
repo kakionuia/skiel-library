@@ -3,9 +3,9 @@
     <div v-if="show" class="fixed inset-0 z-[120] flex items-center justify-center p-6">
       <div class="absolute inset-0 bg-gray-950/30 backdrop-blur-md" @click="handleClose"></div>
       
-      <div class="relative bg-white w-full max-w-[440px] rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden transform transition-all border border-gray-100">
+      <div class="relative bg-white w-full max-w-[440px] max-h-[92vh] rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden transform transition-all border border-gray-100 flex flex-col">
         
-        <div class="px-10 py-12">
+        <div class="px-10 py-12 overflow-y-auto custom-scroll">
           <div class="flex justify-center mb-8">
             <div class="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
               <img src="/image/logo-smk.png" class="w-7 h-7" alt="Logo">
@@ -90,6 +90,12 @@
               <p v-if="errors.email" class="error-msg">{{ errors.email }}</p>
            </div>
 
+            <div v-if="!isLogin" class="space-y-2">
+              <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Nomor Handphone</label>
+              <input v-model="form.phone" type="tel" placeholder="08xxxxxxxxxx" class="auth-input" :disabled="isSubmitting">
+              <p v-if="errors.phone" class="error-msg">{{ errors.phone }}</p>
+            </div>
+
             <div class="space-y-2">
               <div class="flex justify-between items-center ml-1">
                 <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Kata Sandi</label>
@@ -144,6 +150,7 @@ const form = useForm({
   name: '',
   email: '',
   nisn: '',
+  phone: '',
   password: '',
   password_confirmation: '',
   kelas: '',    // <-- tambahan field kelas
@@ -201,6 +208,19 @@ const handleSubmit = () => {
 
 .error-msg {
   @apply text-[10px] text-red-500 font-bold mt-1 ml-1 tracking-wide;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #fed7aa;
+  border-radius: 999px;
 }
 
 /* Modal Smooth Animation */

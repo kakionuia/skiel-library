@@ -100,6 +100,17 @@ import PetugasSidebar from '@/Components/PetugasSidebar.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
+defineProps({
+  categories: {
+    type: Array,
+    default: () => []
+  },
+  errors: {
+    type: Object,
+    default: () => ({})
+  }
+});
+
 const form = ref({
   title: '',
   author: '',

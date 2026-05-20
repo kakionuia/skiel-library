@@ -27,6 +27,7 @@ class User extends Authenticatable
         'status',
         'nisn',
         'kelas',
+        'phone',
         'jurusan',
         'borrow_restricted',
         'profile_photo_path', // Tambahkan ini
@@ -113,6 +114,11 @@ class User extends Authenticatable
     public function borrows()
     {
         return $this->hasMany(\App\Models\Borrow::class);
+    }
+
+    public function literacyEventParticipants()
+    {
+        return $this->hasMany(\App\Models\LiteracyEventParticipant::class);
     }
 
     public function transactions()

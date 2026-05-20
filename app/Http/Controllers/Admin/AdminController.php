@@ -44,6 +44,31 @@ class AdminController extends Controller
             ->limit(6)
             ->get();
 
+        $monthlyBorrows = collect(range(5, 0))
+            ->map(function ($monthsAgo) {
+                $date = now()->subMonths($monthsAgo);
+
+                return [
+                    'month' => $date->translatedFormat('M'),
+                    'count' => Borrow::whereYear('borrow_date', $date->year)
+                        ->whereMonth('borrow_date', $date->month)
+                        ->count(),
+                ];
+            })
+            ->values();
+
+        $totalLateFee = (float) Borrow::whereNotNull('payment_date')
+            ->where('payment_status', 'confirmed')
+            ->whereMonth('payment_date', now()->month)
+            ->whereYear('payment_date', now()->year)
+            ->sum('late_fee');
+
+        if ($totalLateFee <= 0) {
+            $totalLateFee = (float) Borrow::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('late_fee');
+        }
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'totalBooks' => $totalBooks,
@@ -53,7 +78,11 @@ class AdminController extends Controller
                 'totalMembers' => $totalMembers,
                 'totalPetugas' => $totalPetugas,
                 'pendingMembers' => $pendingMembers,
+                'totalLateFee' => $totalLateFee,
+                'lateReturnsCount' => $lateReturns,
+                'pendingBookRequests' => BookRequest::where('status', 'pending')->count(),
             ],
+            'monthlyBorrows' => $monthlyBorrows,
             'recentBorrows' => $recentBorrows,
             'topBooks' => $topBooks,
         ]);

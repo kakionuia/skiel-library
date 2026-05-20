@@ -94,12 +94,20 @@ class ReviewController extends Controller
             $imagePath = $request->file('image')->store('review-comments', 'public');
         }
 
-        ReviewComment::create([
+        $comment = ReviewComment::create([
             'user_id' => Auth::id(),
             'review_id' => $review->id,
             'comment' => $validated['comment'],
             'image_path' => $imagePath,
-        ]);
+        ])->load('user');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'comment' => $comment,
+                'comments_count' => $review->comments()->count(),
+            ]);
+        }
 
         return back()->with('success', 'Komentar ditambahkan!');
     }
@@ -110,7 +118,15 @@ class ReviewController extends Controller
             abort(403);
         }
 
+        $review = $comment->review;
         $comment->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'comments_count' => $review->comments()->count(),
+            ]);
+        }
 
         return back()->with('success', 'Komentar dihapus');
     }
@@ -210,4 +226,3 @@ class ReviewController extends Controller
         ]);
     }
 }
-

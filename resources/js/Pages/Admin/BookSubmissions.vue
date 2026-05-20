@@ -71,7 +71,7 @@ async function rejectSubmission(book) {
 <template>
   <AdminLayout title="Pengajuan Buku">
     <div class="min-h-screen">
-      <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="max-w-7xl mx-auto px-4 py-8 ms-8">
         <!-- Header -->
         <div class="mb-8">
           <h1 class="text-3xl font-bold text-slate-900">Pengajuan Buku</h1>

@@ -7,6 +7,7 @@ use App\Models\Activity;
 use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\BookRequest;
+use App\Models\Category;
 use App\Models\SystemParameter;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -105,7 +106,9 @@ class PetugasController extends Controller
 
     public function createBook()
     {
-        return inertia('Petugas/Books/Create');
+        return inertia('Petugas/Books/Create', [
+            'categories' => Category::orderBy('name')->get(['id', 'name']),
+        ]);
     }
 
     public function storeBook(Request $request)

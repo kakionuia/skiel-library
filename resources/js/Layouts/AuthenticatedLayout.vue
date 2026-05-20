@@ -48,14 +48,14 @@ const profilePhotoUrl = computed(() => {
                 <div class="flex items-center gap-6">
                     <div class="flex items-center gap-3 group cursor-pointer">
                         <div class="bg-gradient-to-br from-orange-500 to-amber-500 p-2 rounded-xl shadow-md shadow-orange-500/10 group-hover:scale-105 transition-transform duration-300">
-                            <img :src="$page.props.logoUrl || '/images/logo.png'" alt="Logo" class="w-6 h-6 object-contain brightness-0 invert">
+                            <img :src="$page.props.logoUrl" alt="Logo" class="w-8 h-8">
                         </div>
                         <div class="flex flex-col hidden sm:flex">
                             <h1 class="font-black text-sm tracking-tight text-slate-900 leading-none">
                                 SKIE-Library
                             </h1>
                             <p class="text-[9px] uppercase font-semibold tracking-wider text-orange-600 mt-0.5">
-                                Internal System
+                                Online Administration
                             </p>
                         </div>
                     </div>

@@ -10,6 +10,7 @@ const form = useForm({
     nisn: '',
     kelas: '',
     jurusan: '',
+    phone: '',
     email: '',
     password: '',
     password_confirmation: '',
@@ -130,6 +131,19 @@ const submit = () => {
                     class="w-full rounded-xl border border-orange-400 px-4 py-2.5 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none placeholder:text-gray-300"
                 />
                 <InputError class="mt-1 ml-1" :message="form.errors.email" />
+            </div>
+
+            <div class="space-y-1">
+                <InputLabel for="phone" value="Nomor Handphone" class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1" />
+                <input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="08xxxxxxxxxx" 
+                    v-model="form.phone"
+                    required
+                    class="w-full rounded-xl border border-orange-400 px-4 py-2.5 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none placeholder:text-gray-300"
+                />
+                <InputError class="mt-1 ml-1" :message="form.errors.phone" />
             </div>
 
             <div class="space-y-1">

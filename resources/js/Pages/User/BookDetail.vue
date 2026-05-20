@@ -19,7 +19,7 @@
 
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 w-full">
       
-      <div class="lg:col-span-5 bg-[#D37B3B] p-8 sm:p-16 flex flex-col justify-between relative min-h-[450px] lg:min-h-0">
+      <div class="lg:col-span-5 bg-orange-500 p-8 sm:p-16 flex flex-col justify-between relative min-h-[450px] lg:min-h-0">
         <Link 
           href="/dashboard" 
           class="absolute top-8 left-8 w-12 h-12 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center text-white transition-all duration-200"
@@ -44,7 +44,7 @@
         <div class="space-y-10">
           
           <div>
-            <h2 class="text-xs font-bold text-[#D37B3B] uppercase tracking-widest mb-2">Informasi Mengenai Buku</h2>
+            <h2 class="text-xs font-bold text-orange-500 uppercase tracking-widest mb-2">Informasi Mengenai Buku</h2>
             <h1 class="text-3xl sm:text-4.5xl font-black text-slate-950 tracking-tight leading-tight">
               {{ book.title }}
             </h1>
@@ -105,7 +105,7 @@
             <button 
               v-if="book.available_quantity > 0 && !props.activeBorrow"
               @click="handleBorrowClick"
-              class="w-full sm:w-auto px-10 py-4 rounded-lg font-bold text-base tracking-wide transition-all duration-200 block text-center bg-[#D37B3B] text-white hover:bg-orange-700 active:scale-[0.99] shadow-lg shadow-orange-700/10"
+              class="w-full sm:w-auto px-10 py-4 rounded-lg font-bold text-base tracking-wide transition-all duration-200 block text-center bg-orange-500 text-white hover:bg-orange-700 active:scale-[0.99] shadow-lg shadow-orange-700/10"
             >
               Pinjam Buku
             </button>
@@ -124,8 +124,8 @@
               :disabled="isInQueue || isAddingQueue || props.activeBorrow"
               class="w-full sm:w-auto px-10 py-4 rounded-lg font-bold text-base tracking-wide transition-all duration-200 block text-center text-white disabled:opacity-50 disabled:cursor-not-allowed"
               :class="isInQueue || props.activeBorrow
-                ? 'bg-slate-100 text-slate-500 border border-slate-200' 
-                : 'bg-slate-900 hover:bg-black'"
+                ? 'bg-orange-600 text-slate-white border border-slate-200' 
+                : 'bg-orange-600 hover:bg-orange-700'"
             >
               {{ isInQueue ? `Posisi Antre: #${userQueuePosition}` : (props.activeBorrow ? 'Sudah Dipinjam' : 'Antre Buku Ini') }}
             </button>
@@ -134,7 +134,7 @@
           <div class="border-t border-slate-100 pt-8">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Ulasan Buku</h3>
-              <Link :href="route('books.reviews', book.id)" class="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 transition-colors">
+              <Link :href="route('books.reviews', book.id)" class="text-xs font-bold text-orange-500 hover:text-orange-700 flex items-center gap-1 transition-colors">
                 Selengkapnya
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>

@@ -74,16 +74,81 @@
                     <th class="px-6 py-4 text-right text-[10px] font-black uppercase text-slate-400">Nilai</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
-                  <tr>
-                    <td class="px-6 py-4 text-sm font-medium text-slate-600">Jumlah Eksemplar</td>
-                    <td class="px-6 py-4 text-right text-sm font-black text-slate-900">{{ borrow.quantity }} Unit</td>
-                  </tr>
-                  <tr v-if="borrow.late_fee > 0" class="bg-orange-50/30">
-                    <td class="px-6 py-4 text-sm font-medium text-orange-700 font-bold italic">Denda Keterlambatan ({{ borrow.late_days }} hari)</td>
-                    <td class="px-6 py-4 text-right text-sm font-black text-orange-600">Rp {{ formatNumber(borrow.late_fee) }}</td>
-                  </tr>
-                </tbody>
+                <tbody class="divide-y divide-slate-100">
+
+  <tr>
+    <td class="px-6 py-4 text-sm font-medium text-slate-600">
+      Jumlah Eksemplar
+    </td>
+
+    <td class="px-6 py-4 text-right text-sm font-black text-slate-900">
+      {{ borrow.quantity }} Unit
+    </td>
+  </tr>
+
+ <tr v-if="paymentMethod">
+  <td class="px-6 py-4 text-sm font-medium text-slate-600">
+    Metode Pembayaran
+  </td>
+
+  <td class="px-6 py-4 text-right">
+    <span class="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">
+      {{ paymentMethod }}
+    </span>
+  </td>
+</tr>
+
+ <tr v-if="paymentStatus">
+  <td class="px-6 py-4 text-sm font-medium text-slate-600">
+    Status Pembayaran
+  </td>
+
+  <td class="px-6 py-4 text-right">
+    <span
+      class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black tracking-wide"
+      :class="paymentStatus === 'LUNAS'
+        ? 'border-green-200 bg-green-50 text-green-700'
+        : 'border-orange-200 bg-orange-50 text-orange-600'"
+    >
+      <span
+        class="h-2 w-2 rounded-full"
+        :class="paymentStatus === 'LUNAS'
+          ? 'bg-green-500'
+          : 'bg-orange-500'"
+      ></span>
+
+      {{ paymentStatus }}
+    </span>
+  </td>
+</tr>
+
+  <tr
+    v-if="liveLateDays > 0"
+    class="bg-orange-50/40"
+  >
+    <td class="px-6 py-4 text-sm font-medium text-orange-700">
+      Keterlambatan
+    </td>
+
+    <td class="px-6 py-4 text-right text-sm font-black text-orange-600">
+      {{ liveLateDays }} Hari
+    </td>
+  </tr>
+
+  <tr
+    v-if="liveFine > 0"
+    class="bg-orange-50/40"
+  >
+    <td class="px-6 py-4 text-sm font-bold italic text-orange-700">
+      Total Denda Berjalan
+    </td>
+
+    <td class="px-6 py-4 text-right text-lg font-black text-orange-600">
+      Rp {{ formatNumber(liveFine) }}
+    </td>
+  </tr>
+
+</tbody>
               </table>
             </div>
 
@@ -147,4 +212,198 @@ const steps = computed(() => [
   { label: 'Persetujuan Admin', time: formatDate(props.borrow.approved_at), completed: !!props.borrow.approved_at },
   { label: 'Pengembalian Selesai', time: formatDate(props.borrow.return_date), completed: props.borrow.status === 'returned' }
 ]);
+
+
+
+const hasFine = computed(() => {
+  return liveFine.value > 0;
+});
+
+const paymentStatus = computed(() => {
+
+  // kalau tidak ada denda
+  if (!hasFine.value) {
+    return null;
+  }
+
+  // kalau sudah jadi riwayat / returned
+  // otomatis lunas
+  if (
+    props.borrow.status === 'returned' ||
+    props.borrow.return_date
+  ) {
+    return 'LUNAS';
+  }
+
+  return 'BELUM LUNAS';
+});
+
+const paymentMethod = computed(() => {
+
+  // kalau tidak ada denda
+  // tidak usah tampil metode pembayaran
+  if (!hasFine.value) {
+    return null;
+  }
+
+  return props.borrow.payment_method === 'qris'
+    ? 'QRIS'
+    : 'Tunai';
+});
+const liveLateDays = computed(() => {
+  if (!props.borrow.due_date || props.borrow.status === 'returned') {
+    return props.borrow.late_days || 0;
+  }
+
+  const due = new Date(props.borrow.due_date);
+  const now = new Date();
+
+  if (now <= due) return 0;
+
+  const diff = Math.floor(
+    (now - due) / (1000 * 60 * 60 * 24)
+  );
+
+  return diff;
+});
+
+const liveFine = computed(() => {
+
+  if (paymentStatus.value === 'LUNAS') {
+    return props.borrow.late_fee || 0;
+  }
+
+  const finePerDay = props.borrow.fine_per_day || 1000;
+
+  return liveLateDays.value * finePerDay;
+});
 </script>
+
+<style>
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+    zoom: 0.82;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  nav {
+    display: none !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Layout jadi compact */
+  .grid {
+    gap: 20px !important;
+  }
+
+  /* Cover buku kecil elegant */
+  .aspect-\[3\/4\] {
+    width: 180px !important;
+    max-height: 250px !important;
+    margin: 0 auto !important;
+  }
+
+  .aspect-\[3\/4\] img {
+    object-fit: cover !important;
+  }
+
+  /* Semua shadow dimatikan */
+  .shadow-2xl,
+  .shadow-xl,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  /* Card */
+  .rounded-2xl {
+    border-radius: 18px !important;
+  }
+
+  /* Judul buku */
+  h2 {
+    font-size: 30px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Spacing dipadatkan */
+  .space-y-12 > * + * {
+    margin-top: 24px !important;
+  }
+
+  .space-y-8 > * + * {
+    margin-top: 18px !important;
+  }
+
+  .pb-10 {
+    padding-bottom: 20px !important;
+  }
+
+  .py-12 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Table compact */
+  table td,
+  table th {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  /* Hindari kepotong */
+  table,
+  tr,
+  td,
+  th,
+  img {
+    page-break-inside: avoid !important;
+  }
+
+  /* Footer */
+  .text-xs {
+    font-size: 10px !important;
+  }
+
+  /* Hilangin animasi */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+table th {
+  color: rgb(100 116 139);
+  font-weight: 800;
+}
+
+table td {
+  border-color: rgb(241 245 249) !important;
+}
+
+.rounded-2xl {
+  border-radius: 1.25rem;
+}
+
+.border-slate-100 {
+  border-color: rgb(241 245 249 / 0.7) !important;
+}
+</style>
