@@ -5,11 +5,322 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        font-size: 16px;
+    }
+
     body {
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
         background-color: #f8fafc;
+        color: #1e293b;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    html.dark body {
+        background-color: #0f172a;
+        color: #e2e8f0;
+    }
+
+    html.dark {
+        color-scheme: dark;
     }
 }
+
+/* ===== COMPREHENSIVE DARK MODE STYLES ===== */
+
+/* Background Colors */
+html.dark .bg-white {
+    background-color: #0f172a;
+}
+
+html.dark .bg-slate-50 {
+    background-color: #020617;
+}
+
+html.dark .bg-slate-100 {
+    background-color: #1e293b;
+}
+
+html.dark .bg-gray-50,
+html.dark .bg-gray-100 {
+    background-color: #111827;
+}
+
+html.dark .bg-gray-50\/40,
+html.dark .bg-gray-50\/50 {
+    background-color: rgba(17, 24, 39, 0.55);
+}
+
+html.dark .bg-red-50\/5 {
+    background-color: rgba(127, 29, 29, 0.08);
+}
+
+html.dark .from-white {
+    --tw-gradient-from: #0f172a var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(15 23 42 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+html.dark .to-red-50\/5 {
+    --tw-gradient-to: rgb(254 242 242 / 0.06) var(--tw-gradient-to-position);
+}
+
+html.dark .bg-slate-50\/50 {
+    background-color: rgba(15, 23, 42, 0.5);
+}
+
+html.dark .bg-white\/70 {
+    background-color: rgba(15, 23, 42, 0.7);
+}
+
+/* Text Colors */
+html.dark .text-slate-800 {
+    color: #f1f5f9;
+}
+
+html.dark .text-slate-900 {
+    color: #f8fafc;
+}
+
+html.dark .text-slate-700 {
+    color: #e2e8f0;
+}
+
+html.dark .text-slate-600 {
+    color: #94a3b8;
+}
+
+html.dark .text-slate-500 {
+    color: #64748b;
+}
+
+html.dark .text-slate-400 {
+    color: #475569;
+}
+
+html.dark .text-slate-300 {
+    color: #334155;
+}
+
+html.dark .text-gray-300 {
+    color: #374151;
+}
+
+html.dark .text-gray-400 {
+    color: #9ca3af;
+}
+
+html.dark .text-gray-500 {
+    color: #9ca3af;
+}
+
+html.dark .text-gray-600 {
+    color: #d1d5db;
+}
+
+html.dark .text-gray-700 {
+    color: #d1d5db;
+}
+
+html.dark .text-gray-800 {
+    color: #e5e7eb;
+}
+
+html.dark .text-gray-900,
+html.dark .text-black {
+    color: #f9fafb;
+}
+
+/* Border Colors */
+html.dark .border-slate-200 {
+    border-color: #334155;
+}
+
+html.dark .border-slate-100 {
+    border-color: #1e293b;
+}
+
+html.dark .border-slate-200\/80 {
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+html.dark .border-orange-200 {
+    border-color: #7c2d12;
+}
+
+html.dark .border-gray-100 {
+    border-color: #334155;
+}
+
+html.dark .border-gray-200,
+html.dark .border-gray-200\/60,
+html.dark .border-gray-200\/70,
+html.dark .border-gray-200\/80,
+html.dark .border-gray-300 {
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+html.dark .border-slate-200\/60 {
+    border-color: rgba(71, 85, 105, 0.6);
+}
+
+/* Hover Background Colors */
+html.dark .hover\:bg-orange-50:hover {
+    background-color: rgba(234, 88, 12, 0.2);
+}
+
+html.dark .hover\:bg-slate-100:hover {
+    background-color: #1e293b;
+}
+
+html.dark .hover\:bg-slate-200:hover {
+    background-color: #334155;
+}
+
+html.dark .hover\:bg-red-50:hover {
+    background-color: rgba(220, 38, 38, 0.2);
+}
+
+html.dark .group\/card:hover .hover\:bg-orange-50:hover {
+    background-color: rgba(234, 88, 12, 0.2);
+}
+
+/* Ring & Shadow Colors */
+html.dark .ring-white {
+    --tw-ring-color: #1e293b;
+}
+
+html.dark .ring-orange-100 {
+    ring-color: rgba(234, 88, 12, 0.3);
+}
+
+html.dark .shadow-orange-100 {
+    box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.2);
+}
+
+html.dark .shadow-orange-500\/10 {
+    box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.2);
+}
+
+html.dark .shadow-xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+}
+
+/* Placeholder Text */
+html.dark .placeholder-slate-400::placeholder {
+    color: #64748b;
+}
+
+/* Input/Form Styling */
+html.dark input,
+html.dark textarea,
+html.dark select {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #64748b;
+}
+
+/* Orange Accent - Keep Prominent */
+html.dark .text-orange-600 {
+    color: #f97316;
+}
+
+html.dark .text-orange-500 {
+    color: #fb923c;
+}
+
+html.dark .bg-orange-50 {
+    background-color: rgba(124, 45, 18, 0.2);
+}
+
+html.dark .bg-orange-100 {
+    background-color: rgba(124, 45, 18, 0.4);
+}
+
+html.dark .from-orange-500 {
+    --tw-gradient-from: #f97316 var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(249 115 22 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+html.dark .to-amber-500 {
+    --tw-gradient-to: #f59e0b var(--tw-gradient-to-position);
+}
+
+/* Specific Component Fixes */
+html.dark .bg-slate-100:not(.dark\:bg-slate-800) {
+    background-color: #1e293b;
+}
+
+/* Scrollbar in Dark Mode */
+html.dark {
+    scrollbar-color: #475569 #1e293b;
+}
+
+html.dark ::-webkit-scrollbar {
+    width: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Dropdown Menu Dark Mode */
+html.dark .bg-white\/95 {
+    background-color: rgba(15, 23, 42, 0.95);
+}
+
+html.dark .bg-slate-50\/50 {
+    background-color: rgba(15, 23, 42, 0.5);
+}
+
+/* Global readable text sizing. These overrides adjust text only, so page spacing/layout stays stable. */
+html[data-font-size='compact'] .text-xs { font-size: 0.7rem !important; line-height: 1rem !important; }
+html[data-font-size='compact'] .text-sm { font-size: 0.8rem !important; line-height: 1.2rem !important; }
+html[data-font-size='compact'] .text-base { font-size: 0.92rem !important; line-height: 1.4rem !important; }
+html[data-font-size='compact'] .text-lg { font-size: 1.04rem !important; line-height: 1.55rem !important; }
+html[data-font-size='compact'] .text-xl { font-size: 1.15rem !important; line-height: 1.65rem !important; }
+html[data-font-size='compact'] .text-2xl { font-size: 1.35rem !important; line-height: 1.8rem !important; }
+html[data-font-size='compact'] .text-3xl { font-size: 1.65rem !important; line-height: 2rem !important; }
+html[data-font-size='compact'] .text-4xl { font-size: 2rem !important; line-height: 2.25rem !important; }
+html[data-font-size='compact'] .text-5xl { font-size: 2.55rem !important; line-height: 1.05 !important; }
+html[data-font-size='compact'] .text-6xl { font-size: 3.3rem !important; line-height: 1 !important; }
+
+html[data-font-size='large'] .text-xs { font-size: 0.82rem !important; line-height: 1.15rem !important; }
+html[data-font-size='large'] .text-sm { font-size: 0.98rem !important; line-height: 1.45rem !important; }
+html[data-font-size='large'] .text-base { font-size: 1.12rem !important; line-height: 1.65rem !important; }
+html[data-font-size='large'] .text-lg { font-size: 1.28rem !important; line-height: 1.85rem !important; }
+html[data-font-size='large'] .text-xl { font-size: 1.45rem !important; line-height: 2rem !important; }
+html[data-font-size='large'] .text-2xl { font-size: 1.75rem !important; line-height: 2.2rem !important; }
+html[data-font-size='large'] .text-3xl { font-size: 2.15rem !important; line-height: 2.45rem !important; }
+html[data-font-size='large'] .text-4xl { font-size: 2.7rem !important; line-height: 2.95rem !important; }
+html[data-font-size='large'] .text-5xl { font-size: 3.35rem !important; line-height: 1.05 !important; }
+html[data-font-size='large'] .text-6xl { font-size: 4.25rem !important; line-height: 1 !important; }
+
+html[data-font-size='xlarge'] .text-xs { font-size: 0.9rem !important; line-height: 1.25rem !important; }
+html[data-font-size='xlarge'] .text-sm { font-size: 1.08rem !important; line-height: 1.55rem !important; }
+html[data-font-size='xlarge'] .text-base { font-size: 1.25rem !important; line-height: 1.8rem !important; }
+html[data-font-size='xlarge'] .text-lg { font-size: 1.45rem !important; line-height: 2.05rem !important; }
+html[data-font-size='xlarge'] .text-xl { font-size: 1.65rem !important; line-height: 2.2rem !important; }
+html[data-font-size='xlarge'] .text-2xl { font-size: 2rem !important; line-height: 2.45rem !important; }
+html[data-font-size='xlarge'] .text-3xl { font-size: 2.45rem !important; line-height: 2.75rem !important; }
+html[data-font-size='xlarge'] .text-4xl { font-size: 3.05rem !important; line-height: 3.3rem !important; }
+html[data-font-size='xlarge'] .text-5xl { font-size: 3.75rem !important; line-height: 1.05 !important; }
+html[data-font-size='xlarge'] .text-6xl { font-size: 4.7rem !important; line-height: 1 !important; }
 
 /* Hilangkan tooltip global */
 *[title] {

@@ -43,7 +43,7 @@
                     </span>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="text-xs text-gray-500">{{ complaint.created_at }}</div>
+                    <div class="text-xs text-gray-500">{{ formatDateTime(complaint.created_at) }}</div>
                   </td>
                   <td class="px-6 py-4 text-right">
                     <Link :href="`/admin/complaints/${complaint.id}`" class="text-orange-600 hover:text-orange-800 text-sm">
@@ -70,4 +70,23 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 defineProps({
   complaints: { type: Object, default: () => ({ data: [] }) },
 });
+
+const formatDateTime = (dateString) => {
+  if (!dateString) return '-';
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Jakarta',
+    timeZoneName: 'short',
+  }).format(date);
+};
 </script>

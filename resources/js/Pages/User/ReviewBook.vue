@@ -74,6 +74,45 @@
               </div>
             </div>
 
+            <div>
+              <label class="mb-3 block text-sm font-bold text-slate-900">Lampirkan Foto (Opsional)</label>
+              <div class="relative">
+                <input
+                  ref="fileInput"
+                  type="file"
+                  @change="handleImageUpload"
+                  accept="image/*"
+                  class="sr-only"
+                />
+                <div
+                  @click="$refs.fileInput.click()"
+                  class="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-all"
+                  :class="imagePreview ? 'border-orange-400 bg-orange-50' : 'bg-slate-50'"
+                >
+                  <div v-if="!imagePreview" class="py-4">
+                    <svg class="mx-auto h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="mt-2 text-sm font-semibold text-slate-700">Klik untuk memilih gambar</p>
+                    <p class="text-xs text-slate-500 mt-1">JPG, PNG, atau WebP (Maks. 2MB)</p>
+                  </div>
+                  <div v-else class="relative">
+                    <img :src="imagePreview" class="w-full h-48 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      @click.stop="removeImage"
+                      class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p v-if="form.errors.image" class="mt-2 text-sm font-semibold text-red-600">{{ form.errors.image }}</p>
+            </div>
+
             <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
               <Link :href="`/books/${book.id}`" class="inline-flex justify-center rounded-lg border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
                 Batal
@@ -110,16 +149,63 @@ const props = defineProps({
 });
 
 const hoveredRating = ref(0);
+const imagePreview = ref(null);
+const fileInput = ref(null);
+
 const form = useForm({
   book_id: props.book.id,
   rating: props.existingReview?.rating || 5,
-  comment: props.existingReview?.comment || ''
+  comment: props.existingReview?.comment || '',
+  image: null
 });
 
 const displayRating = computed(() => hoveredRating.value || form.rating);
 
+function handleImageUpload(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    form.setError('image', 'File harus berupa gambar');
+    return;
+  }
+
+  // Validate file size (2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    form.setError('image', 'Ukuran gambar maksimal 2MB');
+    return;
+  }
+
+  form.image = file;
+
+  // Preview image
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imagePreview.value = e.target?.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  form.image = null;
+  imagePreview.value = null;
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
+}
+
 function submitReview() {
-  form.post(route('dashboard.reviews.store'), {
+  const formData = new FormData();
+  formData.append('book_id', form.book_id);
+  formData.append('rating', form.rating);
+  formData.append('comment', form.comment || '');
+  
+  if (form.image) {
+    formData.append('image', form.image);
+  }
+
+  router.post(route('dashboard.reviews.store'), formData, {
     preserveScroll: true,
     onSuccess: () => {
       Swal.fire({
@@ -128,6 +214,11 @@ function submitReview() {
         icon: 'success',
         confirmButtonColor: '#ea580c'
       }).then(() => router.visit(`/books/${props.book.id}`));
+    },
+    onError: (errors) => {
+      if (errors.image) {
+        form.setError('image', errors.image);
+      }
     }
   });
 }

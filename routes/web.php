@@ -12,6 +12,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\LiteracyEventController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ScanBorrowController;
+use App\Http\Controllers\FeedbackController;
 use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\Complaint;
@@ -83,6 +85,21 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| FEEDBACK ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::get('/feedback', [FeedbackController::class, 'show'])->name('feedback.show');
+Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+
+/*
+|--------------------------------------------------------------------------
+| PUBLIC API ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::get('/api/books/{bookId}/borrow-history', [BorrowController::class, 'getBorrowHistory'])->name('books.borrow-history');
+
+/*
+|--------------------------------------------------------------------------
 | ADMIN ROUTES
 |--------------------------------------------------------------------------
 */
@@ -128,13 +145,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
     Route::delete('/reviews/{review}', [AdminController::class, 'destroyReview'])->name('reviews.destroy');
     
-    // Complaints
+    // Complaints & Suggestions
     Route::get('/complaints', [AdminController::class, 'complaints'])->name('complaints');
+    Route::get('/suggestions', [AdminController::class, 'complaints'])->name('suggestions'); // Same as complaints (unified)
     Route::get('/complaints/{complaint}', [AdminController::class, 'showComplaint'])->name('complaints.show');
     Route::post('/complaints/{complaint}/resolve', [AdminController::class, 'resolveComplaint'])->name('complaints.resolve');
-    
-    // Suggestions
-    Route::get('/suggestions', [AdminController::class, 'suggestions'])->name('suggestions');
     Route::post('/suggestions/{suggestion}/update', [AdminController::class, 'updateSuggestionStatus'])->name('suggestions.update');
     
     // Activity Logs
@@ -659,6 +674,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             'book_id' => 'required|exists:books,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1500',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $book = Book::where('status', 'approved')->findOrFail($validated['book_id']);
@@ -670,11 +686,17 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
 
         abort_unless($hasReturnedBorrow, 403);
 
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('reviews', 'public');
+        }
+
         Review::updateOrCreate(
             ['user_id' => Auth::id(), 'book_id' => $book->id],
             [
                 'rating' => $validated['rating'],
                 'comment' => $validated['comment'] ?? null,
+                'image_path' => $imagePath,
             ]
         );
 
@@ -706,6 +728,12 @@ Route::middleware('auth')->group(function () {
     // Profile Photo Routes
     Route::post('/profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'destroyProfilePhoto'])->name('profile.photo.destroy');
+
+    Route::middleware(['verified', 'approved'])->group(function () {
+        Route::get('/scan-buku', [ScanBorrowController::class, 'index'])->name('scan-borrow.index');
+        Route::post('/scan-buku/lookup', [ScanBorrowController::class, 'lookup'])->name('scan-borrow.lookup');
+        Route::post('/scan-buku/pinjam', [ScanBorrowController::class, 'store'])->name('scan-borrow.store');
+    });
 });
 
 /*

@@ -140,6 +140,7 @@ class AdminController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'isbn' => 'required|string|unique:books',
+            'barcode_code' => 'nullable|string|max:255|unique:books,barcode_code',
             'category' => 'required|string',
             'publisher' => 'nullable|string',
             'year' => 'nullable|integer',
@@ -178,6 +179,7 @@ class AdminController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'isbn' => 'required|string|unique:books,isbn,' . $book->id,
+            'barcode_code' => 'nullable|string|max:255|unique:books,barcode_code,' . $book->id,
             'category' => 'required|string',
             'publisher' => 'nullable|string',
             'year' => 'nullable|integer',
@@ -348,47 +350,65 @@ class AdminController extends Controller
         return back()->with('success', 'Review dihapus');
     }
 
-    // Complaints Management
+    // Complaints & Suggestions Management (Unified)
     public function complaints()
     {
-        $complaints = Complaint::with('user')->latest()->paginate(10);
+        $complaints = Complaint::with('user')->latest()->get();
+        $suggestions = Suggestion::with('user')->latest()->get();
 
-        return Inertia::render('Admin/Complaints/Index', [
+        return Inertia::render('Admin/FeedbackIndex', [
             'complaints' => $complaints,
+            'suggestions' => $suggestions,
         ]);
     }
 
     public function showComplaint(Complaint $complaint)
     {
-        return Inertia::render('Admin/ComplaintDetail', [
+        return Inertia::render('Admin/Complaints/Show', [
             'complaint' => $complaint,
         ]);
     }
 
-    public function resolveComplaint(Complaint $complaint)
+    public function resolveComplaint(Request $request, Complaint $complaint)
     {
-        $complaint->update(['status' => 'resolved']);
-        Activity::log(Auth::id(), 'update', "Menyelesaikan keluhan dari: {$complaint->user?->name}");
+        $validated = $request->validate([
+            'status' => 'required|in:pending,reviewed,resolved,rejected',
+            'admin_response' => 'required|string|max:1000',
+        ]);
 
-        return back()->with('success', 'Keluhan diselesaikan');
+        $complaint->update([
+            'status' => $validated['status'],
+            'admin_response' => $validated['admin_response'],
+            'handled_by' => Auth::id(),
+        ]);
+
+        Activity::log(Auth::id(), 'update', "Mengelola keluhan dari: {$complaint->user?->name}");
+
+        return back()->with('success', 'Keluhan berhasil diproses');
     }
 
-    // Suggestions Management
+    // Suggestions Management (now unified with complaints)
     public function suggestions()
     {
-        $suggestions = Suggestion::latest()->paginate(10);
-
-        return Inertia::render('Admin/Suggestions/Index', [
-            'suggestions' => $suggestions,
-        ]);
+        // Redirect to complaints (unified page)
+        return $this->complaints();
     }
 
-    public function updateSuggestionStatus(Suggestion $suggestion)
+    public function updateSuggestionStatus(Request $request, Suggestion $suggestion)
     {
-        $suggestion->update(['status' => 'processed']);
+        $validated = $request->validate([
+            'status' => 'required|in:pending,reviewed,implemented,rejected',
+            'admin_note' => 'nullable|string|max:1000',
+        ]);
+
+        $suggestion->update([
+            'status' => $validated['status'],
+            'admin_note' => $validated['admin_note'] ?? $suggestion->admin_note,
+        ]);
+
         Activity::log(Auth::id(), 'update', "Memproses saran dari: {$suggestion->user?->name}");
 
-        return back()->with('success', 'Saran diproses');
+        return back()->with('success', 'Saran berhasil diproses');
     }
 
     // Late Returns
@@ -608,6 +628,14 @@ public function pendingPayments()
         ->with(['user', 'book'])
         ->orderBy('updated_at', 'desc')
         ->paginate(20);
+
+    $borrows->getCollection()->transform(function ($borrow) {
+        $borrow->late_fee = (float) ($borrow->late_fee ?? 0);
+        $borrow->additional_fine = (float) ($borrow->additional_fine ?? 0);
+        $borrow->total_fine = $borrow->late_fee + $borrow->additional_fine;
+
+        return $borrow;
+    });
 
     return Inertia::render('Admin/Payments/PendingPayments', [
         'borrows' => $borrows,

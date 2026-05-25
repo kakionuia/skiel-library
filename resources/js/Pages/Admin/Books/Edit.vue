@@ -15,6 +15,7 @@ const form = ref({
   publisher: props.book.publisher || '',
   year: props.book.year || new Date().getFullYear(),
   isbn: props.book.isbn || '',
+  barcode_code: props.book.barcode_code || '',
   category: props.book.category || '',
   quantity: props.book.quantity || 1,
   available_quantity: props.book.available_quantity || 1,
@@ -127,6 +128,20 @@ async function submitForm() {
                 <p v-if="errors.isbn" class="text-rose-500 text-xs mt-1">{{ errors.isbn }}</p>
               </div>
 
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kode Barcode</label>
+                <input
+                  v-model="form.barcode_code"
+                  type="text"
+                  placeholder="Contoh: 400/SKIE/senibersikapbodoamat"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-slate-300 font-mono"
+                  :class="{ 'border-rose-400 focus:ring-rose-500/20 focus:border-rose-500': errors.barcode_code }"
+                />
+                <p v-if="errors.barcode_code" class="text-rose-500 text-xs mt-1">{{ errors.barcode_code }}</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kategori <span class="text-rose-500">*</span></label>
                 <select 

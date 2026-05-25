@@ -449,13 +449,20 @@
           class="flex flex-col h-full"
         >
           <!-- Image Container -->
-          <div class="relative mb-5 overflow-hidden flex-shrink-0" style="height: 200px;">
+          <div class="relative mb-5 overflow-hidden flex-shrink-0 bg-gray-100" style="height: 200px;">
             <img 
+              v-if="getArticleImage(item.featured_image)"
               :src="getArticleImage(item.featured_image)" 
               class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
               :alt="item.title"
-              @error="(e) => e.target.src = 'https://via.placeholder.com/400x240?text=No+Image'"
+              @error="(e) => e.target.style.display = 'none'"
             />
+            <!-- Fallback placeholder -->
+            <div v-if="!getArticleImage(item.featured_image)" class="w-full h-full flex items-center justify-center bg-gray-200">
+              <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" />
+              </svg>
+            </div>
           </div>
           
           <!-- Category Badge -->
@@ -492,17 +499,19 @@
       ></button>
     </div>
   </div>
+</section>
 
-  <!-- CTA Formulir -->
-  <div class="mt-24 bg-orange-500 rounded-3xl p-10 md:p-14 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-2xl">
+<!-- CTA Formulir -->
+<section class="max-w-7xl mx-auto px-4 py-12 md:py-24 font-sans">
+  <div class="mt-12 bg-orange-500 rounded-3xl p-10 md:p-14 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-2xl">
     <div class="z-10 text-center md:text-left">
       <h2 class="text-3xl md:text-4xl font-black text-white mb-8 leading-tight">
-        Punya pertanyaan dan saran<br class="hidden md:block"> untuk kami kedepannya?
+        Punya pertanyaan, saran, keluhan<br class="hidden md:block"> untuk kami?
       </h2>
-      <a href="#" class="bg-white text-gray-800 px-10 py-4 rounded-full font-black flex items-center gap-4 w-fit mx-auto md:mx-0 hover:shadow-lg transition transform hover:-translate-y-1">
+      <Link :href="route('feedback.show')" class="bg-white text-gray-800 px-10 py-4 rounded-full font-black flex items-center gap-4 w-fit mx-auto md:mx-0 hover:shadow-lg transition transform hover:-translate-y-1">
         BUAT FORMULIR
         <span class="bg-orange-500 text-white rounded-full w-7 h-7 flex items-center justify-center">→</span>
-      </a>
+      </Link>
     </div>
 
     <div class="mt-12 md:mt-0 relative group">
@@ -590,7 +599,7 @@ const historyItems = [
 const badges = ['🎖 Pembaca Aktif', '🏅 Tepat Waktu', '🎟 Event Access'];
 
 const fiturList = [
-  { no: '01', title: 'Scan barcode buku',                  desc: 'Foto dan scan barcode yang ada di buku dengan kamera handphone untuk peminjaman buku secara cepat tanpa antre di meja petugas.' },
+  { no: '01', title: 'Scan barcode buku',                   desc: 'Foto dan scan barcode yang ada di buku dengan kamera handphone untuk peminjaman buku secara cepat tanpa antre di meja petugas.' },
   { no: '02', title: 'Pendataan peminjaman & pengembalian', desc: 'Seluruh data peminjaman dan pengembalian buku tercatat otomatis dalam sistem, mudah dicek kapan saja dan di mana saja.' },
   { no: '03', title: 'Notifikasi buku tersedia',            desc: 'Tandai buku yang sedang tidak tersedia, dan kamu akan mendapat notifikasi segera setelah buku itu bisa dipinjam kembali.' },
   { no: '04', title: 'Riwayat & tenggat peminjaman',        desc: 'Pantau semua buku yang pernah kamu pinjam, lengkap dengan tanggal peminjaman dan tenggat pengembalian agar tidak terlambat.' },
@@ -606,7 +615,7 @@ const currentIndex = ref(0);
 
 // Gunakan data dari props (dari controller) langsung
 const getArticleImage = (path) => {
-  if (!path) return 'https://via.placeholder.com/400x240?text=No+Image';
+  if (!path) return null; // Gunakan v-if untuk handle fallback di template
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
   if (path.startsWith('storage/')) return `/${path}`;
   if (path.startsWith('/')) return path;

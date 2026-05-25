@@ -55,6 +55,12 @@
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Kode Barcode</label>
+              <input v-model="form.barcode_code" type="text" placeholder="400/SKIE/senibersikapbodoamat" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium font-mono">
+              <p class="text-[10px] text-slate-400 mt-2">Isi sesuai kode yang terbaca dari barcode buku.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Tahun Terbit</label>
               <input v-model="form.year" type="number" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
@@ -117,6 +123,7 @@ const form = ref({
   publisher: '',
   year: new Date().getFullYear(),
   isbn: '',
+  barcode_code: '',
   category: '',
   quantity: 1,
   description: '',
@@ -143,6 +150,7 @@ const createBook = () => {
   formData.append('publisher', form.value.publisher);
   formData.append('year', form.value.year);
   formData.append('isbn', form.value.isbn);
+  formData.append('barcode_code', form.value.barcode_code);
   formData.append('category', form.value.category);
   formData.append('quantity', form.value.quantity);
   formData.append('description', form.value.description);

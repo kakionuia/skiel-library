@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Review extends Model
 {
@@ -22,6 +23,16 @@ class Review extends Model
     ];
 
     protected $withCount = ['likes', 'comments', 'bookmarks'];
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        if ($this->image_path) {
+            return Storage::disk('public')->url($this->image_path);
+        }
+        return null;
+    }
 
     public function user()
     {

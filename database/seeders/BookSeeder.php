@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Book;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class BookSeeder extends Seeder
 {
@@ -18,12 +17,13 @@ class BookSeeder extends Seeder
         $adminId = $admin ? $admin->id : 1;
 
         // 2. Masukkan data buku dengan semua kolom yang diminta database
-        Book::firstOrCreate(
+        Book::updateOrCreate(
             ['isbn' => '978-0-13-110362-7'],
             [
-                'book_id' => 'BK-' . strtoupper(Str::random(8)),
+                'book_id' => 'BK-C-PROGRAMMING',
                 'title' => 'The C Programming Language',
                 'author' => 'Brian W. Kernighan, Dennis M. Ritchie',
+                'barcode_code' => '400/SKIE/thecprogramminglanguage',
                 'category' => 'Programming',
                 'status' => 'approved', // Pakai 'approved' sesuai logic controller kamu
                 'quantity' => 3,
@@ -32,16 +32,32 @@ class BookSeeder extends Seeder
             ]
         );
 
-        Book::firstOrCreate(
+        Book::updateOrCreate(
             ['isbn' => '978-0-201-63361-0'],
             [
-                'book_id' => 'BK-' . strtoupper(Str::random(8)),
+                'book_id' => 'BK-DESIGN-PATTERNS',
                 'title' => 'Design Patterns',
                 'author' => 'Gang of Four',
+                'barcode_code' => '400/SKIE/designpatterns',
                 'category' => 'Programming',
                 'status' => 'approved',
                 'quantity' => 2,
                 'available_quantity' => 2,
+                'created_by' => $adminId,
+            ]
+        );
+
+        Book::updateOrCreate(
+            ['isbn' => '978-602-452-698-6'],
+            [
+                'book_id' => 'BK-SENI-BERSIKAP',
+                'title' => 'Seni Bersikap Bodo Amat',
+                'author' => 'Mark Manson',
+                'barcode_code' => '400/SKIE/senibersikapbodoamat',
+                'category' => 'Non Fiksi',
+                'status' => 'approved',
+                'quantity' => 20,
+                'available_quantity' => 20,
                 'created_by' => $adminId,
             ]
         );

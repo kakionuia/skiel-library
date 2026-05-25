@@ -58,7 +58,7 @@
             </p>
 
             <div v-if="review.image_path" class="mt-3 rounded-xl overflow-hidden border border-slate-200 max-h-80 bg-white">
-              <img :src="review.image_path" :alt="review.user.name" class="w-full h-full object-cover" />
+              <img :src="review.image_url" :alt="review.user.name" class="w-full h-full object-cover" />
             </div>
 
             <div class="flex items-center justify-between max-w-md mt-3 -ml-2 text-slate-500">
@@ -240,7 +240,7 @@
                     </button>
                   </div>
                   <p class="text-xs text-slate-900 mt-0.5 leading-normal font-normal whitespace-pre-wrap">{{ comment.comment }}</p>
-                  <img v-if="comment.image_path" :src="comment.image_path" class="mt-2 rounded-md max-w-xs h-auto border border-slate-200" />
+                  <img v-if="comment.image_path" :src="comment.image_url" class="mt-2 rounded-md max-w-xs h-auto border border-slate-200" />
                 </div>
               </div>
             </div>

@@ -77,7 +77,7 @@
           <div class="px-5 py-4 flex-1">
             <p class="text-sm text-slate-700 leading-relaxed line-clamp-4">{{ bookmark.review.comment || 'Tidak ada komentar.' }}</p>
             <div v-if="bookmark.review.image_path" class="mt-3 rounded-lg overflow-hidden bg-slate-100">
-              <img :src="bookmark.review.image_path" :alt="bookmark.review.user.name" class="w-full h-32 object-cover" />
+              <img :src="bookmark.review.image_url" :alt="bookmark.review.user.name" class="w-full h-32 object-cover" />
             </div>
           </div>
 

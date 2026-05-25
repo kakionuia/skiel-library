@@ -3,7 +3,7 @@
     <!-- ========== HERO SECTION ========== -->
     <section
       ref="heroSection"
-      class="relative min-h-[600px] flex items-center overflow-hidden bg-gradient-to-br from-orange-700 to-orange-500 text-white"
+      class="relative min-h-[600px] flex items-center overflow-hidden bg-gradient-to-br from-orange-700 to-orange-500 text-white justify-center items-center"
     >
       <div class="absolute inset-0 z-0">
         <div class="absolute -left-20 -top-20 h-[500px] w-[500px] rounded-full bg-white/10 blur-[120px]" />
@@ -34,29 +34,15 @@
               Tingkatkan literasi digital dan temukan referensi terbaik untuk mendukung perjalanan akademikmu.
             </p>
 
-            <div class="relative max-w-md group">
-              <input
-                v-model="bookSearch"
-                type="text"
-                placeholder="Cari judul buku, penulis, atau kategori..."
-                class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-orange-100 focus:bg-white/20 focus:border-white/40 focus:ring-0 transition-all outline-none backdrop-blur-md shadow-inner"
-              />
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-orange-200 group-focus-within:text-white transition-colors" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
+            
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <button
               v-for="action in quickActions"
               :key="action.label"
+              type="button"
+              @click="handleQuickAction(action)"
               class="group relative flex flex-col items-start gap-4 rounded-3xl bg-white p-6 text-left shadow-xl shadow-orange-900/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden"
             >
               <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-500">
@@ -80,206 +66,241 @@
       </div>
     </section>
 
-    <!-- ========== STICKY NAVBAR ========== -->
-    <nav
-      ref="navbarRef"
-      class="transition-all duration-300 w-full z-50 bg-white"
-      :class="{ 'sticky top-0 shadow-md': navbarSticky }"
-    >
-      <div class="mx-auto max-w-7xl px-4 md:px-8 py-4 flex justify-between items-center gap-8 md:gap-5">
-        <!-- Hamburger Button Mobile -->
-        <button @click="toggleSidebar" class=" text-orange-500 p-1 transition-transform active:scale-90">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+   <nav
+    ref="navbarRef"
+    class="w-full z-40 bg-white border-b border-slate-100 transition-all duration-300"
+    :class="{ 'sticky top-0 shadow-md': navbarSticky }"
+  >
+    <div class="mx-auto max-w-7xl px-4 md:px-8 py-4 flex justify-between items-center gap-4 md:gap-5">
+      
+      <!-- Tombol Toggle Sidebar -->
+      <button 
+        @click="toggleSidebar" 
+        class="text-orange-500 p-1.5 rounded-xl hover:bg-orange-50 transition-all active:scale-90"
+        aria-label="Menu Utama"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <!-- Desktop Search Section -->
+      <div class="hidden md:flex items-center gap-2.5 w-full max-w-2xl">
+        <button
+          type="button"
+          @click="openScanBorrow"
+          class="shrink-0 bg-white border border-orange-500 text-orange-500 p-2.5 rounded-xl shadow-xs hover:bg-orange-50 transition-all active:scale-95"
+          title="Scan barcode buku"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M4 5q-.825 0-1.412.587Q2 6.175 2 7v10q0 .825.588 1.413Q3.175 19 4 19h16q.825 0 1.413-.587Q22 17.825 22 17V7q0-.825-.587-1.413Q20.825 5 20 5h-3.15L15.45 3H8.55L7.15 5ZM12 17q-2.075 0-3.537-1.463Q7 14.075 7 12q0-2.075 1.463-3.537Q9.925 7 12 7q2.075 0 3.538 1.463Q17 9.925 17 12q0 2.075-1.462 3.537Q14.075 17 12 17Zm0-2q1.25 0 2.125-.875T15 12q0-1.25-.875-2.125T12 9q-1.25 0-2.125.875T9 12q0 1.25.875 2.125T12 15Z" />
           </svg>
         </button>
 
-
-        <!-- Scan & Search - Hidden on mobile -->
-        <div class="hidden md:flex gap-2 w-full">
-          <button class="flex-shrink-0 bg-white border border-orange-500 text-orange-500 p-2.5 rounded-2xl shadow-lg shadow-black/5 hover:bg-orange-50 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M4 5q-.825 0-1.412.587Q2 6.175 2 7v10q0 .825.588 1.413Q3.175 19 4 19h16q.825 0 1.413-.587Q22 17.825 22 17V7q0-.825-.587-1.413Q20.825 5 20 5h-3.15L15.45 3H8.55L7.15 5ZM12 17q-2.075 0-3.537-1.463Q7 14.075 7 12q0-2.075 1.463-3.537Q9.925 7 12 7q2.075 0 3.538 1.463Q17 9.925 17 12q0 2.075-1.462 3.537Q14.075 17 12 17Zm0-2q1.25 0 2.125-.875T15 12q0-1.25-.875-2.125T12 9q-1.25 0-2.125.875T9 12q0 1.25.875 2.125T12 15Z" />
-            </svg>
-          </button>
-
-          <div class="flex-1 flex gap-2">
-            <div class="relative flex-1">
-              <input
-                v-model="bookSearch"
-                type="text"
-                placeholder="Cari buku, penulis, dan tahun terbit"
-                class="w-full border border-orange-500 rounded-2xl py-3 px-6 shadow-lg shadow-black/5 focus:ring-0 outline-none text-slate-400 placeholder:text-slate-300 transition"
-              />
-            </div>
-            <button @click="triggerSearch" class="bg-orange-500 text-white p-3 rounded-2xl shadow-lg shadow-black/5 hover:bg-orange-700 transition-all active:scale-95">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Mobile Search Button -->
-        <button @click="toggleMobileSearch" class="md:hidden text-orange-500 p-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </button>
-
-        <Link href="/profile" class="flex-shrink-0">
-          <img :src="userAvatar" class="h-10 w-10 md:h-12 md:w-12 rounded-full border-2 border-slate-100 object-cover hover:scale-105 transition shadow-sm" alt="Profile" />
-        </Link>
-      </div>
-
-      <!-- Mobile Search Bar (Dropdown) -->
-      <div v-if="showMobileSearch" class="md:hidden px-4 pb-4">
-        <div class="flex gap-2">
+        <div class="flex-1 flex gap-2">
           <div class="relative flex-1">
             <input
               v-model="bookSearch"
               type="text"
-              placeholder="Cari buku, penulis, atau kategori..."
-              class="w-full border border-orange-500 rounded-2xl py-3 px-4 focus:ring-0 outline-none text-slate-800 placeholder:text-slate-400"
-              autofocus
+              placeholder="Cari buku, penulis, dan tahun terbit..."
+              class="w-full border border-orange-500 rounded-xl py-2.5 px-4 shadow-3xs focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-hidden text-slate-800 placeholder:text-slate-400 transition"
             />
           </div>
-          <button @click="triggerSearch" class="bg-orange-500 text-white px-4 rounded-2xl">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <button 
+            @click="triggerSearch" 
+            class="bg-orange-500 text-white px-5 rounded-xl shadow-xs hover:bg-orange-600 transition-all active:scale-95"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
         </div>
       </div>
 
-      <!-- Category Bar - Responsive -->
-      <div class="bg-orange-500 shadow-md">
-        <div class="mx-auto max-w-7xl px-4 py-3">
-          <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap text-white font-bold text-sm no-scrollbar">
-            <button @click="setActiveCategory('')" class="transition-opacity px-2 py-1 rounded-lg hover:bg-white/10 flex-shrink-0" :class="activeCategory === '' ? 'opacity-100 bg-white/20' : 'opacity-80 hover:opacity-100'">
-              Semua Buku
-            </button>
-            <button
-              v-for="category in allCategories"
-              :key="category"
-              @click="setActiveCategory(category)"
-              class="transition-opacity px-2 py-1 rounded-lg hover:bg-white/10 flex-shrink-0"
-              :class="activeCategory === category ? 'opacity-100 bg-white/20' : 'opacity-80 hover:opacity-100'"
-            >
-              {{ category }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- ========== SIDEBAR (Mobile) ========== -->
-    <div 
-      v-if="isSidebarOpen" 
-      class="fixed inset-0 z-50"
-    >
-      <!-- Overlay dengan Backdrop Blur yang Lembut -->
-      <div 
-        class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
-        @click="closeSidebar"
-      ></div>
-      
-      <!-- Sidebar Panel -->
-      <div 
-        class="absolute left-0 top-0 h-full w-80 bg-white shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-out"
-        @click.stop
+      <!-- Mobile Search Button -->
+      <button 
+        @click="toggleMobileSearch" 
+        class="md:hidden text-orange-500 p-2 rounded-xl hover:bg-orange-50 transition active:scale-95"
+        aria-label="Cari buku"
       >
-        <!-- Upper Section -->
-        <div>
-          <!-- Sidebar Header: Lebih Clean & Elegan -->
-          <div class="relative overflow-hidden bg-gradient-to-br from-orange-600 to-orange-500 p-6 text-white">
-            <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl" />
-            <div class="relative z-10 flex items-center gap-4">
-              <img 
-                :src="userAvatar" 
-                class="h-14 w-14 rounded-full border-2 border-white/80 object-cover shadow-md" 
-                alt="User Avatar"
-              />
-              <div class="space-y-0.5">
-                <h3 class="font-bold text-base tracking-tight leading-tight line-clamp-1">{{ user.name }}</h3>
-                <p class="text-xs text-orange-100/90 font-medium tracking-wide truncate">
-                  {{ user.email || 'student@skie.sch.id' }}
-                </p>
-              </div>
-            </div>
-          </div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
 
-          <!-- Sidebar Navigation Menu -->
-          <nav class="p-4 space-y-1">
-            <Link 
-              href="/dashboard" 
-              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span class="font-semibold text-sm tracking-wide">Beranda</span>
-            </Link>
+      <!-- User Avatar / Profile Link -->
+      <Link href="/profile" class="shrink-0 rounded-full focus:outline-hidden focus:ring-2 focus:ring-orange-500/40">
+        <img 
+          :src="userAvatar" 
+          class="h-10 w-10 md:h-11 md:w-11 rounded-full border-2 border-slate-100 object-cover hover:scale-105 transition duration-200 shadow-xs" 
+          alt="Profile" 
+        />
+      </Link>
+    </div>
 
-            <Link 
-              href="/my-loans" 
-              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              <span class="font-semibold text-sm tracking-wide">Rak Buku Saya</span>
-            </Link>
-
-            <Link 
-              href="/loans" 
-              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="font-semibold text-sm tracking-wide">Riwayat Peminjaman</span>
-            </Link>
-
-            <Link 
-              href="/services" 
-              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-              <span class="font-semibold text-sm tracking-wide">Layanan</span>
-            </Link>
-
-            <Link 
-              href="/help" 
-              class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="font-semibold text-sm tracking-wide">Bantuan</span>
-            </Link>
-          </nav>
+    <!-- Mobile Search Bar (Dropdown) -->
+    <div v-if="showMobileSearch" class="md:hidden px-4 pb-4 transition-all animate-fadeIn">
+      <div class="flex gap-2">
+        <div class="relative flex-1">
+          <input
+            v-model="bookSearch"
+            type="text"
+            placeholder="Cari buku, penulis, atau kategori..."
+            class="w-full border border-orange-500 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-hidden text-slate-800 placeholder:text-slate-400"
+            autofocus
+          />
         </div>
+        <button @click="triggerSearch" class="bg-orange-500 text-white px-4 rounded-xl active:scale-95 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      </div>
+    </div>
 
-        <!-- Sidebar Footer: Tombol Keluar yang Bersih -->
-        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+    <!-- Category Bar -->
+    <div class="bg-orange-500 shadow-inner">
+      <div class="mx-auto max-w-7xl px-4 md:px-8 py-2.5">
+        <div class="flex items-center gap-3 overflow-x-auto whitespace-nowrap text-white font-bold text-xs tracking-wide no-scrollbar">
           <button 
-            @click="logout" 
-            class="flex items-center gap-3.5 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 font-semibold text-sm tracking-wide"
+            @click="setActiveCategory('')" 
+            class="transition duration-150 px-3 py-1.5 rounded-lg font-extrabold uppercase shrink-0" 
+            :class="activeCategory === '' ? 'bg-white/20 text-white' : 'opacity-80 hover:opacity-100 hover:bg-white/10'"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Keluar Account
+            Semua Buku
+          </button>
+          <button
+            v-for="category in allCategories"
+            :key="category"
+            @click="setActiveCategory(category)"
+            class="transition duration-150 px-3 py-1.5 rounded-lg font-extrabold uppercase shrink-0"
+            :class="activeCategory === category ? 'bg-white/20 text-white' : 'opacity-80 hover:opacity-100 hover:bg-white/10'"
+          >
+            {{ category }}
           </button>
         </div>
       </div>
     </div>
+  </nav>
+
+  <!-- ========== SIDEBAR DRAWER ========== -->
+  <div v-if="isSidebarOpen" class="fixed inset-0 z-50 overflow-hidden">
+    <!-- Backdrop Overlay (Fade-In) -->
+    <div 
+      class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ease-out animate-fadeIn"
+      @click="closeSidebar"
+    ></div>
+    
+    <!-- Sidebar Panel (Slide-In) -->
+    <div 
+      class="absolute left-0 top-0 h-full w-72 bg-white shadow-xl flex flex-col justify-between transition-transform duration-300 ease-out transform translate-x-0 animate-slideIn"
+      @click.stop
+    >
+      <!-- Upper Navigation Section -->
+      <div class="flex-1 overflow-y-auto no-scrollbar">
+        <!-- Sidebar Header (Clean White Version) -->
+        <div class="p-6 border-b border-slate-100 flex items-center gap-4 bg-white">
+          <img 
+            :src="userAvatar" 
+            class="h-11 w-11 rounded-full border border-slate-100 object-cover ring-2 ring-orange-500/10" 
+            alt="User Avatar"
+          />
+          <div class="min-w-0 flex-1">
+            <h3 class="font-semibold text-sm text-slate-800 tracking-tight truncate">{{ user.name }}</h3>
+            <p class="text-xs text-slate-400 truncate mt-0.5">
+              {{ user.email || 'student@skie.sch.id' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation Menu Links -->
+        <nav class="p-4 space-y-1">
+          <!-- Beranda -->
+          <Link 
+            href="/" 
+            class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:text-orange-500 hover:bg-slate-50 transition-all duration-200 group relative"
+          >
+            <!-- Aksen Garis Oranye Saat Hover / Aktif -->
+            <div class="absolute left-0 top-3 bottom-3 w-1 bg-orange-500 rounded-r-md opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span class="text-sm font-medium tracking-wide">Beranda</span>
+          </Link>
+
+          <!-- Rak Buku Saya -->
+          <Link 
+            href="/my-loans" 
+            class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:text-orange-500 hover:bg-slate-50 transition-all duration-200 group relative"
+          >
+            <div class="absolute left-0 top-3 bottom-3 w-1 bg-orange-500 rounded-r-md opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span class="text-sm font-medium tracking-wide">Rak Buku Saya</span>
+          </Link>
+
+          <!-- Riwayat Peminjaman -->
+          <Link 
+            href="/loans" 
+            class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:text-orange-500 hover:bg-slate-50 transition-all duration-200 group relative"
+          >
+            <div class="absolute left-0 top-3 bottom-3 w-1 bg-orange-500 rounded-r-md opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm font-medium tracking-wide">Riwayat Peminjaman</span>
+          </Link>
+
+          <!-- Layanan -->
+          <Link 
+            href="/services" 
+            class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:text-orange-500 hover:bg-slate-50 transition-all duration-200 group relative"
+          >
+            <div class="absolute left-0 top-3 bottom-3 w-1 bg-orange-500 rounded-r-md opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <span class="text-sm font-medium tracking-wide">Layanan</span>
+          </Link>
+
+          <!-- Bantuan -->
+          <Link 
+            href="/help" 
+            class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-600 hover:text-orange-500 hover:bg-slate-50 transition-all duration-200 group relative"
+          >
+            <div class="absolute left-0 top-3 bottom-3 w-1 bg-orange-500 rounded-r-md opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm font-medium tracking-wide">Bantuan</span>
+          </Link>
+        </nav>
+      </div>
+
+      <!-- Sidebar Footer Action (Clean Logout Button) -->
+      <div class="p-4 border-t border-slate-100 bg-white shrink-0">
+        <button 
+          @click="logout" 
+          class="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all duration-200 group"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-rose-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span class="text-sm font-medium tracking-wide">Keluar Akun</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
     <!-- ========== MAIN CONTENT ========== -->
     <main class="mx-auto max-w-7xl px-4 py-8 md:py-12">
-      <section class="space-y-16">
+      <section id="catalog-section" class="space-y-16 scroll-mt-28">
         <!-- Empty States -->
         <div v-if="availableBooks.length === 0" class="py-32 text-center">
           <div class="text-6xl mb-6">📚</div>
@@ -463,10 +484,10 @@ const props = defineProps({
 
 // QUICK ACTIONS
 const quickActions = [
-  { label: 'Scan QR', description: 'Pinjam via barcode', icon: QrCodeIcon },
-  { label: 'Katalog', description: 'Cari koleksi buku', icon: BookOpenIcon },
-  { label: 'Riwayat', description: 'Aktivitas baca kamu', icon: ClockIcon },
-  { label: 'Diskusi', description: 'Forum ulasan siswa', icon: ChatBubbleLeftRightIcon }
+  { label: 'Scan QR', description: 'Pinjam via barcode', icon: QrCodeIcon, routeName: 'scan-borrow.index' },
+  { label: 'Katalog', description: 'Cari koleksi buku', icon: BookOpenIcon, target: 'catalog' },
+  { label: 'Riwayat', description: 'Aktivitas baca kamu', icon: ClockIcon, href: '/my-loans' },
+  { label: 'Diskusi', description: 'Forum ulasan siswa', icon: ChatBubbleLeftRightIcon, href: '/reviews-showcase' }
 ];
 
 // BEST SELLER DATA
@@ -609,6 +630,26 @@ function triggerSearch() {
   Object.keys(visibleCountPerGroup).forEach(key => {
     delete visibleCountPerGroup[key];
   });
+}
+
+function handleQuickAction(action) {
+  if (action.routeName) {
+    router.visit(route(action.routeName));
+    return;
+  }
+
+  if (action.href) {
+    router.visit(action.href);
+    return;
+  }
+
+  if (action.target === 'catalog') {
+    document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function openScanBorrow() {
+  router.visit(route('scan-borrow.index'));
 }
 
 function toggleSidebar() {

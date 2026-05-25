@@ -42,7 +42,7 @@
                     <p class="text-sm text-gray-600 max-w-xs truncate">{{ suggestion.admin_note || '-' }}</p>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="text-xs text-gray-500">{{ suggestion.created_at }}</div>
+                    <div class="text-xs text-gray-500">{{ formatDateTime(suggestion.created_at) }}</div>
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex gap-2 justify-end">
@@ -76,6 +76,25 @@ import { confirmDialog, dangerConfirm } from '@/Utils/sweetAlert';
 defineProps({
   suggestions: { type: Object, default: () => ({ data: [] }) },
 });
+
+const formatDateTime = (dateString) => {
+  if (!dateString) return '-';
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Jakarta',
+    timeZoneName: 'short',
+  }).format(date);
+};
 
 const updateStatus = async (id, status) => {
   const isApproved = status === 'approved';

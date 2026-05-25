@@ -106,12 +106,12 @@
                   </div>
                   <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke-width="2" /></svg>
                 </Link>
-                <Link href="/admin/book-requests" class="flex items-center px-6 py-4 border-t border-gray-50 hover:bg-slate-50 transition-colors">
+                <Link href="/admin/book-submissions" class="flex items-center px-6 py-4 border-t border-gray-50 hover:bg-slate-50 transition-colors">
                   <div class="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center mr-4">
                     <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                   </div>
                   <div class="flex-1">
-                    <p class="text-sm font-bold text-slate-900">{{ stats.pendingBookRequests }} Permintaan</p>
+                    <p class="text-sm font-bold text-slate-900">{{ stats.pendingBookSubmissions }} Permintaan</p>
                     <p class="text-xs text-slate-500">Menunggu review admin</p>
                   </div>
                   <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke-width="2" /></svg>

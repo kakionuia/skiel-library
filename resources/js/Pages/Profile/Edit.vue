@@ -237,7 +237,7 @@ const formatCurrency = (value) => {
                             <Link 
                                 v-for="borrow in activeBorrows" 
                                 :key="borrow.id" 
-                                :href="route('books.index')" 
+                                :href="route('borrow.my-loans')"
                                 class="flex items-center justify-between p-3.5 rounded-xl border border-gray-200/70 bg-gray-50/40 hover:bg-orange-50/30 hover:border-orange-200/80 transition group"
                             >
                                 <div class="min-w-0 flex items-center gap-3">

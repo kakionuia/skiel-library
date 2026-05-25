@@ -14,6 +14,7 @@ const form = ref({
   publisher: '',
   year: new Date().getFullYear(),
   isbn: '',
+  barcode_code: '',
   category: '',
   quantity: 1,
   description: '',
@@ -113,6 +114,19 @@ async function submitForm() {
                 :class="{ 'border-red-500 focus:ring-red-500/20 focus:border-red-500': errors.isbn }"
               />
               <p v-if="errors.isbn" class="text-red-600 text-sm mt-1">{{ errors.isbn }}</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Kode Barcode Buku</label>
+              <input
+                v-model="form.barcode_code"
+                type="text"
+                placeholder="Contoh: 400/SKIE/senibersikapbodoamat"
+                class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all font-mono text-sm"
+                :class="{ 'border-red-500 focus:ring-red-500/20 focus:border-red-500': errors.barcode_code }"
+              />
+              <p v-if="errors.barcode_code" class="text-red-600 text-sm mt-1">{{ errors.barcode_code }}</p>
+              <p class="text-slate-500 text-xs mt-2">Kode ini harus sama persis dengan isi barcode yang ditempel di buku.</p>
             </div>
 
             <div>

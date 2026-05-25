@@ -9,7 +9,7 @@
           </svg>
           Kembali ke Rak Buku
         </Link>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight sm:text-4xl">📋 Laporan Kondisi Buku</h1>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight sm:text-4xl">Laporan Kondisi Buku</h1>
         <p class="text-slate-500 mt-2 text-sm sm:text-base">Verifikasi kondisi fisik buku sebelum melanjutkan prosedur penutupan administrasi pinjaman.</p>
       </div>
 
@@ -17,7 +17,7 @@
       <div class="bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-200/60 overflow-hidden mb-8">
         
         <!-- Book Info Section -->
-        <div class="bg-gradient-to-br from-orange-50/60 via-orange-50/30 to-transparent border-b border-slate-100 p-6 sm:p-8">
+        <div class="bg-white p-6 sm:p-8">
           <div class="flex flex-col sm:flex-row gap-6">
             <!-- Book Cover -->
             <div class="w-24 h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-orange-400 to-orange-500 shadow-md shadow-orange-500/20 flex items-center justify-center text-4xl shrink-0 mx-auto sm:mx-0">
@@ -176,16 +176,13 @@
                     class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 outline-none transition-all appearance-none text-sm font-medium text-slate-800"
                   >
                     <option value="">Pilih jenis kerusakan</option>
-                    <option value="lost">📚 Buku Hilang / Tidak Dikembalikan</option>
-                    <option value="wet">💧 Terkena Air / Lembab / Jamur</option>
-                    <option value="torn">✂️ Lembaran Robek / Hilang Sebagian</option>
-                    <option value="stained">🔴 Coretan / Noda Kopi / Kotoran</option>
-                    <option value="other">❓ Kerusakan Struktural Lainnya</option>
+                    <option value="lost">Buku Hilang / Tidak Dikembalikan</option>
+                    <option value="wet">Terkena Air / Lembab / Jamur</option>
+                    <option value="torn">Lembaran Robek / Hilang Sebagian</option>
+                    <option value="stained">Coretan / Noda Kopi / Kotoran</option>
+                    <option value="other">Kerusakan Struktural Lainnya</option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ReviewComment extends Model
 {
@@ -16,6 +17,16 @@ class ReviewComment extends Model
     ];
 
     public $timestamps = true;
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        if ($this->image_path) {
+            return Storage::disk('public')->url($this->image_path);
+        }
+        return null;
+    }
 
     public function user()
     {

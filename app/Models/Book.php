@@ -19,6 +19,7 @@ class Book extends Model
     'publisher', 
     'year', 
     'isbn', 
+    'barcode_code',
     'category', 
     'quantity', 
     'available_quantity', 

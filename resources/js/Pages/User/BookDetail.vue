@@ -93,7 +93,12 @@
             </div>
             <div>
               <span class="text-xs text-slate-400 block font-bold uppercase tracking-wider mb-1">Peminjaman</span>
-              <span class="font-bold text-slate-800">Telah Dipinjam {{ book.borrows_count || 0 }} kali</span>
+              <button 
+                @click="openBorrowHistoryModal"
+                class="font-bold text-slate-800 hover:text-[#D37B3B] hover:underline cursor-pointer transition-colors text-left"
+              >
+                Telah Dipinjam {{ book.borrows_count || 0 }} kali
+              </button>
             </div>
             <div>
               <span class="text-xs text-slate-400 block font-bold uppercase tracking-wider mb-1">Tahun Terbit</span>
@@ -211,12 +216,106 @@
       </div>
     </div>
 
+    <!-- Modal Riwayat Peminjam -->
+    <div v-if="showBorrowHistoryModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[70vh] overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-slate-200 flex-shrink-0">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">Riwayat Peminjam</h2>
+            <p class="text-sm text-slate-500 mt-1">{{ book.title }}</p>
+          </div>
+          <button 
+            @click="showBorrowHistoryModal = false"
+            class="text-slate-400 hover:text-slate-600 transition"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="overflow-y-auto flex-1">
+          <div v-if="borrowHistory.length > 0" class="divide-y divide-slate-100">
+            <div v-for="(history, index) in borrowHistory" :key="index" class="p-6 hover:bg-slate-50 transition">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Nama Peminjam</p>
+                  <p class="font-semibold text-slate-900">{{ history.user_name }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Kelas</p>
+                  <p class="font-semibold text-slate-900">{{ history.user_class }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Jurusan</p>
+                  <p class="font-semibold text-slate-900">{{ history.user_major }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Tanggal Pinjam</p>
+                  <p class="font-semibold text-slate-900">{{ formatDate(history.borrow_date) }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Tanggal Kembali</p>
+                  <p class="font-semibold text-slate-900">{{ history.return_date ? formatDate(history.return_date) : '(Masih Dipinjam)' }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Status</p>
+                  <span 
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
+                    :class="{
+                      'bg-blue-100 text-blue-700': history.status === 'pending',
+                      'bg-yellow-100 text-yellow-700': history.status === 'approved',
+                      'bg-purple-100 text-purple-700': history.status === 'borrowed',
+                      'bg-green-100 text-green-700': history.status === 'returned',
+                      'bg-red-100 text-red-700': history.status === 'rejected',
+                    }"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="{
+                      'bg-blue-500': history.status === 'pending',
+                      'bg-yellow-500': history.status === 'approved',
+                      'bg-purple-500': history.status === 'borrowed',
+                      'bg-green-500': history.status === 'returned',
+                      'bg-red-500': history.status === 'rejected',
+                    }"></span>
+                    {{ history.status === 'pending' ? 'Menunggu' : 
+                       history.status === 'approved' ? 'Disetujui' : 
+                       history.status === 'borrowed' ? 'Sedang Dipinjam' : 
+                       history.status === 'returned' ? 'Dikembalikan' : 
+                       'Ditolak' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="p-8 text-center">
+            <svg class="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <p class="text-slate-400 font-medium">Belum ada riwayat peminjaman</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t border-slate-200 p-4 flex-shrink-0">
+          <button 
+            @click="showBorrowHistoryModal = false"
+            class="w-full px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-lg font-semibold transition"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
@@ -238,6 +337,9 @@ const props = defineProps({
   }
 });
 
+// route() is available globally from Ziggy
+const route = window.route;
+
 const isInQueue = ref(false);
 const isAddingQueue = ref(false);
 const userQueuePosition = ref(null);
@@ -246,6 +348,9 @@ const queueInfo = ref({
   in_queue: false,
   position: null
 });
+const showBorrowHistoryModal = ref(false);
+const borrowHistory = ref([]);
+const isLoadingHistory = ref(false);
 
 onMounted(async () => {
   await checkQueueStatus();
@@ -330,6 +435,39 @@ async function addToQueue() {
     });
   } finally {
     isAddingQueue.value = false;
+  }
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+async function openBorrowHistoryModal() {
+  showBorrowHistoryModal.value = true;
+  isLoadingHistory.value = true;
+  
+  try {
+    // Use route() helper to get correct API endpoint URL
+    const apiUrl = route('books.borrow-history', { bookId: props.book.id });
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    borrowHistory.value = data.history;
+  } catch (error) {
+    console.error('Error fetching borrow history:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Gagal memuat riwayat peminjaman',
+      confirmButtonColor: '#ea580c'
+    });
+  } finally {
+    isLoadingHistory.value = false;
   }
 }
 </script>

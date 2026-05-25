@@ -12,8 +12,17 @@ function formatDate(date) {
   return new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function toNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function getTotalFine(borrow) {
+  return toNumber(borrow.total_fine ?? (toNumber(borrow.late_fee) + toNumber(borrow.additional_fine)));
+}
+
 function formatNumber(number) {
-  return new Intl.NumberFormat('id-ID').format(number || 0);
+  return new Intl.NumberFormat('id-ID').format(toNumber(number));
 }
 
 function getPaymentMethodBadge(method) {
@@ -32,7 +41,7 @@ function confirmCashPayment(borrow) {
       <div class="text-left space-y-2">
         <p><strong>Pengguna:</strong> ${borrow.user.name}</p>
         <p><strong>Buku:</strong> ${borrow.book.title}</p>
-        <p><strong>Nominal:</strong> Rp ${formatNumber(borrow.late_fee)}</p>
+        <p><strong>Nominal:</strong> Rp ${formatNumber(getTotalFine(borrow))}</p>
       </div>
     `,
     icon: 'question',
@@ -62,7 +71,7 @@ function confirmQrisPayment(borrow) {
       <div class="text-left space-y-2">
         <p><strong>Pengguna:</strong> ${borrow.user.name}</p>
         <p><strong>Buku:</strong> ${borrow.book.title}</p>
-        <p><strong>Nominal:</strong> Rp ${formatNumber((borrow.late_fee || 0) + (borrow.additional_fine || 0))}</p>
+        <p><strong>Nominal:</strong> Rp ${formatNumber(getTotalFine(borrow))}</p>
       </div>
     `,
     icon: 'question',
@@ -108,7 +117,7 @@ function confirmQrisPayment(borrow) {
           <div class="bg-white p-4 rounded-lg border border-slate-200">
             <p class="text-xs text-slate-900 uppercase font-semibold">Total Denda</p>
             <p class="text-2xl font-bold text-slate-900 mt-1">
-              Rp {{ formatNumber(borrows.data.reduce((sum, b) => sum + (b.late_fee || 0) + (b.additional_fine || 0), 0)) }}
+              Rp {{ formatNumber(borrows.data.reduce((sum, b) => sum + getTotalFine(b), 0)) }}
             </p>
           </div>
         </div>
@@ -141,7 +150,7 @@ function confirmQrisPayment(borrow) {
                   <div class="text-xs text-gray-500">{{ borrow.book.author }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-sm font-bold text-red-600">Rp {{ formatNumber((borrow.late_fee || 0) + (borrow.additional_fine || 0)) }}</span>
+                  <span class="text-sm font-bold text-red-600">Rp {{ formatNumber(getTotalFine(borrow)) }}</span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span 

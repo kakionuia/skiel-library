@@ -28,6 +28,14 @@ class ReviewController extends Controller
         $reviews->getCollection()->transform(function ($review) use ($userId) {
             $review->user_liked = $userId ? $review->isLikedBy($userId) : false;
             $review->user_bookmarked = $userId ? $review->isBookmarkedBy($userId) : false;
+            
+            // Ensure comments include image_url accessor
+            if ($review->comments) {
+                $review->comments = $review->comments->map(function ($comment) {
+                    return $comment->toArray();
+                });
+            }
+            
             return $review;
         });
 
@@ -86,7 +94,7 @@ class ReviewController extends Controller
     {
         $validated = $request->validate([
             'comment' => 'required|string|min:3|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $imagePath = null;
@@ -104,7 +112,7 @@ class ReviewController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'comment' => $comment,
+                'comment' => $comment->toArray(),
                 'comments_count' => $review->comments()->count(),
             ]);
         }
@@ -143,6 +151,14 @@ class ReviewController extends Controller
         $reviews->getCollection()->transform(function ($like) use ($userId) {
             $like->review->user_liked = true;
             $like->review->user_bookmarked = $like->review->isBookmarkedBy($userId);
+            
+            // Ensure comments include image_url accessor
+            if ($like->review->comments) {
+                $like->review->comments = $like->review->comments->map(function ($comment) {
+                    return $comment->toArray();
+                });
+            }
+            
             return $like;
         });
 
@@ -163,6 +179,14 @@ class ReviewController extends Controller
         $reviews->getCollection()->transform(function ($bookmark) use ($userId) {
             $bookmark->review->user_liked = $bookmark->review->isLikedBy($userId);
             $bookmark->review->user_bookmarked = true;
+            
+            // Ensure comments include image_url accessor
+            if ($bookmark->review->comments) {
+                $bookmark->review->comments = $bookmark->review->comments->map(function ($comment) {
+                    return $comment->toArray();
+                });
+            }
+            
             return $bookmark;
         });
 
@@ -183,6 +207,17 @@ class ReviewController extends Controller
         $comments->getCollection()->transform(function ($comment) use ($userId) {
             $comment->review->user_liked = $comment->review->isLikedBy($userId);
             $comment->review->user_bookmarked = $comment->review->isBookmarkedBy($userId);
+            
+            // Ensure current comment includes image_url
+            $commentData = $comment->toArray();
+            
+            // Ensure review's other comments also include image_url
+            if ($comment->review->comments) {
+                $comment->review->comments = $comment->review->comments->map(function ($c) {
+                    return $c->toArray();
+                });
+            }
+            
             return $comment;
         });
 
@@ -204,6 +239,14 @@ class ReviewController extends Controller
             ->map(function ($review) use ($userId) {
                 $review->user_liked = $userId ? $review->isLikedBy($userId) : false;
                 $review->user_bookmarked = $userId ? $review->isBookmarkedBy($userId) : false;
+                
+                // Ensure comments include image_url accessor
+                if ($review->comments) {
+                    $review->comments = $review->comments->map(function ($comment) {
+                        return $comment->toArray();
+                    });
+                }
+                
                 return $review;
             });
 
@@ -217,6 +260,14 @@ class ReviewController extends Controller
             ->map(function ($review) use ($userId) {
                 $review->user_liked = $userId ? $review->isLikedBy($userId) : false;
                 $review->user_bookmarked = $userId ? $review->isBookmarkedBy($userId) : false;
+                
+                // Ensure comments include image_url accessor
+                if ($review->comments) {
+                    $review->comments = $review->comments->map(function ($comment) {
+                        return $comment->toArray();
+                    });
+                }
+                
                 return $review;
             });
 

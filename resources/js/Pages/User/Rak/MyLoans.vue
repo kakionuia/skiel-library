@@ -52,6 +52,7 @@
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Dashboard Overview"
           >
+            <i class="fas fa-th-large text-sm w-5 text-center"></i>
             <span v-show="!isSidebarCollapsed || isSidebarOpen">Dashboard</span>
           </Link>
 
@@ -61,7 +62,7 @@
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Rak Buku Saya"
           >
-            <span class="text-lg">📖</span>
+            <i class="fas fa-book-open text-sm w-5 text-center"></i>
             <span v-show="!isSidebarCollapsed || isSidebarOpen">Rak Buku Saya</span>
           </Link>
 
@@ -71,7 +72,7 @@
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Antrian Buku"
           >
-            <span class="text-lg">⏳</span>
+            <i class="fas fa-hourglass-half text-sm w-5 text-center"></i>
             <span v-show="!isSidebarCollapsed || isSidebarOpen">Antrian Buku</span>
           </Link>
         </div>
@@ -93,7 +94,9 @@
             :title="tab.label"
           >
             <div class="flex items-center gap-3">
-              <span class="text-base filter brightness-90 group-hover:brightness-110">{{ getTabIcon(tab.key) }}</span>
+              <span class="text-sm filter brightness-90 group-hover:brightness-110 flex items-center justify-center w-5">
+                <i :class="getTabIcon(tab.key)"></i>
+              </span>
               <span v-show="!isSidebarCollapsed" class="text-xs font-bold uppercase tracking-wider">{{ tab.label }}</span>
             </div>
             <span 
@@ -209,7 +212,9 @@
 
         <div class="space-y-6">
           <div v-if="visibleLoans.length === 0" class="py-20 text-center bg-white rounded-2xl border border-slate-200/60 p-6 shadow-3xs">
-            <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-2xl text-orange-500 mb-4">💻</div>
+            <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-xl text-orange-500 mb-4">
+              <i class="fas fa-folder-open"></i>
+            </div>
             <h3 class="text-base font-extrabold text-slate-900 tracking-tight">{{ currentTab.emptyTitle }}</h3>
             <p class="mt-1.5 text-xs font-medium text-slate-400 max-w-sm mx-auto leading-relaxed">{{ currentTab.emptyDescription }}</p>
           </div>
@@ -281,8 +286,13 @@ function toggleSidebar() {
 }
 
 function getTabIcon(key) {
-  const icons = { active: '📂', pending: '⏳', history: '📝', fines: '💳' };
-  return icons[key] || '📄';
+  const icons = { 
+    active: 'fas fa-folder', 
+    pending: 'fas fa-clock', 
+    history: 'fas fa-history', 
+    fines: 'fas fa-credit-card' 
+  };
+  return icons[key] || 'fas fa-file-alt';
 }
 
 const activeLoans = computed(() => props.loans.filter(loan => loan.status === 'approved' || loan.status === 'borrowed'));
@@ -294,7 +304,6 @@ const stats = computed(() => {
   return {
     total_active: activeLoans.value.length,
     total_pending: pendingLoans.value.length,
-    // PERBAIKAN: Memastikan late_fee dikonversi ke angka sebelum dijumlahkan
     total_fines: finesList.value.reduce((sum, loan) => {
       const fee = parseFloat(loan.late_fee);
       return sum + (isNaN(fee) ? 0 : fee);
@@ -379,7 +388,7 @@ function extendLoan(loan) {
     `,
     icon: 'info',
     showCancelButton: true,
-    confirmButtonColor: '#ea580c',
+    confirmButtonColor: '#f97316',
     cancelButtonColor: '#64748b',
     confirmButtonText: 'Kirim Permintaan',
     cancelButtonText: 'Batal',
@@ -403,7 +412,7 @@ function extendLoan(loan) {
             title: 'Success', 
             text: 'Permintaan perpanjangan telah dikirim. Silakan tunggu persetujuan petugas.', 
             icon: 'success', 
-            confirmButtonColor: '#ea580c' 
+            confirmButtonColor: '#f97316' 
           });
         },
         onError: (errors) => {
@@ -411,7 +420,7 @@ function extendLoan(loan) {
             title: 'Gagal',
             text: Object.values(errors)[0] || 'Terjadi kesalahan saat mengirim permintaan',
             icon: 'error',
-            confirmButtonColor: '#ea580c'
+            confirmButtonColor: '#f97316'
           });
         }
       });
@@ -425,7 +434,7 @@ function cancelLoan(loan) {
     html: `<p class="text-xs text-slate-500">Batalkan antrian otorisasi buku <strong>${loan.book?.title || 'Unknown'}</strong>?</p>`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#ea580c',
+    confirmButtonColor: '#f97316',
     cancelButtonColor: '#64748b',
     confirmButtonText: 'Drop Request',
     cancelButtonText: 'Keep'
@@ -439,22 +448,6 @@ function cancelLoan(loan) {
     }
   });
 }
-
-// function payFine(fine) {
-//   Swal.fire({
-//     title: 'Proses Invoice?',
-//     html: `<p class="text-xs text-slate-500">Melanjutkan pembayaran denda nominal: <strong>Rp ${formatNumber(fine.late_fee)}</strong></p>`,
-//     icon: 'question',
-//     showCancelButton: true,
-//     confirmButtonColor: '#ea580c',
-//     cancelButtonColor: '#64748b',
-//     confirmButtonText: 'Proceed Gateway',
-//     cancelButtonText: 'Hold'
-//   }).then((result) => {
-//     if (result.isConfirmed) router.visit(`/fines/${fine.id}/pay`);
-//   });
-// }
-
 
 function payFine(fine) {
   if (fine.is_damaged === null || fine.is_damaged === undefined) {
@@ -483,7 +476,7 @@ function handleLogout() {
   }).then((result) => {
     if (result.isConfirmed) router.post(route('logout'));
   });
-};
+}
 </script>
 
 <style scoped>

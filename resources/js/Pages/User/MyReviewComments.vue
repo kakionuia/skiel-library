@@ -90,7 +90,7 @@
               <div class="flex-1">
                 <p class="text-sm font-bold text-slate-900">Anda</p>
                 <p class="text-sm text-slate-700 mt-1">{{ comment.comment }}</p>
-                <img v-if="comment.image_path" :src="comment.image_path" class="mt-3 rounded-lg max-w-xs h-auto" />
+                <img v-if="comment.image_path" :src="comment.image_url" class="mt-3 rounded-lg max-w-xs h-auto" />
               </div>
             </div>
           </div>

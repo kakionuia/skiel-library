@@ -14,9 +14,12 @@
             <p class="text-slate-400 text-sm mt-0.5">Monitoring anggota dengan masa pinjam melampaui batas</p>
           </div>
           <div class="flex items-center gap-4">
-            <div class="bg-orange-50/60 px-4 py-2 rounded-xl border border-orange-100/70 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-              <p class="text-xs font-bold text-orange-700 tracking-wide">High Priority Action</p>
+            <div
+              class="px-4 py-2 rounded-xl border flex items-center gap-2"
+              :class="priorityStatus.badgeClass"
+            >
+              <span class="w-2 h-2 rounded-full" :class="priorityStatus.dotClass"></span>
+              <p class="text-xs font-bold tracking-wide">{{ priorityStatus.label }}</p>
             </div>
           </div>
         </div>
@@ -31,7 +34,7 @@
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Kasus Aktif</p>
             <div class="flex items-end gap-2 mt-4">
-              <h3 class="text-3xl font-extrabold text-slate-900 leading-none">{{ overdueLoans.length }}</h3>
+              <h3 class="text-3xl font-extrabold text-slate-900 leading-none">{{ totalCases }}</h3>
               <p class="text-xs font-medium text-slate-400 mb-0.5">Anggota Melanggar</p>
             </div>
           </div>
@@ -41,7 +44,7 @@
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Akumulasi Finansial Denda</p>
             <div class="flex items-end gap-1 mt-4">
               <span class="text-sm font-bold text-slate-400 mb-1 mr-1">Rp</span>
-              <h3 class="text-3xl font-extrabold text-slate-900 leading-none">{{ totalFines.toLocaleString('id-ID') }}</h3>
+              <h3 class="text-3xl font-extrabold text-slate-900 leading-none">{{ formatNumber(totalFines) }}</h3>
             </div>
           </div>
 
@@ -102,7 +105,7 @@
                   
                   <!-- Fine Estimate -->
                   <td class="px-8 py-4.5">
-                    <p class="text-sm font-semibold text-slate-800 font-mono">Rp {{ loan.fine.toLocaleString('id-ID') }}</p>
+                    <p class="text-sm font-semibold text-slate-800 font-mono">Rp {{ formatNumber(loan.fine) }}</p>
                   </td>
                   
                   <!-- Multi Status Condition (Minimalist Monochrome Dots) -->
@@ -134,7 +137,7 @@
                 </tr>
 
                 <!-- Empty State -->
-                <tr v-if="overdueLoans.length === 0">
+                <tr v-if="totalCases === 0">
                   <td colspan="6" class="px-8 py-16 text-center">
                     <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
                       <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -156,12 +159,48 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import PetugasSidebar from '@/Components/PetugasSidebar.vue';
+import { computed } from 'vue';
 
-defineProps({
+const props = defineProps({
   overdueLoans: { type: Array, default: () => [] },
   totalFines: { type: Number, default: 0 },
   averageDaysOverdue: { type: Number, default: 0 },
 });
+
+const toNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const totalCases = computed(() => props.overdueLoans?.length || 0);
+const normalizedTotalFines = computed(() => toNumber(props.totalFines));
+const normalizedAverageDays = computed(() => toNumber(props.averageDaysOverdue));
+
+const priorityStatus = computed(() => {
+  if (totalCases.value === 0 || normalizedTotalFines.value === 0) {
+    return {
+      label: 'Aman',
+      badgeClass: 'bg-emerald-50/80 border-emerald-100/80 text-emerald-700',
+      dotClass: 'bg-emerald-500',
+    };
+  }
+
+  if (totalCases.value >= 5 || normalizedAverageDays.value >= 7 || normalizedTotalFines.value >= 50000) {
+    return {
+      label: 'High Priority Action',
+      badgeClass: 'bg-orange-50/60 border-orange-100/70 text-orange-700',
+      dotClass: 'bg-orange-500 animate-pulse',
+    };
+  }
+
+  return {
+    label: 'Perlu Dipantau',
+    badgeClass: 'bg-amber-50/70 border-amber-100/80 text-amber-700',
+    dotClass: 'bg-amber-500',
+  };
+});
+
+const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(toNumber(value));
 
 const formatDate = (date) => {
   if (!date) return '-';

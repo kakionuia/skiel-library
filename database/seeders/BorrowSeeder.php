@@ -7,86 +7,135 @@ use App\Models\User;
 use App\Models\Borrow;
 use App\Models\SystemParameter;
 use Illuminate\Database\Seeder;
-use Carbon\Carbon;
 
 class BorrowSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Ambil semua buku dan user yang ada
-        $books = Book::all();
-        $users = User::where('role', 'anggota')->get();
+        $books = Book::orderBy('id')->get();
 
-        // 2. Cek dulu, kalau bukunya atau usernya kosong, jangan lanjut biar gak error
-        if ($books->isEmpty() || $users->isEmpty()) {
+        if ($books->isEmpty()) {
             return;
         }
 
-        // Get fine per day from system parameters
         $finePerDay = SystemParameter::getByKey('fine_per_day', 5000);
+        $student = User::updateOrCreate(
+            ['email' => 'siswa@perpus.com'],
+            [
+                'name' => 'Siswa Test',
+                'password' => bcrypt('password'),
+                'role' => 'anggota',
+                'status' => 'approved',
+                'nisn' => '001',
+                'kelas' => '10-A',
+                'phone' => '08123456789',
+            ]
+        );
 
-        // 3. Buat data peminjaman secara aman
-        // Borrow yang masih aktif (on time)
-        Borrow::create([
-            'user_id' => $users->random()->id,
-            'book_id' => $books->random()->id,
-            'borrow_date' => now(),
-            'due_date' => now()->addDays(7),
-            'status' => 'borrowed',
-        ]);
+        $activeBook = $books->first();
+        $overdueBook = $books->skip(1)->first() ?? $activeBook;
+        $returnedBook = $books->skip(2)->first() ?? $activeBook;
 
-        // Borrow yang sudah kembali (tepat waktu)
-        Borrow::create([
-            'user_id' => $users->first()->id, 
-            'book_id' => $books->first()->id,
-            'borrow_date' => now()->subDays(10),
-            'due_date' => now()->subDays(3),
-            'return_date' => now()->subDay(),
-            'status' => 'returned',
-        ]);
-
-        // Borrow yang TERLAMBAT 5 hari (dummy data untuk testing)
-        if ($users->count() >= 2) {
-            $lateDays = 5;
-            Borrow::create([
-                'user_id' => $users->get(1)->id,
-                'book_id' => $books->get(1)->id ?? $books->first()->id,
-                'borrow_date' => now()->subDays(12),
-                'due_date' => now()->subDays($lateDays),
+        Borrow::updateOrCreate(
+            [
+                'user_id' => $student->id,
+                'notes' => 'DATA_TEST_SISWA_ACTIVE',
+            ],
+            [
+                'book_id' => $activeBook->id,
+                'borrow_date' => now()->toDateString(),
+                'due_date' => now()->addDays(7)->toDateString(),
+                'return_date' => null,
                 'status' => 'borrowed',
-                'late_days' => 0, // Will be calculated dynamically
-                'late_fee' => 0, // Will be calculated dynamically
-            ]);
-        }
+                'quantity' => 1,
+                'late_days' => 0,
+                'late_fee' => 0,
+                'payment_method' => 'none',
+                'payment_status' => 'unpaid',
+            ]
+        );
 
-        // Borrow yang TERLAMBAT 10 hari (dummy data untuk testing)
-        if ($users->count() >= 3) {
-            $lateDays = 10;
-            Borrow::create([
-                'user_id' => $users->get(2)->id,
-                'book_id' => $books->get(2)->id ?? $books->first()->id,
-                'borrow_date' => now()->subDays(17),
-                'due_date' => now()->subDays($lateDays),
-                'status' => 'borrowed',
-                'late_days' => 0, // Will be calculated dynamically
-                'late_fee' => 0, // Will be calculated dynamically
-            ]);
-        }
-
-        // Borrow yang sudah kembali TERLAMBAT 7 hari (dummy data untuk testing)
-        if ($users->count() >= 2 && $books->count() >= 3) {
-            $lateDays = 7;
-            $lateFee = $lateDays * $finePerDay;
-            Borrow::create([
-                'user_id' => $users->get(1)->id,
-                'book_id' => $books->get(2)->id,
-                'borrow_date' => now()->subDays(14),
-                'due_date' => now()->subDays(7),
-                'return_date' => now()->subDays(1),
+        Borrow::updateOrCreate(
+            [
+                'user_id' => $student->id,
+                'notes' => 'DATA_TEST_SISWA_RETURNED',
+            ],
+            [
+                'book_id' => $returnedBook->id,
+                'borrow_date' => now()->subDays(10)->toDateString(),
+                'due_date' => now()->subDays(3)->toDateString(),
+                'return_date' => now()->subDay()->toDateString(),
                 'status' => 'returned',
+                'quantity' => 1,
+                'late_days' => 0,
+                'late_fee' => 0,
+                'payment_method' => 'none',
+                'payment_status' => 'unpaid',
+            ]
+        );
+
+        $lateDays = 5;
+        Borrow::updateOrCreate(
+            [
+                'user_id' => $student->id,
+                'notes' => 'DATA_TEST_SISWA_OVERDUE',
+            ],
+            [
+                'book_id' => $overdueBook->id,
+                'borrow_date' => now()->subDays(12)->toDateString(),
+                'due_date' => now()->subDays($lateDays)->toDateString(),
+                'return_date' => null,
+                'status' => 'borrowed',
+                'quantity' => 1,
                 'late_days' => $lateDays,
-                'late_fee' => $lateFee,
-            ]);
+                'late_fee' => $lateDays * $finePerDay,
+                'payment_method' => 'none',
+                'payment_status' => 'unpaid',
+            ]
+        );
+
+        for ($i = 1; $i <= 12; $i++) {
+            $lateDays = 5 + $i;
+            $book = $books->get($i % $books->count()) ?? $activeBook;
+
+            Borrow::updateOrCreate(
+                [
+                    'user_id' => $student->id,
+                    'notes' => sprintf('DATA_TEST_SISWA_OVERDUE_EXTRA_%02d', $i),
+                ],
+                [
+                    'book_id' => $book->id,
+                    'borrow_date' => now()->subDays($lateDays + 7)->toDateString(),
+                    'due_date' => now()->subDays($lateDays)->toDateString(),
+                    'return_date' => null,
+                    'status' => 'borrowed',
+                    'quantity' => 1,
+                    'late_days' => $lateDays,
+                    'late_fee' => $lateDays * $finePerDay,
+                    'payment_method' => 'none',
+                    'payment_status' => 'unpaid',
+                ]
+            );
         }
+
+        $extraUsers = User::where('role', 'anggota')
+            ->where('id', '!=', $student->id)
+            ->orderBy('id')
+            ->get();
+
+        if ($extraUsers->isEmpty()) {
+            return;
+        }
+
+        Borrow::updateOrCreate([
+            'user_id' => $extraUsers->first()->id,
+            'notes' => 'DATA_TEST_EXTRA_ACTIVE',
+        ], [
+            'book_id' => $activeBook->id,
+            'borrow_date' => now()->toDateString(),
+            'due_date' => now()->addDays(7)->toDateString(),
+            'status' => 'borrowed',
+            'quantity' => 1,
+        ]);
     }
 }

@@ -41,6 +41,11 @@
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Kode Barcode</label>
+              <input v-model="form.barcode_code" type="text" placeholder="400/SKIE/senibersikapbodoamat" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium font-mono">
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Tahun Terbit</label>
               <input v-model="form.year" type="number" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white text-sm font-medium">
             </div>
@@ -96,6 +101,7 @@ const form = ref({
   publisher: props.book.publisher || '',
   year: props.book.year || '',
   isbn: props.book.isbn || '',
+  barcode_code: props.book.barcode_code || '',
   category: props.book.category || '',
   quantity: props.book.quantity || 1,
   description: props.book.description || '',

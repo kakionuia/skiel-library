@@ -679,7 +679,33 @@ public function show(Borrow $borrow)
         $borrow->load(['user', 'book', 'approvedBy']);
 
         return Inertia::render('User/BorrowProof', [
-            'borrow' => $borrow,
+            'borrow' => [
+                'id' => $borrow->id,
+                'book_id' => $borrow->book_id,
+                'user_id' => $borrow->user_id,
+                'quantity' => $borrow->quantity,
+                'status' => $borrow->status,
+                'status_text' => $borrow->status_text,
+                'borrow_date' => $borrow->borrow_date,
+                'due_date' => $borrow->due_date,
+                'return_date' => $borrow->return_date,
+                'late_days' => $borrow->late_days ?? 0,
+                'late_fee' => $borrow->late_fee ?? 0,
+                'payment_method' => $borrow->payment_method,
+                'payment_status' => $borrow->payment_status,
+                'created_at' => $borrow->created_at,
+                'approved_at' => $borrow->approved_at,
+                'fine_per_day' => (int) SystemParameter::getByKey('fine_per_day', 5000),
+                'book' => [
+                    'id' => $borrow->book?->id,
+                    'title' => $borrow->book?->title,
+                    'author' => $borrow->book?->author,
+                    'publisher' => $borrow->book?->publisher,
+                    'cover_url' => $borrow->book?->cover_image
+                        ? asset('storage/' . $borrow->book->cover_image)
+                        : null,
+                ],
+            ],
         ]);
     }
 
@@ -992,6 +1018,33 @@ public function waitingPayment(Borrow $borrow)
         ]
     ]);
 }
+
+    /**
+     * API: Ambil riwayat peminjam untuk satu buku (untuk modal di halaman detail buku)
+     */
+    public function getBorrowHistory($bookId)
+    {
+        $history = Borrow::where('book_id', $bookId)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($borrow) {
+                return [
+                    'id' => $borrow->id,
+                    'user_name' => $borrow->user->name ?? 'Tidak diketahui',
+                    'user_class' => $borrow->user->kelas ?? '-',
+                    'user_major' => $borrow->user->jurusan ?? '-',
+                    'borrow_date' => $borrow->borrow_date,
+                    'return_date' => $borrow->return_date,
+                    'status' => $borrow->status,
+                ];
+            });
+
+        return response()->json([
+            'history' => $history,
+            'total_count' => $history->count(),
+        ]);
+    }
 
     
 }

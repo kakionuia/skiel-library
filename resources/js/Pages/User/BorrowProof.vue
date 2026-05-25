@@ -24,7 +24,12 @@
           <div class="relative group">
             <div class="absolute -inset-4 bg-orange-50 rounded-[2rem] scale-95 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500"></div>
             <div class="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl shadow-slate-200 border border-slate-100">
-              <img :src="borrow.book?.cover_url" class="h-full w-full object-cover" />
+              <img
+                :src="bookCoverUrl"
+                :alt="borrow.book?.title || 'Cover buku'"
+                class="h-full w-full object-cover"
+                @error="coverLoadFailed = true"
+              />
             </div>
           </div>
 
@@ -167,12 +172,26 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 const props = defineProps({
   borrow: {
     type: Object,
     required: true
   }
+});
+
+const coverLoadFailed = ref(false);
+const placeholderCover = computed(() => {
+  const title = props.borrow.book?.title || 'No Cover';
+  return `https://placehold.co/420x560/f1f5f9/64748b?text=${encodeURIComponent(title)}`;
+});
+
+const bookCoverUrl = computed(() => {
+  if (coverLoadFailed.value) {
+    return placeholderCover.value;
+  }
+
+  return props.borrow.book?.cover_url || placeholderCover.value;
 });
 
 function formatDate(date) {

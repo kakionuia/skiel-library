@@ -1,3 +1,6 @@
+Berikut adalah kode lengkap untuk file antrian buku (`myqueue.vue` / sejenisnya). Kode ini telah diperbarui agar komponen **Sidebar** dan **Header** memiliki visualisasi, tata letak, logika responsive (*resize listener*), serta dekorasi ikon Font Awesome yang **identik dan sinkron** dengan halaman sirkulasi/peminjaman sebelumnya (`myloans.vue`):
+
+```vue
 <template>
   <div class="flex h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-orange-100 overflow-hidden">
     
@@ -25,8 +28,8 @@
     >
       <div class="h-20 flex items-center px-6 border-b border-slate-100 justify-between shrink-0">
         <Link href="/dashboard" class="flex items-center gap-3 group overflow-hidden">
-          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white group-hover:bg-orange-600 transition-colors">
-            <img src="/image/logo-smk.png" alt="" class="h-5 w-5">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white group-hover:bg-orange-700 transition-colors">
+            <img src="/image/logo-smk.png" alt="Logo" class="h-5 w-5" onerror="this.style.display='none'">
           </span>
           <div v-show="!isSidebarCollapsed || isSidebarOpen" class="transition-opacity duration-200 whitespace-nowrap">
             <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">SKIE LIBRARY</p>
@@ -48,10 +51,11 @@
           
           <Link 
             href="/dashboard" 
-            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-600 transition"
+            class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-orange-50 hover:text-orange-500 transition"
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
-            title="Katalog Buku"
+            title="Dashboard Overview"
           >
+            <i class="fas fa-th-large text-sm w-5 text-center"></i>
             <span v-show="!isSidebarCollapsed || isSidebarOpen">Dashboard</span>
           </Link>
 
@@ -61,7 +65,7 @@
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Rak Buku Saya"
           >
-            <span class="text-lg">📖</span>
+            <i class="fas fa-book-open text-sm w-5 text-center"></i>
             <span v-show="!isSidebarCollapsed || isSidebarOpen">Rak Buku Saya</span>
           </Link>
 
@@ -71,7 +75,7 @@
             :class="{ 'justify-center': isSidebarCollapsed && !isSidebarOpen }"
             title="Antrian Buku"
           >
-            <span class="text-lg">⏳</span>
+            <i class="fas fa-hourglass-half text-sm w-5 text-center"></i>
             <span v-show="!isSidebarCollapsed || isSidebarOpen">Antrian Buku</span>
           </Link>
         </div>
@@ -87,13 +91,18 @@
             @click="activeTab = tab.key"
             class="flex w-full items-center rounded-xl p-3 text-left transition duration-150 group"
             :class="[
-              activeTab === tab.key ? 'bg-orange-500 text-white shadow-sm' : 'text-slate-500 hover:bg-orange-50 hover:text-orange-600',
+              activeTab === tab.key ? 'bg-orange-500 text-white shadow-xs' : 'text-slate-500 hover:bg-orange-50 hover:text-orange-600',
               isSidebarCollapsed ? 'justify-center' : 'justify-between'
             ]"
             :title="tab.label"
           >
             <div class="flex items-center gap-3">
-              <span class="text-base">{{ tab.key === 'waiting' ? '⏳' : '🎉' }}</span>
+              <span class="text-sm filter brightness-90 group-hover:brightness-110 flex items-center justify-center w-5">
+                <i :class="{
+                  'fas fa-clock': tab.key === 'waiting',
+                  'fas fa-check-circle': tab.key === 'notified'
+                }"></i>
+              </span>
               <span v-show="!isSidebarCollapsed" class="text-xs font-bold uppercase tracking-wider">{{ tab.label }}</span>
             </div>
             <span 
@@ -156,7 +165,7 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <div class="hidden md:flex items-center gap-6">
+          <div class="hidden sm:flex items-center gap-6 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200/50">
             <div class="text-right">
               <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Sedang Antri</p>
               <p class="text-sm font-black text-slate-900 leading-none mt-0.5">{{ stats.waitingCount ?? 0 }} Buku</p>
@@ -184,7 +193,7 @@
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Daftar Antrian Buku</h1>
             <p class="text-xs font-medium text-slate-500 mt-1">Pantau dan kelola antrian buku reservasi yang Anda ajukan.</p>
           </div>
-          <Link href="/dashboard" class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-orange-50 border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-700 hover:text-orange-600 transition shadow-xs shrink-0">
+          <Link href="/dashboard" class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-orange-50 border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-700 hover:text-orange-600 transition shadow-3xs shrink-0">
             Kembali ke Dashboard
           </Link>
         </div>
@@ -209,10 +218,11 @@
 
         <div class="space-y-6">
           
-          <!-- Tab Menunggu -->
           <div v-if="activeTab === 'waiting'" class="space-y-4">
-            <div v-if="queuedBooks.filter(q => !q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl shadow-sm p-6">
-              <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-2xl text-orange-500 mb-4">⏳</div>
+            <div v-if="queuedBooks.filter(q => !q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl border border-slate-200/60 p-6 shadow-3xs">
+              <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-xl text-orange-500 mb-4">
+                <i class="fas fa-hourglass-half"></i>
+              </div>
               <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Tidak ada antrian berjalan</h3>
               <p class="mt-1.5 text-xs font-medium text-slate-400 max-w-sm mx-auto leading-relaxed">Saat ini Anda tidak memiliki antrian buku aktif.</p>
             </div>
@@ -221,9 +231,9 @@
               <div 
                 v-for="queue in queuedBooks.filter(q => !q.notified_at)" 
                 :key="queue.id" 
-                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden"
+                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white border border-slate-200/60 rounded-2xl shadow-3xs hover:shadow-md transition-all duration-300 overflow-hidden"
               >
-                <div class="absolute left-0 top-0 bottom-0 w-[4px] transition-all duration-300 group-hover:w-[6px]"></div>
+                <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-amber-500 transition-all duration-300 group-hover:w-[6px]"></div>
 
                 <div class="w-20 aspect-[3/4.2] shrink-0 overflow-hidden rounded-xl border border-slate-100 p-1 bg-slate-50 shadow-xs mx-auto md:mx-0">
                   <img 
@@ -236,7 +246,7 @@
                 <div class="flex-1 flex flex-col justify-between min-w-0 py-1">
                   <div class="space-y-1 text-center md:text-left">
                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                      <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200/60 rounded-md text-[10px] font-extrabold uppercase tracking-wider">
+                      <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-md text-[10px] font-extrabold uppercase tracking-wider">
                         Menunggu Giliran
                       </span>
                       <span class="px-2.5 py-1 bg-orange-50 text-orange-700 border border-orange-200/60 rounded-md text-[10px] font-black uppercase tracking-wider">
@@ -257,7 +267,7 @@
                 <div class="flex flex-row md:flex-col justify-end items-center gap-3 w-full md:w-auto self-stretch md:self-auto pt-4 md:pt-0 border-t border-slate-100 md:border-t-0 md:pl-6 md:border-l md:border-slate-100">
                   <button 
                     @click="cancelQueue(queue)"
-                    class="w-full md:w-auto px-5 py-2.5 bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-500 hover:text-orange-600 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 active:scale-98"
+                    class="w-full md:w-auto px-5 py-2.5 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-500 hover:text-orange-600 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 active:scale-95 shadow-3xs"
                   >
                     Batal Antri
                   </button>
@@ -266,10 +276,11 @@
             </div>
           </div>
 
-          <!-- Tab Tersedia -->
           <div v-if="activeTab === 'notified'" class="space-y-4">
-            <div v-if="queuedBooks.filter(q => q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl shadow-sm p-6">
-              <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-2xl text-orange-500 mb-4">🎉</div>
+            <div v-if="queuedBooks.filter(q => q.notified_at).length === 0" class="py-20 text-center bg-white rounded-2xl border border-slate-200/60 p-6 shadow-3xs">
+              <div class="h-16 w-16 mx-auto bg-orange-50 border border-orange-100/50 rounded-2xl flex items-center justify-center text-xl text-orange-500 mb-4">
+                <i class="fas fa-check-circle"></i>
+              </div>
               <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Belum ada buku tersedia</h3>
               <p class="mt-1.5 text-xs font-medium text-slate-400 max-w-sm mx-auto leading-relaxed">Kami akan memberi tahu Anda di sini jika ada buku yang siap diambil.</p>
             </div>
@@ -278,7 +289,7 @@
               <div 
                 v-for="queue in queuedBooks.filter(q => q.notified_at)" 
                 :key="queue.id" 
-                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white rounded-2xl shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden"
+                class="group relative flex flex-col md:flex-row gap-6 p-5 bg-white border border-slate-200/60 rounded-2xl shadow-3xs hover:shadow-md transition-all duration-300 overflow-hidden"
               >
                 <div class="absolute left-0 top-0 bottom-0 w-[4px] bg-emerald-500 transition-all duration-300 group-hover:w-[6px]"></div>
 
@@ -312,13 +323,13 @@
                 <div class="flex flex-col sm:flex-row md:flex-col justify-end items-center gap-3 w-full md:w-auto self-stretch md:self-auto pt-4 md:pt-0 border-t border-slate-100 md:border-t-0 md:pl-6 md:border-l md:border-slate-100">
                   <Link 
                     :href="`/books/${queue.book?.id}`"
-                    class="w-full text-center px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 shadow-xs active:scale-98"
+                    class="w-full text-center px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 shadow-3xs active:scale-95"
                   >
                     Pinjam Sekarang
                   </Link>
                   <button 
                     @click="cancelQueue(queue)"
-                    class="w-full px-5 py-2.5 bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-500 hover:text-orange-600 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 active:scale-98"
+                    class="w-full px-5 py-2.5 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-500 hover:text-orange-600 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 active:scale-95 shadow-3xs"
                   >
                     Batalkan
                   </button>
@@ -338,18 +349,16 @@
 import { Link, router, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { dangerConfirm, successAlert } from '@/Utils/sweetAlert';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
   queuedBooks: { type: Array, default: () => [] },
   stats: { type: Object, default: () => ({}) },
 });
 
-// Ambil shared data user dari Inertia global props
 const page = usePage();
 const user = computed(() => page.props.auth?.user || { name: 'Guest', role: 'Siswa' });
 
-// Bikin inisial otomatis dari nama user jika user_initials tidak dioper dari backend
 const userInitials = computed(() => {
   if (user.value.initials) return user.value.initials;
   return user.value.name
@@ -359,9 +368,25 @@ const userInitials = computed(() => {
 
 const activeTab = ref('waiting');
 
-// State responsif sidebar
 const isSidebarOpen = ref(false); 
 const isSidebarCollapsed = ref(false); 
+
+function handleResize() {
+  if (window.innerWidth >= 1024) {
+    isSidebarOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+  if (window.innerWidth < 1024) {
+    isSidebarCollapsed.value = false;
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 
 function toggleSidebar() {
   if (window.innerWidth >= 1024) {
@@ -428,3 +453,5 @@ const tabs = computed(() => [
   scrollbar-width: none;
 }
 </style>
+
+```
