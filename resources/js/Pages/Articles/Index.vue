@@ -2,36 +2,61 @@
   <div class="min-h-screen bg-white font-sans antialiased">
     <Navbar @open-auth="showAuthModal = true" />
 
-    <header class="border-b border-gray-100 bg-white">
-      <div class="max-w-6xl mx-auto px-4 py-28 md:py-32 text-center space-y-4">
-        <div>
-          <span class="inline-block px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full tracking-wide">
-            Artikel, Berita & Event
-          </span>
-        </div>
-        <h1 class="text-3xl md:text-5xl font-extrabold text-slate-950 tracking-tight">
-          Jelajahi Wawasan & Informasi
-        </h1>
-        <p class="text-gray-500 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-          Temukan artikel inspiratif, berita terbaru, dan event literasi dari Perpustakaan SMKN 1 Gunungputri.
-        </p>
-        
-        <div class="pt-4 max-w-xl mx-auto">
+    <header class="border-b border-slate-100 bg-white relative overflow-hidden bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+    
+    <div class="absolute -top-20 -left-20 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl -z-10"></div>
+
+    <div class="max-w-6xl mx-auto px-4 py-24 md:py-28 text-center space-y-6 relative z-10">
+      
+      <div data-aos="fade-down">
+        <span class="inline-block px-4 py-1.5 bg-orange-50 text-orange-600 border border-orange-200/60 text-xs font-black rounded-full tracking-wider uppercase">
+          Artikel, Berita & Event
+        </span>
+      </div>
+      
+      <h1 class="text-3xl md:text-5xl font-black text-slate-950 tracking-tight leading-tight max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+        Jelajahi Wawasan & <span class="text-orange-500">Informasi Terbaru</span>
+      </h1>
+      
+      <p class="text-slate-500 text-sm md:text-base max-w-xl mx-auto leading-relaxed" data-aos="fade-up" data-aos-delay="200">
+        Temukan artikel inspiratif, berita terbaru, dan event literasi seru dari Perpustakaan SMKN 1 Gunungputri.
+      </p>
+      
+      <div class="pt-4 max-w-xl mx-auto space-y-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="relative group">
+          <div class="absolute -inset-0.5 bg-gradient-to-r range-to-orange-500 to-orange-600 rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition duration-300"></div>
+          
           <div class="relative">
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Cari artikel berdasarkan judul..."
-              class="w-full px-4 py-3 pl-11 bg-slate-50 border border-gray-200 rounded-md text-sm text-slate-800 placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all"
+              class="w-full px-5 py-3.5 pl-12 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all shadow-sm group-hover:bg-white"
               @input="debounceSearch"
             />
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
         </div>
+
+        <div class="flex flex-wrap justify-center items-center gap-2 pt-1 text-xs text-slate-500">
+          <span class="font-medium text-slate-400">Pencarian populer:</span>
+          <button @click="searchQuery = 'Literasi'" class="px-3 py-1 bg-slate-100 hover:bg-orange-500 hover:text-white rounded-lg transition-all font-semibold text-slate-600">
+            #Literasi
+          </button>
+          <button @click="searchQuery = 'Pengumuman'" class="px-3 py-1 bg-slate-100 hover:bg-orange-500 hover:text-white rounded-lg transition-all font-semibold text-slate-600">
+            #Pengumuman
+          </button>
+          <button @click="searchQuery = 'Event'" class="px-3 py-1 bg-slate-100 hover:bg-orange-500 hover:text-white rounded-lg transition-all font-semibold text-slate-600">
+            #Event
+          </button>
+        </div>
+
       </div>
-    </header>
+    </div>
+  </header>
 
     <div class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
       <div class="max-w-6xl mx-auto px-4">

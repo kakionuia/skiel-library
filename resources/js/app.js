@@ -9,11 +9,17 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { useAppSettings } from './Utils/useAppSettings';
 import AppSettings from './Components/AppSettings.vue';
 
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faYoutube } from '@fortawesome/free-brands-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faYoutube);
+// Import ikon Solid (Pesan & Telepon)
+import { faEnvelope, faPhone } from '@fortawesome/free-solid-svg-icons'
+
+// Import ikon Brands (YouTube, Instagram, TikTok)
+import { faYoutube, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons'
+
+// Masukkan semua ikon ke library
+library.add(faEnvelope, faPhone, faYoutube, faInstagram, faTiktok)
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
