@@ -25,11 +25,11 @@
     >
       <div class="h-20 flex items-center px-6 border-b border-slate-100 justify-between shrink-0">
         <Link href="/dashboard" class="flex items-center gap-3 group overflow-hidden">
-          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-black text-white group-hover:bg-orange-700 transition-colors">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black text-white transition-colors">
             <img src="/image/logo-smk.png" alt="Logo" class="h-5 w-5" onerror="this.style.display='none'">
           </span>
           <div v-show="!isSidebarCollapsed || isSidebarOpen" class="transition-opacity duration-200 whitespace-nowrap">
-            <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">SKIE LIBRARY</p>
+            <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">SKIE-LIBRARY</p>
             <span class="text-sm font-extrabold tracking-tight text-slate-900">Sirkulasi</span>
           </div>
         </Link>
