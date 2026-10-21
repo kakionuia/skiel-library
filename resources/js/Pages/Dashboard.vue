@@ -641,8 +641,7 @@
 
       <!-- Empty History State -->
       <div v-if="history.length === 0" class="text-center py-12">
-        <div class="text-4xl mb-3">📋</div>
-        <h3 class="text-sm font-bold text-slate-900">
+        <h3 class="text-md font-bold text-slate-900">
           Belum ada riwayat peminjaman
         </h3>
         <p class="text-slate-400 text-xs mt-1">
@@ -770,13 +769,6 @@ const userAvatar = computed(() => {
 
 // CONSTANTS
 const MAJOR_CATEGORIES = ['Elektro', 'RPL', 'Las', 'Mesin', 'Kimia']
-const ALL_EXPECTED_CATEGORIES = [
-  'Fiksi',
-  'Non Fiksi',
-  'Referensi',
-  'Cerita Anak',
-  ...MAJOR_CATEGORIES
-]
 const ITEMS_PER_PAGE = 9
 
 // PROPS
@@ -850,24 +842,11 @@ const visibleCountPerGroup = reactive({})
 const isSidebarOpen = ref(false)
 const showMobileSearch = ref(false)
 const toast = ref({ show: false, message: '', type: 'success' })
+const currentTime = ref('')
 let intersectionObserver = null
+let timer = null
 
 // COMPUTED
-const allCategories = computed(() => {
-  const bookCategories = props.availableBooks
-    .map((book) => book.category)
-    .filter(Boolean)
-    .map((cat) => cat.trim())
-  const preferred = preferredMajorCategory.value
-  return [...new Set([...bookCategories, ...ALL_EXPECTED_CATEGORIES])].sort(
-    (a, b) => {
-      if (a === preferred) return -1
-      if (b === preferred) return 1
-      return a.localeCompare(b)
-    }
-  )
-})
-
 const preferredMajorCategory = computed(() => {
   const jurusan = user.value?.jurusan || props.user?.jurusan || ''
   return (
@@ -877,8 +856,25 @@ const preferredMajorCategory = computed(() => {
   )
 })
 
+// Mengambil semua kategori murni dari data buku tanpa ALL_EXPECTED_CATEGORIES
+const allCategories = computed(() => {
+  const bookCategories = props.availableBooks
+    .map((book) => book.category)
+    .filter(Boolean)
+    .map((cat) => cat.trim())
+  
+  const preferred = preferredMajorCategory.value
+  
+  return [...new Set(bookCategories)].sort((a, b) => {
+    if (a === preferred) return -1
+    if (b === preferred) return 1
+    return a.localeCompare(b)
+  })
+})
+
 const filteredGroups = computed(() => {
   let filteredBySearch = [...props.availableBooks]
+  
   if (bookSearch.value) {
     const searchTerm = bookSearch.value.toLowerCase()
     filteredBySearch = filteredBySearch.filter(
@@ -898,6 +894,7 @@ const filteredGroups = computed(() => {
 
   if (filteredBooks.length === 0) return []
 
+  // Jika sedang mode pencarian atau filter kategori spesifik
   if (bookSearch.value || activeCategory.value) {
     const groupName =
       activeCategory.value ||
@@ -917,18 +914,8 @@ const filteredGroups = computed(() => {
     ]
   }
 
+  // Pengelompokan default berdasarkan kategori dari buku yang ada
   const groups = {}
-  const orderedCategories = [...ALL_EXPECTED_CATEGORIES].sort((a, b) => {
-    const preferred = preferredMajorCategory.value
-    if (a === preferred) return -1
-    if (b === preferred) return 1
-    return ALL_EXPECTED_CATEGORIES.indexOf(a) - ALL_EXPECTED_CATEGORIES.indexOf(b)
-  })
-
-  orderedCategories.forEach((cat) => {
-    groups[cat] = []
-  })
-
   filteredBooks.forEach((book) => {
     const category = book.category?.trim() || 'Lain-lain'
     if (!groups[category]) groups[category] = []
@@ -948,10 +935,6 @@ const filteredGroups = computed(() => {
         totalBooks: books.length
       }
     })
-})
-
-const bestSellerBooks = computed(() => {
-  return props.bestSellerBooks || []
 })
 
 const history = computed(() => {
@@ -981,8 +964,6 @@ const history = computed(() => {
     isReviewed: borrow.is_reviewed || false
   }))
 })
-
-const currentTime = ref('')
 
 const libraryStatus = computed(() => {
   const now = new Date()
@@ -1115,8 +1096,6 @@ const updateTime = () => {
     }) + ' WIB'
 }
 
-let timer = null
-
 // LIFECYCLE
 onMounted(() => {
   updateTime()
@@ -1136,7 +1115,12 @@ onUnmounted(() => {
   if (intersectionObserver) intersectionObserver.disconnect()
   document.body.style.overflow = ''
 })
+
+
 </script>
+
+
+
 
 <style scoped>
 .no-scrollbar::-webkit-scrollbar {

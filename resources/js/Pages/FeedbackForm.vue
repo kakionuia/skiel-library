@@ -181,16 +181,7 @@ const handleSubmit = async () => {
           </button>
         </div>
       </form>
-
-      <!-- Back Home Link -->
-      <div class="mt-8 text-center">
-        <Link 
-          :href="route('home')"
-          class="text-orange-600 hover:text-orange-700 font-semibold text-sm"
-        >
-          Kembali ke Beranda
-        </Link>
-      </div>
+      
     </div>
   </div>
 </template>

@@ -2,9 +2,7 @@
   <div class="min-h-screen bg-white font-sans text-gray-800 selection:bg-orange-100 overflow-x-hidden">
     <Navbar @open-auth="showAuthModal = true" />
 
-    <!-- Hero -->
 <header class="relative pt-24 md:pt-40 pb-10 md:pb-20 px-4 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0 overflow-hidden">
-      <!-- ===== GAMBAR DEKORATIF BACKGROUND (pastikan file /image/1.png dan /image/2.png ada) ===== -->
       <!-- Gambar kecil di kiri atas (opacity 40% agar lebih jelas) -->
       <img 
         src="/image/1.png" 
@@ -12,22 +10,20 @@
         class="absolute left-0 top-0 w-24 md:w-32 opacity-40 z-0 pointer-events-none"
         @error="(e) => e.target.style.display = 'none'"
       />
-      <!-- Gambar besar di kanan bawah -->
       <img 
         src="/image/2.png" 
         alt="" 
         class="absolute right-0 bottom-0 w-48 md:w-72 opacity-40 z-0 pointer-events-none"
         @error="(e) => e.target.style.display = 'none'"
       />
-      <!-- ===== AKHIR GAMBAR DEKORATIF ===== -->
 
-      <!-- Kolom Kiri (Teks) -->
       <div class="md:w-1/2 relative z-10" data-aos="fade-right" data-aos-duration="800" data-aos-delay="100">
         <h2 class="text-orange-500 font-bold text-lg md:text-xl mb-3 text-left">Selamat Datang di!</h2>
         <h1 class="text-3xl md:text-5xl font-black leading-tight mb-6 text-gray-900 text-left">
           Pengelolaan Perpustakaan <br>
           <span class="text-orange-500 inline-block">SMKN 1 Gunungputri</span> Berbasis Teknologi Web
         </h1>
+        
         <p class="text-gray-600 mb-8 text-base md:text-lg leading-relaxed max-w-lg text-left" data-aos="fade-up" data-aos-delay="300">
           Pengelolaan koleksi perpustakaan yang lebih mudah, cepat dan modern menggunakan Sistem Informasi berbasis Digital di SMKN 1 Gunungputri.
         </p>
@@ -37,7 +33,6 @@
         </div>
       </div>
 
-      <!-- Kolom Kanan (Foto + Bubble) -->
       <div class="md:w-1/2 flex justify-center md:justify-end mt-8 md:mt-0 relative z-10" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="200">
         <div class="relative w-64 h-64 md:w-[400px] md:h-[400px]">
           <div class="absolute -top-5 -right-5 w-40 h-40 md:w-64 md:h-64 bg-orange-500 rounded-full opacity-90 floating-slow"></div>
@@ -69,19 +64,19 @@
       Kunjungi halaman profil dan situs resmi kami untuk menjelajahi literasi digital dan melacak info kegiatan terbaru.
     </p>
 
-    <div class="flex justify-center items-center gap-8 my-10 max-w-md mx-auto border-y border-slate-100 py-4 text-slate-900" data-aos="fade-up" data-aos-delay="350">
+    <div class="flex justify-center m-8 items-center gap-8 my-10 max-w-md mx-auto border-y border-slate-100 py-4 text-slate-900" data-aos="fade-up" data-aos-delay="350">
       <div class="text-center">
-        <div class="text-2xl font-black text-orange-500">10K+</div>
+        <div class="lg:text-2xl font-black text-orange-500">10K+</div>
         <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Koleksi Buku</div>
       </div>
       <div class="h-8 w-px bg-slate-200"></div>
       <div class="text-center">
-        <div class="text-2xl font-black text-slate-900">2K+</div>
+        <div class="lg:text-2xl font-black text-slate-900"></div>
         <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Anggota Aktif</div>
       </div>
       <div class="h-8 w-px bg-slate-200"></div>
       <div class="text-center">
-        <div class="text-2xl font-black text-slate-900">A+</div>
+        <div class="lg:text-2xl font-black text-slate-900">A</div>
         <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Akreditasi</div>
       </div>
     </div>
@@ -421,9 +416,9 @@
         <h2 class="text-2xl font-bold text-gray-800" data-aos="fade-right" data-aos-duration="800">Artikel dan Event Kami</h2>
         <Link
           :href="route('articles.index', activeTab === 'event' ? { category: 'event' } : {})"
-          class="btn-ripple bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md"
+          class="btn-ripple md:text-sm bg-orange-500 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition shadow-md"
         >
-          Lihat Semua <span class="text-xl">→</span>
+          Lihat Semua <span class="md:text-xl">→</span>
         </Link>
       </div>
 
@@ -549,7 +544,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Autoplay } from 'swiper/modules';
+import { Autoplay } from 'swiper/modules'; 
 import 'swiper/css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';

@@ -97,7 +97,7 @@ defineEmits(['openAuth']);
     <!-- Logo -->
     <div class="flex items-center gap-3 group cursor-pointer" @click="navigateTo('home')">
       <div class="bg-white p-1.5 rounded-full shadow-sm group-hover:scale-110 transition-transform duration-300">
-        <img :src="$page.props.logoUrl" alt="Logo" class="w-8 h-8">
+        <img :src="$page.props.logoUrl" alt="Logo" class="h-8 w-8 md:h-10 md:w-10 object-contain" />
       </div>
       <div class="flex flex-col">
         <h1 :class="['font-black leading-none transition-colors duration-500', isScrolled ? 'text-white' : 'text-orange-600']">
@@ -204,7 +204,7 @@ defineEmits(['openAuth']);
         v-if="user"
         :href="getDashboardRoute()"
         :class="[
-          'flex items-center gap-3 px-5 py-2 rounded-full font-bold transition-all duration-500 border-2',
+          'flex items-center gap-2 px-4 py-2 md:gap-3 md:px-5 md:py-2 rounded-full font-bold transition-all duration-500 border-2',
           isScrolled 
             ? 'bg-white text-orange-600 border-white hover:bg-orange-50' 
             : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-200'

@@ -7,7 +7,7 @@
     <div class="absolute -top-20 -left-20 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl -z-10"></div>
     <div class="absolute top-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl -z-10"></div>
 
-    <div class="max-w-6xl mx-auto px-4 py-24 md:py-28 text-center space-y-6 relative z-10">
+    <div class="max-w-6xl mx-auto px-4 py-32 md:py-36 text-center space-y-7 relative z-10">
       
       <div data-aos="fade-down">
         <span class="inline-block px-4 py-1.5 bg-orange-50 text-orange-600 border border-orange-200/60 text-xs font-black rounded-full tracking-wider uppercase">
@@ -58,7 +58,8 @@
     </div>
   </header>
 
-    <div class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+    <!-- Filter kategori: ubah top-16 menjadi top-20 agar lebih longgar di bawah navbar -->
+    <div class="bg-white border-b border-gray-100 sticky top-20 z-40 shadow-sm">
       <div class="max-w-6xl mx-auto px-4">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between py-3 gap-4">
           
@@ -129,7 +130,7 @@
                 :src="getArticleImage(article.featured_image)"
                 :alt="article.title"
                 class="w-full h-full object-cover group-hover:opacity-90 transition-opacity duration-300"
-                @error="(e) => e.target.src = 'https://via.placeholder.com/800x500?text=No+Image'"
+                @error="(e) => e.target.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22500%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22800%22 height=%22500%22/%3E%3Ctext fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2236%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dominant-baseline=%22central%22%3ENo Image%3C/text%3E%3C/svg%3E'"
               />
             </div>
             <div class="absolute top-3 left-3">
@@ -363,8 +364,11 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
+// Fallback gambar SVG inline (tidak memerlukan request jaringan)
+const noImageSvg = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22500%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22800%22 height=%22500%22/%3E%3Ctext fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2236%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dominant-baseline=%22central%22%3ENo Image%3C/text%3E%3C/svg%3E';
+
 const getArticleImage = (path) => {
-  if (!path) return 'https://via.placeholder.com/800x500?text=No+Image';
+  if (!path) return noImageSvg;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
   if (path.startsWith('storage/')) return `/${path}`;
   if (path.startsWith('/')) return path;

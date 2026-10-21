@@ -297,17 +297,21 @@ function decreaseQuantity() {
 
 function submitBorrow() {
   errors.value = {};
-  
   isSubmitting.value = true;
 
   form.post(route('borrow.store'), {
     onSuccess: () => {
       window.location.href = '/my-loans?success=1';
     },
-    onError: (error) => {
+    onError: (err) => {
       isSubmitting.value = false;
-      if (error.error && error.error.includes('batas maksimal')) {
-        // Show SweetAlert for 3-book limit
+      errors.value = err;
+
+      // Ambil semua pesan error dari objek `err` dan gabungkan jadi satu string
+      const errorMessage = Object.values(err).join(' ').toLowerCase();
+
+      // 1. Kasus: Batas Maksimal Peminjaman (3 Buku)
+      if (errorMessage.includes('batas maksimal') || errorMessage.includes('3 buku')) {
         Swal.fire({
           title: '⚠️ Batas Peminjaman Tercapai',
           html: `<p class="text-sm mb-3">Anda sudah mencapai batas maksimal peminjaman <strong>(3 buku)</strong>.</p><p class="text-sm text-slate-600">Kembalikan salah satu buku Anda terlebih dahulu untuk dapat meminjam buku lainnya.</p>`,
@@ -317,16 +321,25 @@ function submitBorrow() {
           showCancelButton: true,
           cancelButtonText: 'Batal',
           cancelButtonColor: '#94a3b8',
-          reverseButtons: false
         }).then((result) => {
           if (result.isConfirmed) {
             window.location.href = '/my-loans';
           }
         });
-      } else {
-        // Show generic error
-        errors.value = error;
+      } 
+      // 2. Kasus: Akun Dibatasi / Suspended
+      else if (errorMessage.includes('dibatasi') || errorMessage.includes('dinonaktifkan') || errorMessage.includes('suspend')) {
+        Swal.fire({
+          title: '🚫 Peminjaman Dibatasi',
+          html: `<p class="text-sm mb-3">Akun Anda saat ini <strong>sedang dibatasi</strong> untuk melakukan peminjaman.</p><p class="text-sm text-slate-600">Silakan hubungi petugas perpustakaan untuk informasi lebih lanjut.</p>`,
+          icon: 'error',
+          confirmButtonText: 'Ngerti',
+          confirmButtonColor: '#ef4444',
+        });
       }
+    },
+    onFinish: () => {
+      isSubmitting.value = false;
     }
   });
 }
